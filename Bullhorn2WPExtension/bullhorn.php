@@ -261,7 +261,7 @@
 		}
 
 		/**
-		 * Run this befor any api call.
+		 * Run this before any api call.
 		 *
 		 * @return void
 		 */
