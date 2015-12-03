@@ -2,8 +2,11 @@
 
 class Bullhorn_Settings {
 
+	/**
+	 * Bullhorn_Settings constructor.
+	 */
 	public function __construct() {
-		if ( isset( $_GET['sync'] ) && $_GET['sync'] == 'bullhorn' ) {
+		if ( isset( $_GET['sync'] ) && 'bullhorn' === $_GET['sync'] ) {
 			add_action( 'admin_init', 'bullhorn_sync' );
 		}
 
@@ -21,7 +24,7 @@ class Bullhorn_Settings {
 	 * Sets up the plugin by adding the settings link on the GF Settings page
 	 */
 	public function init() {
-		if ( isset( $_GET['sync'] ) && $_GET['sync'] == 'bullhorn' ) {
+		if ( isset( $_GET['sync'] ) && 'bullhorn' === $_GET['sync'] ) {
 			wp_redirect( admin_url( 'options-general.php?page=bullhorn' ) );
 		}
 
@@ -70,6 +73,7 @@ class Bullhorn_Settings {
 				return true;
 			}
 		}
+		return false;
 	}
 
 	/**
@@ -250,7 +254,7 @@ class Bullhorn_Settings {
 		<div class="wrap">
 			<div id="icon-options-general" class="icon32"><br></div>
 			<h2>Bullhorn Developer</h2>
-			<form method="post" action="options.php">
+			<form method="post" action="<?php echo  admin_url( 'options.php' ); ?>">
 				<?php settings_fields( 'bullhorn_settings' ); ?>
 				<?php do_settings_sections( 'bullhornwp' ); ?>
 				<p class="submit">
@@ -291,7 +295,6 @@ class Bullhorn_Settings {
 			! empty( $settings['client_secret'] )
 		);
 	}
-
 }
 
 $bullhorn_settings = new Bullhorn_Settings;

@@ -58,7 +58,7 @@ class Bullhorn_Connection {
 	 */
 	public function sync() {
 		// Refresh the token if necessary before doing anything
-		$this->refreshToken();
+		$this->refresh_token();
 
 		$logged_in = $this->login();
 		if ( ! $logged_in ) {
@@ -67,19 +67,19 @@ class Bullhorn_Connection {
 
 		wp_defer_term_counting( true );
 
-		$this->getCategoriesFromBullhorn();
+		$this->get_categories_from_bullhorn();
 
-		$jobs     = $this->getJobsFromBullhorn();
-		$existing = $this->getExisting();
+		$jobs     = $this->get_jobs_from_bullhorn();
+		$existing = $this->get_existing();
 
-		$this->removeOld( $jobs );
+		$this->remove_old( $jobs );
 
 		if ( count( $jobs ) ) {
 			foreach ( $jobs as $job ) {
 				if ( isset( $existing[ $job->id ] ) ) {
-					$this->syncJob( $job, $existing[ $job->id ] );
+					$this->sync_job( $job, $existing[ $job->id ] );
 				} else {
-					$this->syncJob( $job );
+					$this->sync_job( $job );
 				}
 			}
 		}
@@ -122,7 +122,7 @@ class Bullhorn_Connection {
 	 *
 	 * @return boolean
 	 */
-	protected function refreshToken() {
+	protected function refresh_token() {
 		$url    = 'https://auth.bullhornstaffing.com/oauth/token';
 		$params = array(
 			'grant_type'    => 'refresh_token',
@@ -149,7 +149,7 @@ class Bullhorn_Connection {
 	 *
 	 * @return array
 	 */
-	private function getCategoriesFromBullhorn() {
+	private function get_categories_from_bullhorn() {
 		$url    = $this->url . 'options/Category';
 		$params = array(
 			'BhRestToken' => $this->session,
@@ -171,7 +171,7 @@ class Bullhorn_Connection {
 	 *
 	 * @return string
 	 */
-	private function getDescriptionField() {
+	private function get_description_field() {
 		if ( isset( $this->settings['description_field'] ) ) {
 			$description = $this->settings['description_field'];
 		} else {
@@ -186,9 +186,9 @@ class Bullhorn_Connection {
 	 *
 	 * @return array
 	 */
-	private function getJobsFromBullhorn() {
+	private function get_jobs_from_bullhorn() {
 		// Use the specified description field if set, otherwise the default
-		$description = $this->getDescriptionField();
+		$description = $this->get_description_field();
 
 		$start = 0;
 		$page  = 100;
@@ -228,17 +228,23 @@ class Bullhorn_Connection {
 		return $jobs;
 	}
 
+
 	/**
 	 * This will take a job object from Bullhorn and insert it into WordPress
 	 * with the proper fields, custom fields, and taxonomy relationships. If
 	 * the job already exists in WordPress it simply updates the fields.
 	 *
-	 * @return boolean
+	 * @param      $job
+	 * @param null $id
+	 *
+	 * @return bool
+	 * @throws Exception
 	 */
-	private function syncJob( $job, $id = null ) {
-		$description = $this->getDescriptionField();
+	private function sync_job( $job, $id = null ) {
+		global $post;
+		$description = $this->get_description_field();
 
-		$post = array(
+		$post_args = array(
 			'post_title'   => $job->title,
 			'post_content' => $job->{$description},
 			'post_type'    => 'bullhornjoblisting',
@@ -248,10 +254,9 @@ class Bullhorn_Connection {
 
 		if ( $id ) {
 			$post['ID'] = $id;
-
-			$id = wp_update_post( $post );
+			$id = wp_update_post( $post_args );
 		} else {
-			$id = wp_insert_post( $post );
+			$id = wp_insert_post( $post_args );
 		}
 
 		$address = (array) $job->address;
@@ -301,7 +306,7 @@ class Bullhorn_Connection {
 	 *
 	 * @return boolean
 	 */
-	private function removeOld( $jobs ) {
+	private function remove_old( $jobs ) {
 		$ids = array();
 		foreach ( $jobs as $job ) {
 			$ids[] = $job->id;
@@ -337,7 +342,7 @@ class Bullhorn_Connection {
 	 *
 	 * @return array
 	 */
-	private function getExisting() {
+	private function get_existing() {
 		global $wpdb;
 
 		$posts = $wpdb->get_results( "SELECT $wpdb->posts.id, $wpdb->postmeta.meta_value FROM $wpdb->postmeta JOIN $wpdb->posts ON $wpdb->posts.id = $wpdb->postmeta.post_id WHERE meta_key = 'bullhorn_job_id'", ARRAY_A );
@@ -364,5 +369,4 @@ class Bullhorn_Connection {
 
 		return $response;
 	}
-
 }

@@ -15,16 +15,23 @@
  * @return string
  */
 function bullhorn_shortcode( $atts ) {
-	extract( shortcode_atts( array(
+	shortcode_atts( array(
 		'limit'     => 5,
 		'show_date' => false,
 		'state'     => null,
 		'type'      => null,
 		'title'     => null,
 		'columns'   => 1,
-	), $atts ) );
+	), $atts );
 
 	$output = null;
+
+	$limit = absint( $atts['limit'] );
+	$show_date = (bool) $atts['show_date'];
+	$state = esc_attr( $atts['state'] );
+	$type = esc_attr( $atts['type'] );
+	$title = esc_attr( $atts['title'] );
+	$columns = absint( $atts['columns'] );
 
 	// Only allow up to two columns for now
 	if ( $columns > 4 or $columns < 1 ) {

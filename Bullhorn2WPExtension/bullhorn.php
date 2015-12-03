@@ -246,7 +246,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 */
 	private function apiAuth() {
 		// Refresh the token if necessary before doing anything
-		$this->refreshToken();
+		$this->refresh_token();
 
 		// login to bullhorn api
 		$logged_in = $this->login();

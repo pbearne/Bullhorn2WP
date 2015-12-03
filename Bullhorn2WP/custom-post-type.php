@@ -2,18 +2,24 @@
 
 class Bullhorn_Custom_Post_Type {
 
+	/**
+	 * Bullhorn_Custom_Post_Type constructor.
+	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'init' ) );
 
 		add_filter( 'post_updated_messages', array( $this, 'post_updated_messages' ) );
 
-		add_action( 'contextual_help', array( $this, 'contextual_help' ), 10, 3 );
+		add_action( 'contextual_help', array( $this, 'contextual_help' ), 10, 2 );
 
 		add_action( 'the_content', array( $this, 'the_content' ) );
 
 		add_filter( 'comments_open', array( $this, 'comments_open' ), 10, 2 );
 	}
 
+	/**
+	 * @return bool
+	 */
 	public function init() {
 		$settings = (array) get_option( 'bullhorn_settings' );
 		if ( empty( $settings ) or ! isset( $settings['listings_page'] ) ) {
@@ -33,7 +39,7 @@ class Bullhorn_Custom_Post_Type {
 			'not_found'          => 'No job listings found',
 			'not_found_in_trash' => 'No job listings found in Trash',
 			'parent_item_colon'  => '',
-			'menu_name'          => 'Job Listings'
+			'menu_name'          => 'Job Listings',
 		);
 		$args   = array(
 			'labels'             => $labels,
@@ -104,11 +110,17 @@ class Bullhorn_Custom_Post_Type {
 			'show_tagcloud'     => true,
 		);
 		register_taxonomy( 'bullhorn_state', 'bullhornjoblisting', $args );
+		return true;
 	}
+
 
 	/**
 	 * Add filter to ensure the text Job Listing, or job listing, is displayed
 	 * when user updates a job listing.
+
+	 * @param $messages
+	 *
+	 * @return mixed
 	 */
 	public function post_updated_messages( $messages ) {
 		global $post, $post_ID;
@@ -126,18 +138,24 @@ class Bullhorn_Custom_Post_Type {
 			8  => sprintf( __( 'Job listing submitted. <a target="_blank" href="%s">Preview job listing</a>', 'your_text_domain' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
 			9  => sprintf( __( 'Job listing scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview job listing</a>', 'your_text_domain' ),
 				// translators: Publish box date format, see http://php.net/date
-				date_i18n( __( 'M j, Y @ G:i' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post_ID ) ) ),
+			date_i18n( __( 'M j, Y @ G:i' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post_ID ) ) ),
 			10 => sprintf( __( 'Job listing draft updated. <a target="_blank" href="%s">Preview job listing</a>', 'your_text_domain' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
 		);
 
 		return $messages;
 	}
 
+
 	/**
 	 * Display contextual help for Job Listings.
+	 *
+	 * @param $contextual_help
+	 * @param $screen_id
+	 *
+	 * @return string
 	 */
-	public function contextual_help( $contextual_help, $screen_id, $screen ) {
-		if ( 'bullhornjoblisting' == $screen->id ) {
+	public function contextual_help( $contextual_help, $screen_id ) {
+		if ( 'bullhornjoblisting' === $screen_id ) {
 			$contextual_help =
 				'<p>' . __( 'Things to remember when adding or editing a job listing:', 'bullhorn_text_domain' ) . '</p>' .
 				'<ul>' .
@@ -152,7 +170,7 @@ class Bullhorn_Custom_Post_Type {
 				'<p><strong>' . __( 'For more information:', 'bullhorn_text_domain' ) . '</strong></p>' .
 				'<p>' . __( '<a href="http://codex.wordpress.org/Posts_Edit_SubPanel" target="_blank">Edit Posts Documentation</a>', 'bullhorn_text_domain' ) . '</p>' .
 				'<p>' . __( '<a href="http://wordpress.org/support/" target="_blank">Support Forums</a>', 'bullhorn_text_domain' ) . '</p>';
-		} elseif ( 'edit-job-listing' == $screen->id ) {
+		} elseif ( 'edit-job-listing' == $screen_id ) {
 			$contextual_help =
 				'<p>' . __( 'This is the help screen displaying the table of job listings.', 'bullhorn_text_domain' ) . '</p>';
 		}
@@ -160,9 +178,14 @@ class Bullhorn_Custom_Post_Type {
 		return $contextual_help;
 	}
 
+
 	/**
 	 * Filters the content for single job posts to insert a customizable link
 	 * to the form where the user can submit their resume.
+
+	 * @param null $content
+	 *
+	 * @return null|string
 	 */
 	public function the_content( $content = null ) {
 		$settings = (array) get_option( 'bullhorn_settings' );
@@ -178,16 +201,21 @@ class Bullhorn_Custom_Post_Type {
 		return $content;
 	}
 
+	/**
+	 * @param $open
+	 * @param $post_id
+	 *
+	 * @return bool
+	 */
 	public function comments_open( $open, $post_id ) {
 		$post_type = get_post_type( $post_id );
 
-		if ( $post_type === 'bullhornjoblisting' ) {
+		if ( 'bullhornjoblisting' === $post_type ) {
 			return false;
 		}
 
 		return $open;
 	}
-
 }
 
 $bullhorn_custom_post_type = new Bullhorn_Custom_Post_Type;

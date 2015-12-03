@@ -11,28 +11,18 @@ License: GPL2
 
 /*
 WP CRON SYNC: A new WP Cron Schedule was added (every 10 minutes), which is used to run the job sync (Bullhorn->WP CPT). The scheduling of WP Cron requires user interaction on the WordPress installation, if a WP Cron job is scheduled to run every 10 minutes but no pages have been loaded for 15 minutes, the job will be run immediately during the next page load.
-
 WP CPT: This plugin adds the custom post type bullhornjoblisting, with a URL slug of /open-positions/ with archive turned on at that address and single job listings displayed at /open-positions/{post-slug}.
-
 SYNCHRONIZING: Jobs are pulled in to the custom post type, and additional information is stored as meta data (jobOrderID, createdDate, employmentType, and employmentType).
-
 BULLHORN: The Bullhorn API has a limit of 20 posts per request, this plugin currently loops through 1 entry at a time to avoid this limit and make the code simpler (but perhaps slower than some alternatives).
-
 THEME DISPLAY: This plugin should be accompanied by two template files in the active theme's root directory.
-
 LIMITS: WP Cron sync schedule should not be shortened, elongate as necessary. Each run of the synchronizer will only handle 500 posts at a time. If there are more than 500 needing deletion this will span multiple synchronization runs. There is also currently a limit of 120 jobs set, this plugin may support over 1000 but could suffer from unexpected behavior at anything above the current limit. Unlike the post limit this will not be surpassed during immediately preceeding runs of the synchronization; 120 of the newest jobs are pulled from Bullhorn, and only as newer jobs are added will they be pulled into WordPress. Therefore: There will end up being more than 120 jobs listed if more than 120 have existed and have yet to be deleted over the span of time in which this plugin was running.
-
 DISABLING: If you disable this plugin and want to restore the original /open-positions page, go to Settings > Permalinks and click Save Changes after disabling (this will refresh the WP Rewrite cache).
 */
 
 require_once plugin_dir_path( __FILE__ ) . 'bullhorn.php';
-
 require_once plugin_dir_path( __FILE__ ) . 'settings.php';
-
 require_once plugin_dir_path( __FILE__ ) . 'custom-post-type.php';
-
 require_once plugin_dir_path( __FILE__ ) . 'cron.php';
-
 require_once plugin_dir_path( __FILE__ ) . 'shortcode.php';
 
 /**
@@ -73,7 +63,7 @@ function bullhorn_sort_results( $query ) {
 		$modify_query = true;
 	}
 
-	if ( $modify_query === true ) {
+	if ( true === $modify_query ) {
 		if ( isset( $_GET['bullhorn_state'] ) ) {
 			$tax_queries[] = array(
 				'taxonomy' => 'bullhorn_state',
@@ -96,12 +86,19 @@ function bullhorn_sort_results( $query ) {
 
 add_action( 'pre_get_posts', 'bullhorn_sort_results' );
 
+/**
+ * flush rewrtie on activation
+ */
 function bullhorn_activation_hook() {
 	flush_rewrite_rules();
 }
 
 register_activation_hook( __FILE__, 'bullhorn_activation_hook' );
 
+/**
+ * remove cron on deactivation
+ * flush rewrtie on deactivation
+ */
 function bullhorn_deactivation_hook() {
 	wp_clear_scheduled_hook( 'bullhorn_hourly_event' );
 	flush_rewrite_rules();
