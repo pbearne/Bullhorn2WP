@@ -23,14 +23,14 @@ class Bullhorn_Connection {
 	 *
 	 * @var string
 	 */
-	private $session;
+	protected $session;
 
 	/**
 	 * Stores the URL we need to make requests to (includes the corpToken).
 	 *
 	 * @var string
 	 */
-	private $url;
+	protected $url;
 
 	/**
 	 * Array to cache the categories retrieved from bullhorn.
@@ -96,7 +96,7 @@ class Bullhorn_Connection {
 	 * @throws Exception
 	 * @return boolean
 	 */
-	private function login() {
+	protected function login() {
 		$url = 'https://rest.bullhornstaffing.com/rest-services/login?version=*&access_token=' . $this->api_access['access_token'];
 		$response = $this->request( $url );
 		$body = json_decode( $response['body'] );
@@ -122,7 +122,7 @@ class Bullhorn_Connection {
 	 *
 	 * @return boolean
 	 */
-	private function refreshToken() {
+	protected function refreshToken() {
 		$url = 'https://auth.bullhornstaffing.com/oauth/token';
 		$params = array(
 			'grant_type'    => 'refresh_token',
