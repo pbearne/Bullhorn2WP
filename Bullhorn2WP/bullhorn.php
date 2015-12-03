@@ -45,7 +45,7 @@ class Bullhorn_Connection {
 	 * @return \Bullhorn_Connection
 	 */
 	public function __construct() {
-		$this->settings = get_option( 'bullhorn_settings' );
+		$this->settings   = get_option( 'bullhorn_settings' );
 		$this->api_access = get_option( 'bullhorn_api_access' );
 	}
 
@@ -62,22 +62,22 @@ class Bullhorn_Connection {
 
 		$logged_in = $this->login();
 		if ( ! $logged_in ) {
-			throw new Exception('There was a problem logging into the Bullhorn API.');
+			throw new Exception( 'There was a problem logging into the Bullhorn API.' );
 		}
 
 		wp_defer_term_counting( true );
 
 		$this->getCategoriesFromBullhorn();
 
-		$jobs = $this->getJobsFromBullhorn();
+		$jobs     = $this->getJobsFromBullhorn();
 		$existing = $this->getExisting();
 
 		$this->removeOld( $jobs );
 
 		if ( count( $jobs ) ) {
 			foreach ( $jobs as $job ) {
-				if ( isset( $existing[$job->id] ) ) {
-					$this->syncJob( $job, $existing[$job->id] );
+				if ( isset( $existing[ $job->id ] ) ) {
+					$this->syncJob( $job, $existing[ $job->id ] );
 				} else {
 					$this->syncJob( $job );
 				}
@@ -97,19 +97,19 @@ class Bullhorn_Connection {
 	 * @return boolean
 	 */
 	protected function login() {
-		$url = 'https://rest.bullhornstaffing.com/rest-services/login?version=*&access_token=' . $this->api_access['access_token'];
+		$url      = 'https://rest.bullhornstaffing.com/rest-services/login?version=*&access_token=' . $this->api_access['access_token'];
 		$response = $this->request( $url );
-		$body = json_decode( $response['body'] );
+		$body     = json_decode( $response['body'] );
 
 		if ( isset( $body->BhRestToken ) ) {
 			$this->session = $body->BhRestToken;
-			$this->url = $body->restUrl;
+			$this->url     = $body->restUrl;
 
 			return true;
 		}
 
 		if ( isset( $body->errorMessage ) ) {
-			throw new Exception($body->errorMessage);
+			throw new Exception( $body->errorMessage );
 		}
 
 		return false;
@@ -123,7 +123,7 @@ class Bullhorn_Connection {
 	 * @return boolean
 	 */
 	protected function refreshToken() {
-		$url = 'https://auth.bullhornstaffing.com/oauth/token';
+		$url    = 'https://auth.bullhornstaffing.com/oauth/token';
 		$params = array(
 			'grant_type'    => 'refresh_token',
 			'refresh_token' => $this->api_access['refresh_token'],
@@ -132,7 +132,7 @@ class Bullhorn_Connection {
 		);
 
 		$response = wp_remote_post( $url . '?' . http_build_query( $params ) );
-		$body = json_decode( $response['body'], true );
+		$body     = json_decode( $response['body'], true );
 
 		if ( isset( $body['access_token'] ) ) {
 			$body['last_refreshed'] = time();
@@ -150,13 +150,13 @@ class Bullhorn_Connection {
 	 * @return array
 	 */
 	private function getCategoriesFromBullhorn() {
-		$url = $this->url . 'options/Category';
+		$url    = $this->url . 'options/Category';
 		$params = array(
 			'BhRestToken' => $this->session,
 		);
 
 		$response = $this->request( $url . '?' . http_build_query( $params ) );
-		$body = json_decode( $response['body'] );
+		$body     = json_decode( $response['body'] );
 		if ( isset( $body->data ) ) {
 			foreach ( $body->data as $category ) {
 				wp_insert_term( $category->label, 'bullhorn_category' );
@@ -171,9 +171,8 @@ class Bullhorn_Connection {
 	 *
 	 * @return string
 	 */
-	private function getDescriptionField()
-	{
-		if (isset($this->settings['description_field'])) {
+	private function getDescriptionField() {
+		if ( isset( $this->settings['description_field'] ) ) {
 			$description = $this->settings['description_field'];
 		} else {
 			$description = 'description';
@@ -192,27 +191,27 @@ class Bullhorn_Connection {
 		$description = $this->getDescriptionField();
 
 		$start = 0;
-		$page = 100;
-		$jobs = array();
+		$page  = 100;
+		$jobs  = array();
 		while ( true ) {
-			$url = $this->url . 'query/JobOrder';
+			$url    = $this->url . 'query/JobOrder';
 			$params = array(
 				'BhRestToken' => $this->session,
-				'fields' => 'id,title,' . $description . ',dateAdded,categories,address',
-				'where' => 'isPublic=1 AND isOpen=true AND isDeleted=false',
-				'count' => $page,
-				'start' => $start,
+				'fields'      => 'id,title,' . $description . ',dateAdded,categories,address',
+				'where'       => 'isPublic=1 AND isOpen=true AND isDeleted=false',
+				'count'       => $page,
+				'start'       => $start,
 			);
 
 			if ( isset( $this->settings['client_corporation'] ) and ! empty( $this->settings['client_corporation'] ) ) {
-				$ids = explode(',', $this->settings['client_corporation']);
-				$ids = array_map('trim', $ids);
+				$ids = explode( ',', $this->settings['client_corporation'] );
+				$ids = array_map( 'trim', $ids );
 
-				$params['where'] .= ' AND (clientCorporation.id=' . implode(' OR clientCorporation.id=', $ids) . ')';
+				$params['where'] .= ' AND (clientCorporation.id=' . implode( ' OR clientCorporation.id=', $ids ) . ')';
 			}
 
 			$response = $this->request( $url . '?' . http_build_query( $params ) );
-			$body = json_decode( $response['body'] );
+			$body     = json_decode( $response['body'] );
 			if ( isset( $body->data ) ) {
 				$start += $page;
 
@@ -259,7 +258,7 @@ class Bullhorn_Connection {
 		unset( $address['countryID'] );
 
 		$custom_fields = array(
-			'bullhorn_job_id' => $job->id,
+			'bullhorn_job_id'      => $job->id,
 			'bullhorn_job_address' => implode( ' ', $address ),
 		);
 		foreach ( $custom_fields as $key => $val ) {
@@ -271,11 +270,11 @@ class Bullhorn_Connection {
 			$category_id = $category->id;
 
 			// Check to see if this category name has been cached already
-			if ( isset( $this->categories[$category_id] ) ) {
-				$categories[] = $this->categories[$category_id];
+			if ( isset( $this->categories[ $category_id ] ) ) {
+				$categories[] = $this->categories[ $category_id ];
 			} else {
-				$url = $this->url . 'entity/Category/' . $category_id;
-				$params = array('BhRestToken' => $this->session, 'fields' => 'id,name');
+				$url      = $this->url . 'entity/Category/' . $category_id;
+				$params   = array( 'BhRestToken' => $this->session, 'fields' => 'id,name' );
 				$response = $this->request( $url . '?' . http_build_query( $params ) );
 
 				$category = json_decode( $response['body'] );
@@ -283,7 +282,7 @@ class Bullhorn_Connection {
 					$categories[] = $category->data->name;
 
 					// Cache this category in an array
-					$this->categories[$category_id] = $category->data->name;
+					$this->categories[ $category_id ] = $category->data->name;
 				}
 			}
 		}
@@ -298,7 +297,8 @@ class Bullhorn_Connection {
 	 * Before we start adding in new jobs, we need to delete jobs that are no
 	 * longer in Bullhorn.
 	 *
-	 * @param  array   $jobs
+	 * @param  array $jobs
+	 *
 	 * @return boolean
 	 */
 	private function removeOld( $jobs ) {
@@ -343,9 +343,8 @@ class Bullhorn_Connection {
 		$posts = $wpdb->get_results( "SELECT $wpdb->posts.id, $wpdb->postmeta.meta_value FROM $wpdb->postmeta JOIN $wpdb->posts ON $wpdb->posts.id = $wpdb->postmeta.post_id WHERE meta_key = 'bullhorn_job_id'", ARRAY_A );
 
 		$existing = array();
-		foreach ($posts as $post)
-		{
-			$existing[$post['meta_value']] = $post['id'];
+		foreach ( $posts as $post ) {
+			$existing[ $post['meta_value'] ] = $post['id'];
 		}
 
 		return $existing;

@@ -11,9 +11,11 @@ function bullhorn_event_activation() {
 		wp_schedule_event( time(), 'hourly', 'bullhorn_event' );
 	}
 }
+
 add_action( 'wp', 'bullhorn_event_activation' );
 
 function bullhorn_event_routine() {
 	bullhorn_sync();
 }
+
 add_action( 'bullhorn_event', 'bullhorn_event_routine' );

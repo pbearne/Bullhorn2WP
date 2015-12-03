@@ -22,7 +22,7 @@ class Bullhorn_Settings {
 	 */
 	public function init() {
 		if ( isset( $_GET['sync'] ) && $_GET['sync'] == 'bullhorn' ) {
-			wp_redirect(admin_url('options-general.php?page=bullhorn'));
+			wp_redirect( admin_url( 'options-general.php?page=bullhorn' ) );
 		}
 
 		register_setting( 'bullhorn_settings', 'bullhorn_settings', array( $this, 'validate' ) );
@@ -57,7 +57,7 @@ class Bullhorn_Settings {
 			$url = 'https://auth.bullhornstaffing.com/oauth/token?grant_type=authorization_code&code=' . $_GET['code'] . '&client_id=' . $settings['client_id'] . '&client_secret=' . $settings['client_secret'];
 
 			$response = wp_remote_post( $url );
-			$body = json_decode( $response['body'], true );
+			$body     = json_decode( $response['body'], true );
 
 			if ( isset( $body['error_description'] ) ) {
 				return $body;
@@ -76,7 +76,9 @@ class Bullhorn_Settings {
 	 * Callback for the API settings section, which is left blank
 	 */
 	public function api_settings() {
-		if ( ! isset( $_GET['code'] ) ) return;
+		if ( ! isset( $_GET['code'] ) ) {
+			return;
+		}
 
 		if ( $this->authorize() === true ) {
 			echo '<div class="updated"><p>You have successfully connected to Bullhorn.</p></div>';
@@ -160,8 +162,8 @@ class Bullhorn_Settings {
 		}
 
 		wp_dropdown_pages( array(
-			'name' => 'bullhorn_settings[form_page]',
-			'selected' => $form_page,
+			'name'             => 'bullhorn_settings[form_page]',
+			'selected'         => $form_page,
 			'show_option_none' => 'Select a page...',
 		) );
 	}
@@ -186,9 +188,8 @@ class Bullhorn_Settings {
 
 		echo '<select name="bullhorn_settings[listings_sort]">';
 		echo '<option value="">Select a field to sort by...</option>';
-		foreach ($sorts as $value => $name)
-		{
-			$selected = ($listings_sort === $value) ? ' selected="selected"' : '';
+		foreach ( $sorts as $value => $name ) {
+			$selected = ( $listings_sort === $value ) ? ' selected="selected"' : '';
 			echo '<option value="' . $value . '"' . $selected . '>' . $name . '</option>';
 		}
 		echo '</select>';
@@ -206,15 +207,14 @@ class Bullhorn_Settings {
 		}
 
 		$fields = array(
-			'description' => 'Description (default)',
+			'description'       => 'Description (default)',
 			'publicDescription' => 'Public Description',
 		);
 
 		echo '<select name="bullhorn_settings[description_field]">';
 		echo '<option value="">Select the description field to use...</option>';
-		foreach ($fields as $value => $name)
-		{
-			$selected = ($description_field === $value) ? ' selected="selected"' : '';
+		foreach ( $fields as $value => $name ) {
+			$selected = ( $description_field === $value ) ? ' selected="selected"' : '';
 			echo '<option value="' . $value . '"' . $selected . '>' . $name . '</option>';
 		}
 		echo '</select>';
@@ -223,15 +223,16 @@ class Bullhorn_Settings {
 	/**
 	 * Validates the user input
 	 *
-	 * @param array   $input POST data
+	 * @param array $input POST data
+	 *
 	 * @return array        Sanitized POST data
 	 */
 	public function validate( $input ) {
-		$input['client_id']     = esc_html( $input['client_id'] );
-		$input['client_secret'] = esc_html( $input['client_secret'] );
-		$input['listings_page'] = esc_html( $input['listings_page'] );
-		$input['form_page']     = intval( $input['form_page'] );
-		$input['listings_sort'] = esc_html( $input['listings_sort'] );
+		$input['client_id']         = esc_html( $input['client_id'] );
+		$input['client_secret']     = esc_html( $input['client_secret'] );
+		$input['listings_page']     = esc_html( $input['listings_page'] );
+		$input['form_page']         = intval( $input['form_page'] );
+		$input['listings_sort']     = esc_html( $input['listings_sort'] );
 		$input['description_field'] = esc_html( $input['description_field'] );
 
 		// Since the listings page has probably been updated, we need to flush

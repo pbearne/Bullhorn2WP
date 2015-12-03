@@ -30,12 +30,12 @@ class Bullhorn_Custom_Post_Type {
 			'all_items'          => 'All Job Listings',
 			'view_item'          => 'View Job Listing',
 			'search_items'       => 'Search Job Listings',
-			'not_found'          =>  'No job listings found',
+			'not_found'          => 'No job listings found',
 			'not_found_in_trash' => 'No job listings found in Trash',
 			'parent_item_colon'  => '',
 			'menu_name'          => 'Job Listings'
 		);
-		$args = array(
+		$args   = array(
 			'labels'             => $labels,
 			'public'             => true,
 			'publicly_queryable' => true,
@@ -67,7 +67,7 @@ class Bullhorn_Custom_Post_Type {
 			'add_or_remove_items'        => __( 'Add or remove categories', 'bullhorn' ),
 			'choose_from_most_used'      => __( 'Choose from the most used categories', 'bullhorn' ),
 		);
-		$args = array(
+		$args   = array(
 			'labels'            => $labels,
 			'hierarchical'      => false,
 			'public'            => true,
@@ -94,7 +94,7 @@ class Bullhorn_Custom_Post_Type {
 			'add_or_remove_items'        => __( 'Add or remove states', 'bullhorn' ),
 			'choose_from_most_used'      => __( 'Choose from the most used states', 'bullhorn' ),
 		);
-		$args = array(
+		$args   = array(
 			'labels'            => $labels,
 			'hierarchical'      => false,
 			'public'            => true,
@@ -114,17 +114,17 @@ class Bullhorn_Custom_Post_Type {
 		global $post, $post_ID;
 
 		$messages['bullhornjoblisting'] = array(
-			0 => '', // Unused. Messages start at index 1.
-			1 => sprintf( __( 'Job listing updated. <a href="%s">View job listing</a>', 'your_text_domain' ), esc_url( get_permalink( $post_ID ) ) ),
-			2 => __( 'Custom field updated.', 'your_text_domain' ),
-			3 => __( 'Custom field deleted.', 'your_text_domain' ),
-			4 => __( 'Job listing updated.', 'your_text_domain' ),
+			0  => '', // Unused. Messages start at index 1.
+			1  => sprintf( __( 'Job listing updated. <a href="%s">View job listing</a>', 'your_text_domain' ), esc_url( get_permalink( $post_ID ) ) ),
+			2  => __( 'Custom field updated.', 'your_text_domain' ),
+			3  => __( 'Custom field deleted.', 'your_text_domain' ),
+			4  => __( 'Job listing updated.', 'your_text_domain' ),
 			/* translators: %s: date and time of the revision */
-			5 => isset( $_GET['revision'] ) ? sprintf( __( 'Job listing restored to revision from %s', 'your_text_domain' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
-			6 => sprintf( __( 'Job listing published. <a href="%s">View job listing</a>', 'your_text_domain' ), esc_url( get_permalink( $post_ID ) ) ),
-			7 => __( 'Job listing saved.', 'your_text_domain' ),
-			8 => sprintf( __( 'Job listing submitted. <a target="_blank" href="%s">Preview job listing</a>', 'your_text_domain' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
-			9 => sprintf( __( 'Job listing scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview job listing</a>', 'your_text_domain' ),
+			5  => isset( $_GET['revision'] ) ? sprintf( __( 'Job listing restored to revision from %s', 'your_text_domain' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+			6  => sprintf( __( 'Job listing published. <a href="%s">View job listing</a>', 'your_text_domain' ), esc_url( get_permalink( $post_ID ) ) ),
+			7  => __( 'Job listing saved.', 'your_text_domain' ),
+			8  => sprintf( __( 'Job listing submitted. <a target="_blank" href="%s">Preview job listing</a>', 'your_text_domain' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
+			9  => sprintf( __( 'Job listing scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview job listing</a>', 'your_text_domain' ),
 				// translators: Publish box date format, see http://php.net/date
 				date_i18n( __( 'M j, Y @ G:i' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post_ID ) ) ),
 			10 => sprintf( __( 'Job listing draft updated. <a target="_blank" href="%s">Preview job listing</a>', 'your_text_domain' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
@@ -151,11 +151,12 @@ class Bullhorn_Custom_Post_Type {
 				'</ul>' .
 				'<p><strong>' . __( 'For more information:', 'bullhorn_text_domain' ) . '</strong></p>' .
 				'<p>' . __( '<a href="http://codex.wordpress.org/Posts_Edit_SubPanel" target="_blank">Edit Posts Documentation</a>', 'bullhorn_text_domain' ) . '</p>' .
-				'<p>' . __( '<a href="http://wordpress.org/support/" target="_blank">Support Forums</a>', 'bullhorn_text_domain' ) . '</p>' ;
+				'<p>' . __( '<a href="http://wordpress.org/support/" target="_blank">Support Forums</a>', 'bullhorn_text_domain' ) . '</p>';
 		} elseif ( 'edit-job-listing' == $screen->id ) {
 			$contextual_help =
-				'<p>' . __( 'This is the help screen displaying the table of job listings.', 'bullhorn_text_domain' ) . '</p>' ;
+				'<p>' . __( 'This is the help screen displaying the table of job listings.', 'bullhorn_text_domain' ) . '</p>';
 		}
+
 		return $contextual_help;
 	}
 

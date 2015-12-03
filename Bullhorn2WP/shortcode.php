@@ -10,7 +10,8 @@
  * [bulllhorn limit=50 show_date=true] -- Shows 50 jobs with their posting date
  * [bullhorn title="Intern"] -- Only shows jobs that have the word "Intern" in the title
  *
- * @param  array  $atts
+ * @param  array $atts
+ *
  * @return string
  */
 function bullhorn_shortcode( $atts ) {
@@ -32,7 +33,7 @@ function bullhorn_shortcode( $atts ) {
 
 	$args = array(
 		'post_type'      => 'bullhornjoblisting',
-		'posts_per_page' => intval($limit),
+		'posts_per_page' => intval( $limit ),
 		'tax_query'      => array(),
 	);
 
@@ -94,10 +95,11 @@ function bullhorn_shortcode( $atts ) {
 	$output .= '<style>';
 	$output .= '.bullhorn-listings { -moz-column-count: ' . $c . '; -moz-column-gap: 20px; -webkit-column-count: ' . $c . '; -webkit-column-gap: 20px; column-count: ' . $c . '; column-gap: 20px; }';
 	$output .= '</style>';
-	$output .= '<!--[if lt IE 10]><style>.bullhorn-listings li { width: ' . (100 / $c ) . '%; float: left; }</style><![endif]-->';
+	$output .= '<!--[if lt IE 10]><style>.bullhorn-listings li { width: ' . ( 100 / $c ) . '%; float: left; }</style><![endif]-->';
 
 	return $output;
 }
+
 add_shortcode( 'bullhorn', 'bullhorn_shortcode' );
 
 /**
@@ -110,6 +112,7 @@ add_filter( 'widget_text', 'do_shortcode' );
  *
  * @param string   $where
  * @param WP_Query $wp_query
+ *
  * @return string
  */
 function bullhorn_title_like_posts_where( $where, &$wp_query ) {
@@ -121,12 +124,14 @@ function bullhorn_title_like_posts_where( $where, &$wp_query ) {
 
 	return $where;
 }
+
 add_filter( 'posts_where', 'bullhorn_title_like_posts_where', 10, 2 );
 
 /**
  * Adds the shortcode for generating a list of Bullhorn states.
  *
- * @param  array  $atts
+ * @param  array $atts
+ *
  * @return string
  */
 function bullhorn_categories( $atts ) {
@@ -138,7 +143,7 @@ function bullhorn_categories( $atts ) {
 		'hide_empty' => 0,
 	) );
 	foreach ( $categories as $category ) {
-		$params = array('bullhorn_category' => $category->slug);
+		$params = array( 'bullhorn_category' => $category->slug );
 		if ( isset( $_GET['bullhorn_state'] ) ) {
 			$params['bullhorn_state'] = $_GET['bullhorn_state'];
 		}
@@ -155,12 +160,14 @@ function bullhorn_categories( $atts ) {
 
 	return $output;
 }
+
 add_shortcode( 'bullhorn_categories', 'bullhorn_categories' );
 
 /**
  * Adds the shortcode for generating a list of Bullhorn states.
  *
- * @param  array  $atts
+ * @param  array $atts
+ *
  * @return string
  */
 function bullhorn_states( $atts ) {
@@ -172,7 +179,7 @@ function bullhorn_states( $atts ) {
 		'hide_empty' => 0,
 	) );
 	foreach ( $states as $state ) {
-		$params = array('bullhorn_state' => $state->slug);
+		$params = array( 'bullhorn_state' => $state->slug );
 		if ( isset( $_GET['bullhorn_category'] ) ) {
 			$params['bullhorn_category'] = $_GET['bullhorn_category'];
 		}
@@ -189,18 +196,21 @@ function bullhorn_states( $atts ) {
 
 	return $output;
 }
+
 add_shortcode( 'bullhorn_states', 'bullhorn_states' );
 
 /**
  * Adds the shortcode for searching job postings.
  *
- * @param  array  $atts
+ * @param  array $atts
+ *
  * @return string
  */
 function bullhorn_search( $atts ) {
-	$form = get_search_form( false );
+	$form   = get_search_form( false );
 	$hidden = '<input type="hidden" name="post_type" value="bullhornjoblisting" />';
 
 	return str_replace( '</form>', $hidden . '</form>', $form );
 }
+
 add_shortcode( 'bullhorn_search', 'bullhorn_search' );

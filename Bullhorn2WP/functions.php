@@ -60,7 +60,7 @@ function bullhorn_sort_results( $query ) {
 	}
 
 	$modify_query = false;
-	$tax_queries = array_filter( (array) $query->get( 'tax_query' ) );
+	$tax_queries  = array_filter( (array) $query->get( 'tax_query' ) );
 	if ( count( $tax_queries ) > 0 ) {
 		foreach ( $tax_queries as $tax_query ) {
 			if ( strstr( $tax_query['taxonomy'], 'bullhorn_' ) !== false ) {
@@ -93,15 +93,18 @@ function bullhorn_sort_results( $query ) {
 		$query->set( 'tax_query', $tax_queries );
 	}
 }
+
 add_action( 'pre_get_posts', 'bullhorn_sort_results' );
 
 function bullhorn_activation_hook() {
 	flush_rewrite_rules();
 }
+
 register_activation_hook( __FILE__, 'bullhorn_activation_hook' );
 
 function bullhorn_deactivation_hook() {
 	wp_clear_scheduled_hook( 'bullhorn_hourly_event' );
 	flush_rewrite_rules();
 }
+
 register_deactivation_hook( __FILE__, 'bullhorn_deactivation_hook' );
