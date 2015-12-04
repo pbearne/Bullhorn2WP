@@ -5,6 +5,8 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Post\PostFile;
 
 
+require_once dirname(dirname( __FILE__ ) ). '/bullhorn-2-wp/bullhorn-2-wp.php';
+
 /**
  * This class is an extension of Bullhorn_Connection.  Its purpose
  * is to allow for resume and candidate posting
