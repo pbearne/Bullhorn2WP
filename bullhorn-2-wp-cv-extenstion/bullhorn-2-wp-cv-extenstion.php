@@ -12,6 +12,7 @@ License: GPL2
 require_once plugin_dir_path( __FILE__ ) . 'vendor/autoload.php';
 require_once plugin_dir_path( __FILE__ ) . 'bullhorn.php';
 require_once plugin_dir_path( __FILE__ ) . 'settings.php';
+require_once plugin_dir_path( __FILE__ ) . 'shortcode.php';
 
 
 /**
@@ -84,6 +85,15 @@ function sniff_requests() {
 	if ( isset( $wp->query_vars['__api'] ) && isset( $wp->query_vars['endpoint'] ) ) {
 		switch ( $wp->query_vars['endpoint'] ) {
 			case 'resume':
+
+				if (
+					! isset( $_POST['bullhorn_cv_form'] )
+					|| ! wp_verify_nonce( $_POST['bullhorn_cv_form'], 'bullhorn_cv_form' )
+				) {
+					print 'Sorry, your nonce did not verify.';
+					die();
+
+				}
 				$bullhorn = new Bullhorn_Extended_Connection;
 
 				// Get Resume
@@ -100,6 +110,9 @@ function sniff_requests() {
 
 				// Attach resume file to candidate
 				$bullhorn->attachResume( $candidate );
+
+				// link to job
+			//	$bullhorn->link_candidate_to_job( $candidate );
 
 				// Redirect
 				$settings  = (array) get_option( 'bullhorn_extension_settings' );

@@ -2,6 +2,8 @@
 
 class Bullhorn_Settings {
 
+	static $authorize;
+
 	/**
 	 * Bullhorn_Settings constructor.
 	 */
@@ -10,23 +12,45 @@ class Bullhorn_Settings {
 			add_action( 'admin_init', 'bullhorn_sync' );
 		}
 
+//		if ( isset( $_GET['code'] ) ) {
+//			$this->authorize();
+//		}
+
+		add_action( 'admin_init', array( $this, 'init' ) );
+		add_action( 'current_screen', array( $this, 'tasks' ) );
+		add_action( 'admin_menu', array( $this, 'menu' ) );
+
+	}
+
+
+	/**
+	 *
+	 */
+	public function tasks() {
 		// If being redirected back to the site with a code, we need to auth
 		// with the API and save the access_token.
+		$currentScreen = get_current_screen();
+		if ( 'settings_page_bullhorn' !== $currentScreen->id ) {
+			return;
+		}
+
 		if ( isset( $_GET['code'] ) ) {
 			$this->authorize();
 		}
-
-		add_action( 'admin_init', array( $this, 'init' ) );
-		add_action( 'admin_menu', array( $this, 'menu' ) );
+//		if ( isset( $_GET['sync'] ) && 'bullhorn' === $_GET['sync'] ) {
+//			add_action( 'admin_init', 'bullhorn_sync' );
+//		}
 	}
 
 	/**
 	 * Sets up the plugin by adding the settings link on the GF Settings page
 	 */
 	public function init() {
+
 		if ( isset( $_GET['sync'] ) && 'bullhorn' === $_GET['sync'] ) {
 			wp_redirect( admin_url( 'options-general.php?page=bullhorn' ) );
 		}
+
 
 		register_setting( 'bullhorn_settings', 'bullhorn_settings', array( $this, 'validate' ) );
 
@@ -54,10 +78,29 @@ class Bullhorn_Settings {
 	 * @return array|bool
 	 */
 	public function authorize() {
+
+		// check for
+		if ( null !== self::$authorize ) {
+			return self::$authorize;
+		}
+
+
 		$settings = (array) get_option( 'bullhorn_settings' );
 
-		if ( isset( $settings['client_id'] ) and ! empty( $settings['client_id'] ) and isset( $settings['client_secret'] ) and ! empty( $settings['client_secret'] ) ) {
-			$url = 'https://auth.bullhornstaffing.com/oauth/token?grant_type=authorization_code&code=' . $_GET['code'] . '&client_id=' . $settings['client_id'] . '&client_secret=' . $settings['client_secret'];
+		if (
+			isset( $settings['client_id'] ) and ! empty( $settings['client_id'] ) and
+			isset( $settings['client_secret'] ) and ! empty( $settings['client_secret'] ) and
+			isset( $_GET['code'] )
+		) {
+			$url = add_query_arg(
+				array(
+					'grant_type'    => 'authorization_code',
+					'code'          => $_GET['code'],
+					'client_id'     => $settings['client_id'],
+					'client_secret' => $settings['client_secret'],
+					'redirect_uri'  => admin_url( 'options-general.php?page=bullhorn' ),
+				), 'https://auth.bullhornstaffing.com/oauth/token'
+			);
 
 			$response = wp_remote_post( $url );
 			$body     = json_decode( $response['body'], true );
@@ -65,14 +108,14 @@ class Bullhorn_Settings {
 			if ( isset( $body['error_description'] ) ) {
 				return $body;
 			}
-
 			if ( isset( $body['access_token'] ) ) {
 				$body['last_refreshed'] = time();
 				update_option( 'bullhorn_api_access', $body );
-
+				self::$authorize = true;
 				return true;
 			}
 		}
+
 		return false;
 	}
 
@@ -84,7 +127,7 @@ class Bullhorn_Settings {
 			return;
 		}
 
-		if ( $this->authorize() === true ) {
+		if ( true === $this->authorize() ) {
 			echo '<div class="updated"><p>You have successfully connected to Bullhorn.</p></div>';
 		} elseif ( isset( $body['error_description'] ) ) {
 			echo '<div class="error"><p><strong>Bullhorn Error:</strong> ' . $body['error_description'] . '</p></div>';
@@ -117,12 +160,22 @@ class Bullhorn_Settings {
 		echo '<input type="text" size="40" name="bullhorn_settings[client_secret]" value="' . esc_attr( $client_secret ) . '" />';
 
 		if ( isset( $settings['client_id'] ) ) {
-			$start = '<a class="button" href="https://auth.bullhornstaffing.com/oauth/authorize?client_id=' . $settings['client_id'] . '&amp;response_type=code">';
+			$state_string = 'not ready';
 			if ( $this->authorized() ) {
-				echo $start . 'Re-connect to Bullhorn</a>';
+				$state_string = 'Re-connect to Bullhorn';
 			} elseif ( $this->connected() ) {
-				echo $start . 'Connect to Bullhorn</a>';
+				$state_string = 'Connect to Bullhorn';
 			}
+			$url = add_query_arg(
+				array(
+					'client_id'     => $settings['client_id'],
+					'response_type' => 'code',
+					'redirect_uri'  => admin_url( 'options-general.php?page=bullhorn' ),
+				),
+				'https://auth.bullhornstaffing.com/oauth/authorize'
+			);
+
+			printf( '<a class="button" href="%s">%s</a>', $url, $state_string );
 		}
 	}
 
@@ -254,7 +307,7 @@ class Bullhorn_Settings {
 		<div class="wrap">
 			<div id="icon-options-general" class="icon32"><br></div>
 			<h2>Bullhorn Developer</h2>
-			<form method="post" action="<?php echo  admin_url( 'options.php' ); ?>">
+			<form method="post" action="<?php echo admin_url( 'options.php' ); ?>">
 				<?php settings_fields( 'bullhorn_settings' ); ?>
 				<?php do_settings_sections( 'bullhornwp' ); ?>
 				<p class="submit">

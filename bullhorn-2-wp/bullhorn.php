@@ -97,7 +97,15 @@ class Bullhorn_Connection {
 	 * @return boolean
 	 */
 	protected function login() {
-		$url      = 'https://rest.bullhornstaffing.com/rest-services/login?version=*&access_token=' . $this->api_access['access_token'];
+		$this->refresh_token();
+
+		$url = add_query_arg(
+			array(
+				'version'      => '*',
+				'access_token' => $this->api_access['access_token'],
+			), 'https://rest.bullhornstaffing.com/rest-services/login'
+		);
+
 		$response = $this->request( $url );
 		$body     = json_decode( $response['body'] );
 
@@ -122,25 +130,30 @@ class Bullhorn_Connection {
 	 *
 	 * @return boolean
 	 */
-	protected function refresh_token() {
-		$url    = 'https://auth.bullhornstaffing.com/oauth/token';
-		$params = array(
-			'grant_type'    => 'refresh_token',
-			'refresh_token' => $this->api_access['refresh_token'],
-			'client_id'     => $this->settings['client_id'],
-			'client_secret' => $this->settings['client_secret'],
+	protected function refresh_token( $force = false ) {
+// TODO: stop re-calling evertime
+//		$eight_mins_ago = strtotime( '8 minutes ago' );
+//		if ( false === $force && $eight_mins_ago <= $this->api_access['last_refreshed'] ) {
+//			return true;
+//		}
+
+		$url = add_query_arg(
+			array(
+				'grant_type'    => 'refresh_token',
+				'refresh_token'          => $this->api_access['refresh_token'],
+				'client_id'     => $this->settings['client_id'],
+				'client_secret' => $this->settings['client_secret'],
+			), 'https://auth.bullhornstaffing.com/oauth/token'
 		);
 
-		$response = wp_remote_post( $url . '?' . http_build_query( $params ) );
+		$response = wp_remote_post( $url );
 		$body     = json_decode( $response['body'], true );
 
 		if ( isset( $body['access_token'] ) ) {
 			$body['last_refreshed'] = time();
 			update_option( 'bullhorn_api_access', $body );
-
-			$this->api_access = get_option( 'bullhorn_api_access' );
+			$this->api_access = $body;
 		}
-
 		return true;
 	}
 
@@ -254,7 +267,7 @@ class Bullhorn_Connection {
 
 		if ( $id ) {
 			$post['ID'] = $id;
-			$id = wp_update_post( $post_args );
+			$id         = wp_update_post( $post_args );
 		} else {
 			$id = wp_insert_post( $post_args );
 		}

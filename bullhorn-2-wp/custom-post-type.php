@@ -188,13 +188,14 @@ class Bullhorn_Custom_Post_Type {
 	 * @return null|string
 	 */
 	public function the_content( $content = null ) {
-		$settings = (array) get_option( 'bullhorn_settings' );
 
+		$settings = (array) get_option( 'bullhorn_settings' );
 		if ( isset( $settings['form_page'] ) and 'bullhornjoblisting' === get_post_type() ) {
+			$bullhorn_job_id = get_post_meta( get_the_ID(), 'bullhorn_job_id', true );
 			if ( is_single() ) {
-				$content .= '<a class="button" href="' . get_permalink( $settings['form_page'] ) . '?position=' . urlencode( get_the_title() ) . '">Submit Resume</a>';
+				$content .= '<a class="button" href="' . get_permalink( $settings['form_page'] ) . '?position=' . absint( $bullhorn_job_id ) . '">Submit Resume</a>';
 			} else {
-				$content .= '<a class="button" href="' . get_permalink( $settings['form_page'] ) . '?position=' . urlencode( get_the_title() ) . '">Apply Now</a>';
+				$content .= '<a class="button" href="' . get_permalink( $settings['form_page'] ) . '?position=' . absint( $bullhorn_job_id ) . '">Apply Now</a>';
 			}
 		}
 

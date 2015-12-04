@@ -5,7 +5,7 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Post\PostFile;
 
 
-require_once dirname(dirname( __FILE__ ) ). '/bullhorn-2-wp/bullhorn-2-wp.php';
+require_once dirname( dirname( __FILE__ ) ) . '/bullhorn-2-wp/bullhorn-2-wp.php';
 
 /**
  * This class is an extension of Bullhorn_Connection.  Its purpose
@@ -37,7 +37,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		if ( ! isset( $_FILES['resume'] ) ) {
 			$this->throwJsonError( 500, 'No "resume" file found.' );
 		}
-
+//TODO: cahnge to WP function  wp_check_filetype( $filename, $mimes ) as this doen't work on windows
 		// Get file extension
 		$finfo = finfo_open( FILEINFO_MIME_TYPE ); // return mime type ala mimetype extension
 		$ext   = finfo_file( $finfo, $_FILES['resume']['tmp_name'] );
@@ -86,6 +86,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			$error = json_decode( $e->getResponse()->getBody() );
 			$this->throwJsonError( 500, $error->errorMessage );
 		}
+
 		return false;
 	}
 
@@ -97,9 +98,26 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 * @return mixed
 	 */
 	public function createCandidate( $resume ) {
+
 		// Make sure country ID is correct
 		if ( is_null( $resume->candidate->address->countryID ) ) {
 			$resume->candidate->address->countryID = 1;
+		}
+
+		if ( isset( $_POST['email'] ) ) {
+			$cv_email = $resume->candidate->email;
+
+			$resume->candidate->email  = esc_attr( $_POST['email'] );
+			$resume->candidate->email2 = esc_attr( $cv_email );
+		}
+		if ( isset( $_POST['phone'] ) ) {
+			$cv_phone = $resume->candidate->phone;
+
+			$resume->candidate->phone  = esc_attr( $_POST['phone'] );
+			$resume->candidate->phone2 = esc_attr( $cv_phone );
+		}
+		if ( isset( $_POST['name'] ) ) {
+			$resume->candidate->name = esc_attr( $_POST['name'] );
 		}
 
 		$candidate_data = json_encode( $resume->candidate );
@@ -120,6 +138,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			$error = json_decode( $e->getResponse()->getBody() );
 			$this->throwJsonError( 500, $error->errorMessage );
 		}
+
 		return false;
 	}
 
@@ -132,6 +151,11 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 * @return mixed
 	 */
 	public function attachEducation( $resume, $candidate ) {
+
+		if ( ! isset( $resume->candidateEducation ) ) {
+			return false;
+		}
+
 		// API authentication
 		$this->apiAuth();
 
@@ -173,6 +197,9 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 * @return mixed
 	 */
 	public function attachWorkHistory( $resume, $candidate ) {
+		if ( ! isset( $resume->CandidateWorkHistory ) ) {
+			return false;
+		}
 		// API authentication
 		$this->apiAuth();
 
@@ -226,6 +253,57 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			$error = json_decode( $e->getResponse()->getBody() );
 			$this->throwJsonError( 500, $error->errorMessage );
 		}
+
+		return false;
+	}
+
+	/**
+	 * Attach Resume to a candidate.  this pulls the original resume file from the $_FILES array
+	 *
+	 * @param $candidate
+	 *
+	 * @return mixed
+	 */
+	public function link_candidate_to_job( $candidate ) {
+		// API authentication
+		$this->apiAuth();
+
+		echo '<pre>';
+		var_dump( $candidate );
+
+		// Create the url && variables array
+		$url    = $this->url . 'entity/JobSubmission';
+		$params = array( 'BhRestToken' => $this->session  );
+
+		if ( ! isset( $_POST['position'] ) ) {
+			return false;
+		}
+		$jobOrder = $_POST['position'];
+		$data     = json_encode( array(
+			'candidate'       => array( 'id' => absint( $candidate->changedEntityId ) ),
+			'jobOrder'        => array( 'id' => absint( $jobOrder ) ),
+			'status'          => 'New Lead',
+			'dateWebResponse' => time()
+		) );
+//			"candidate": {"id": 3747},
+//"jobOrder": {"id": 36}
+//"status": "New Lead",
+//"dateWebResponse": 1370522348880
+
+		var_dump( $data );
+
+
+		//try {
+			$client   = new Client();
+			$response = $client->put( $url . '?' . http_build_query( $params ), array( 'body' => $data ) );
+			var_dump( $response );
+			die();
+			return json_decode( $response->getBody() );
+//		} catch ( ClientException $e ) {
+//			$error = json_decode( $e->getResponse()->getBody() );
+//			$this->throwJsonError( 500, $error->errorMessage );
+//		}
+
 		return false;
 	}
 
