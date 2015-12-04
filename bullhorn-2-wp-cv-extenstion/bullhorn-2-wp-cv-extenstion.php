@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: Marketing Press Bullhorn Integration Resume/Candidate Extension
-Plugin URI: http://bullhorntowordpress.com
+Plugin URI: http://bullhorntowordpress.com / https://github.com/pbearne/Bullhorn2WP
 Description: This plugin is an extension for the Marketing Press Bullhorn Integration plugin that allows for resume uploads and candidate creation.
-Version: 1.0
+Version: 2.0
 Author: Marketing Press
 Author URI: http://marketingpress.com
 License: GPL2
@@ -28,7 +28,7 @@ add_action( 'parse_request', 'sniff_requests' );
  * @return void
  */
 function child_plugin_has_parent_plugin() {
-	if ( is_admin() && current_user_can( 'activate_plugins' ) && ! is_plugin_active( 'Bullhorn2WP/functions.php' ) ) {
+	if ( is_admin() && current_user_can( 'activate_plugins' ) && ! is_plugin_active( 'Bullhorn2WP/bullhorn-2-wp.php' ) ) {
 		add_action( 'admin_notices', 'child_plugin_notice' );
 
 		deactivate_plugins( plugin_basename( __FILE__ ) );

@@ -16,6 +16,6 @@ $packager->recursiveCopy('src', 'GuzzleHttp', ['php']);
 $packager->recursiveCopy('vendor/react/promise/src', '');
 $packager->recursiveCopy('vendor/guzzlehttp/ringphp/src', 'GuzzleHttp/Ring');
 $packager->recursiveCopy('vendor/guzzlehttp/streams/src', 'GuzzleHttp/Stream');
-$packager->createAutoloader(['React/Promise/functions.php']);
+$packager->createAutoloader(['React/Promise/bullhorn-2-wp.php']);
 $packager->createPhar(__DIR__ . '/artifacts/guzzle.phar');
 $packager->createZip(__DIR__ . '/artifacts/guzzle.zip');
