@@ -13,6 +13,7 @@ require_once plugin_dir_path( __FILE__ ) . 'vendor/autoload.php';
 require_once plugin_dir_path( __FILE__ ) . 'bullhorn.php';
 require_once plugin_dir_path( __FILE__ ) . 'settings.php';
 
+
 /**
  * Plugin Hooks
  */
@@ -28,7 +29,7 @@ add_action( 'parse_request', 'sniff_requests' );
  * @return void
  */
 function child_plugin_has_parent_plugin() {
-	if ( is_admin() && current_user_can( 'activate_plugins' ) && ! is_plugin_active( 'Bullhorn2WP/bullhorn-2-wp.php' ) ) {
+	if ( is_admin() && current_user_can( 'activate_plugins' ) && ! is_plugin_active( 'bullhorn-2-wp/bullhorn-2-wp.php' ) ) {
 		add_action( 'admin_notices', 'child_plugin_notice' );
 
 		deactivate_plugins( plugin_basename( __FILE__ ) );
