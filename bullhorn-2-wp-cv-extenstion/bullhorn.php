@@ -258,7 +258,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	}
 
 	/**
-	 * Attach Resume to a candidate.  this pulls the original resume file from the $_FILES array
+	 * Link a candidate to job.
 	 *
 	 * @param $candidate
 	 *
@@ -269,7 +269,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$this->apiAuth();
 
 		echo '<pre>';
-		var_dump( $candidate );
+	//	var_dump( $candidate );
 
 		// Create the url && variables array
 		$url    = $this->url . 'entity/JobSubmission';
@@ -278,42 +278,45 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		if ( ! isset( $_POST['position'] ) ) {
 			return false;
 		}
-		$jobOrder = $_POST['position'];
-		$data     = json_encode( array(
+		$jobOrder = absint( $_POST['position'] );
+
+		$url = add_query_arg(
+			array(
+				'BhRestToken' => $this->session,
+			), $this->url . 'entity/JobSubmission'
+		);
+
+		$body = array(
 			'candidate'       => array( 'id' => absint( $candidate->changedEntityId ) ),
 			'jobOrder'        => array( 'id' => absint( $jobOrder ) ),
 			'status'          => 'New Lead',
-			'dateWebResponse' => time()
-		) );
-//			"candidate": {"id": 3747},
-//"jobOrder": {"id": 36}
-//"status": "New Lead",
-//"dateWebResponse": 1370522348880
+			'dateWebResponse' => $this->microtime_float(), //date( 'u', $date ),// time(),
+		);
 
-		var_dump( $data );
+		$response = wp_remote_get( $url, array( 'body' => json_encode( $body ), 'method' => 'PUT' ) );
 
-
-		//try {
-			$client   = new Client();
-			$response = $client->put( $url . '?' . http_build_query( $params ), array( 'body' => $data ) );
-			var_dump( $response );
-			die();
-			return json_decode( $response->getBody() );
-//		} catch ( ClientException $e ) {
-//			$error = json_decode( $e->getResponse()->getBody() );
-//			$this->throwJsonError( 500, $error->errorMessage );
-//		}
-
+		if ( 200 === $response['response']['code'] ) {
+			return json_decode( $response['body'] );
+		}
 		return false;
 	}
 
+
+	/**
+	 * get time in microseconds
+	 * @return float
+	 */
+	private function microtime_float() {
+		list( $usec, $sec ) = explode( ' ', microtime() );
+		return ( (float) $usec + (float) $sec ) * 100;
+	}
 	/**
 	 * Send a json error to the screen
 	 *
 	 * @param $status
 	 * @param $error
 	 */
-	private function throwJsonError( $status, $error ) {
+	 function throwJsonError( $status, $error ) {
 		$response = array( 'status' => $status, 'error' => $error );
 		echo json_encode( $response );
 		exit;

@@ -112,7 +112,7 @@ function sniff_requests() {
 				$bullhorn->attachResume( $candidate );
 
 				// link to job
-			//	$bullhorn->link_candidate_to_job( $candidate );
+				$bullhorn->link_candidate_to_job( $candidate );
 
 				// Redirect
 				$settings  = (array) get_option( 'bullhorn_extension_settings' );
