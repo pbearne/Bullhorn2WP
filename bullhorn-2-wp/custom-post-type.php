@@ -110,6 +110,7 @@ class Bullhorn_Custom_Post_Type {
 			'show_tagcloud'     => true,
 		);
 		register_taxonomy( 'bullhorn_state', 'bullhornjoblisting', $args );
+
 		return true;
 	}
 
@@ -117,7 +118,7 @@ class Bullhorn_Custom_Post_Type {
 	/**
 	 * Add filter to ensure the text Job Listing, or job listing, is displayed
 	 * when user updates a job listing.
-
+	 *
 	 * @param $messages
 	 *
 	 * @return mixed
@@ -138,7 +139,7 @@ class Bullhorn_Custom_Post_Type {
 			8  => sprintf( __( 'Job listing submitted. <a target="_blank" href="%s">Preview job listing</a>', 'your_text_domain' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
 			9  => sprintf( __( 'Job listing scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview job listing</a>', 'your_text_domain' ),
 				// translators: Publish box date format, see http://php.net/date
-			date_i18n( __( 'M j, Y @ G:i' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post_ID ) ) ),
+				date_i18n( __( 'M j, Y @ G:i' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post_ID ) ) ),
 			10 => sprintf( __( 'Job listing draft updated. <a target="_blank" href="%s">Preview job listing</a>', 'your_text_domain' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
 		);
 
@@ -182,7 +183,7 @@ class Bullhorn_Custom_Post_Type {
 	/**
 	 * Filters the content for single job posts to insert a customizable link
 	 * to the form where the user can submit their resume.
-
+	 *
 	 * @param null $content
 	 *
 	 * @return null|string
@@ -193,7 +194,12 @@ class Bullhorn_Custom_Post_Type {
 		if ( isset( $settings['form_page'] ) and 'bullhornjoblisting' === get_post_type() ) {
 			$bullhorn_job_id = get_post_meta( get_the_ID(), 'bullhorn_job_id', true );
 			if ( is_single() ) {
-				$content .= '<a class="button" href="' . get_permalink( $settings['form_page'] ) . '?position=' . absint( $bullhorn_job_id ) . '">Submit Resume</a>';
+				if ( apply_filters( 'bullhorn_show_form_on_job_page', true ) ) {
+					$content .= sprintf( '<h4>%s</h4><br />' , __( 'Apply for this Now' ) );
+					$content .= do_shortcode( '[bullhorn_cv_form]' );
+				} else {
+					$content .= '<a class="button" href="' . get_permalink( $settings['form_page'] ) . '?position=' . absint( $bullhorn_job_id ) . '">Submit Resume</a>';
+				}
 			} else {
 				$content .= '<a class="button" href="' . get_permalink( $settings['form_page'] ) . '?position=' . absint( $bullhorn_job_id ) . '">Apply Now</a>';
 			}

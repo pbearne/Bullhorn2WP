@@ -33,6 +33,9 @@ class shortcodes{
 			if ( isset( $_GET['position'] ) ) {
 				printf( '<input id="position" name="position" type="hidden" value="%s" />',
 				esc_attr( $_GET['position'] ) );
+			} elseif ( 'bullhornjoblisting' === get_post_type() ) {
+				printf( '<input id="position" name="position" type="hidden" value="%s" />',
+				esc_attr( get_post_meta( get_the_ID(), 'bullhorn_job_id', true ) ) );
 			}
 
 			wp_nonce_field( 'bullhorn_cv_form' , 'bullhorn_cv_form' );
@@ -42,28 +45,32 @@ class shortcodes{
 		<script type="application/javascript">
 
 		jQuery(document).ready(function(e) {
+			var error_color = '#FFDFE0';
+			var defaut_file_color =  jQuery('#fileToUpload').css( 'background-color'); //'#fff';
+			var defaut_color =   jQuery('#email').css( 'background-color'); //'#d0eafa';
 			jQuery( '#bullhorn-resume').on('submit', function(){
+
 				$no_error = true;
 				$email = jQuery('#email');
 				if ( ( 3 > $email.val().length ) || ! isValidEmailAddress( $email.val() ) ){
-					$email.css( 'background-color', '#FFDFE0' );
+					$email.css( 'background-color', error_color );
 					$no_error = false;
 				} else {
-					$email.css( 'background-color', '#d0eafa' );
+					$email.css( 'background-color', defaut_color );
 				}
 				$name = jQuery('#name');
 				if ( 3 > $name.val().length ){
-					$name.css( 'background-color', '#FFDFE0' );
+					$name.css( 'background-color', error_color );
 					$no_error = false;
 				} else {
-					$name.css( 'background-color', '#d0eafa' );
+					$name.css( 'background-color', defaut_color );
 				}
 				$fileToUpload = jQuery('#fileToUpload');
 				if ( 3 > $fileToUpload.val().length ){
-					$fileToUpload.css( 'background-color', '#FFDFE0' );
+					$fileToUpload.css( 'background-color', error_color );
 					$no_error = false;
 				} else {
-					$fileToUpload.css( 'background-color', '#d0eafa' );
+					$fileToUpload.css( 'background-color', defaut_file_color );
 				}
 
 
