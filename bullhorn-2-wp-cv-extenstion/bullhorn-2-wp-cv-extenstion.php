@@ -116,7 +116,10 @@ function sniff_requests() {
 
 				// Redirect
 				$settings  = (array) get_option( 'bullhorn_extension_settings' );
-				$permalink = get_permalink( $settings['thanks_page'] );
+				$permalink = add_query_arg( array(
+					'bh_applied' => true,
+				),	get_permalink( $settings['thanks_page'] ) );
+
 				header( "location: $permalink" );
 				exit;
 

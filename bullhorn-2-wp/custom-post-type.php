@@ -204,6 +204,9 @@ class Bullhorn_Custom_Post_Type {
 				$content .= '<a class="button" href="' . get_permalink( $settings['form_page'] ) . '?position=' . absint( $bullhorn_job_id ) . '">Apply Now</a>';
 			}
 		}
+		if ( isset( $_GET['bh_applied'] ) ) {
+			$content = sprintf( ' <h3 style="text-align: center">%s</h3>', __( 'Thank you for uploading you resume.' ) ) . $content;
+		}
 
 		return $content;
 	}

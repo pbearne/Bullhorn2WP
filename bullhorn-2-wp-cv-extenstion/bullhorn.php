@@ -239,15 +239,35 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	public function attachResume( $candidate ) {
 		// API authentication
 		$this->apiAuth();
-
+//echo '<pre>';
 		// Create the url && variables array
 		$url    = $this->url . '/file/Candidate/' . $candidate->changedEntityId . '/raw';
 		$params = array( 'BhRestToken' => $this->session, 'externalID' => 'Portfolio', 'fileType' => 'SAMPLE' );
 
 		try {
 			$client   = new Client();
-			$response = $client->put( $url . '?' . http_build_query( $params ), array( 'body' => array( 'resume' => fopen( $_FILES['resume']['tmp_name'], 'r' ) ) ) );
+			$response = $client->put( $url . '?' . http_build_query( $params ),
+				array( 'body' => array( 'resume' => new PostFile( 'resume', fopen( $_FILES['resume']['tmp_name'], 'r' ) ) ) ) );
+//var_dump($response);
 
+//			$request  = $client->createRequest( 'POST', $url . '?' . http_build_query( $params ) );
+//			$postBody = $request->getBody();
+//			$postBody->addFile( new PostFile( 'resume', fopen( $_FILES['resume']['tmp_name'], 'r' ) ) );
+//			$response = $client->send( $request );
+
+//			var_dump($response->getBody());
+
+//			$url = add_query_arg(
+//				array(
+//					'BhRestToken' => $this->session,
+//				), $this->url . '/entityFiles/Candidate/'. $candidate->changedEntityId
+//			);
+//
+//			$response = wp_remote_get( $url );
+
+//			var_dump($response);
+//
+//			die();
 			return json_decode( $response->getBody() );
 		} catch ( ClientException $e ) {
 			$error = json_decode( $e->getResponse()->getBody() );
@@ -255,6 +275,90 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		}
 
 		return false;
+	}
+
+
+	public function wp_upload_file_request( $candidate ) {
+		echo '<pre>';
+		// http://gerhardpotgieter.com/2014/07/30/uploading-files-with-wp_remote_post-or-wp_remote_request/
+		$local_file = $_FILES['resume']['tmp_name'];
+		// wp_remote_request way
+		$file      = fopen( $local_file, 'r' );
+		$file_size = filesize( $local_file );
+		$file_data = fread( $file, $file_size );
+		$args      = array(
+			'method'  => 'PUT',
+			'headers' => array(
+				'accept'       => 'application/json', // The API returns JSON
+				'content-type' => 'application/binary', // Set content type to binary
+			),
+			'body'    => $file_data,
+		);
+
+		$url = add_query_arg(
+			array(
+				'BhRestToken' => $this->session,
+			), $this->url . '/file/Candidate/' . $candidate->changedEntityId . '/raw'
+		);
+
+		$response = wp_remote_request( $url, $args );
+		var_dump( $response );
+		die();
+//		if ( 200 === $response['response']['code'] ) {
+//			return json_decode( $response['body'] );
+//		}
+//		return false;
+
+	}
+
+
+	public function wp_upload_file( $candidate ) {
+		echo '<pre>';
+
+
+		// Create the url && variables array
+//		$url    = $this->url . '/file/Candidate/' . $candidate->changedEntityId . '/raw';
+//		$params = array( 'BhRestToken' => $this->session, 'externalID' => 'Portfolio', 'fileType' => 'SAMPLE' );
+
+//		try {
+//			$client   = new Client();
+//			$response = $client->put( $url . '?' . http_build_query( $params ), array( 'body' => array( 'resume' => fopen( $_FILES['resume']['tmp_name'], 'r' ) ) ) );
+		$boundary = wp_generate_password( 24 );
+		$headers  = array(
+			'content-type' => 'multipart/form-data; boundary=' . $boundary
+		);
+
+
+		$url        = add_query_arg(
+			array(
+				'BhRestToken' => $this->session,
+			), $this->url . '/file/Candidate/' . $candidate->changedEntityId . '/raw'
+		);
+		$payload    = '';
+		$local_file = $_FILES['resume']['tmp_name'];
+// Upload the file
+		if ( $local_file ) {
+			$payload .= '--' . $boundary;
+			$payload .= "\r\n";
+			$payload .= 'Content-Disposition: form-data; name="' . 'upload' .
+			            '"; filename="' . basename( $local_file ) . '"' . "\r\n";
+			$payload .= 'Content-Type: image/jpeg' . "\r\n";
+			$payload .= "\r\n";
+			$payload .= file_get_contents( $local_file );
+			$payload .= "\r\n";
+		}
+		$payload .= '--' . $boundary . '--';
+
+
+		$response = wp_remote_get( $url, array( 'body' => $payload, 'method' => 'PUT', 'headers' => $headers ) );
+
+//		if ( 200 === $response['response']['code'] ) {
+//			return json_decode( $response['body'] );
+//		}
+//		return false;
+
+
+		var_dump( $response );
 	}
 
 	/**
@@ -269,11 +373,11 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$this->apiAuth();
 
 		echo '<pre>';
-	//	var_dump( $candidate );
+		//	var_dump( $candidate );
 
 		// Create the url && variables array
-		$url    = $this->url . 'entity/JobSubmission';
-		$params = array( 'BhRestToken' => $this->session  );
+//		$url    = $this->url . 'entity/JobSubmission';
+//		$params = array( 'BhRestToken' => $this->session  );
 
 		if ( ! isset( $_POST['position'] ) ) {
 			return false;
@@ -298,6 +402,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		if ( 200 === $response['response']['code'] ) {
 			return json_decode( $response['body'] );
 		}
+
 		return false;
 	}
 
@@ -308,15 +413,17 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 */
 	private function microtime_float() {
 		list( $usec, $sec ) = explode( ' ', microtime() );
+
 		return ( (float) $usec + (float) $sec ) * 100;
 	}
+
 	/**
 	 * Send a json error to the screen
 	 *
 	 * @param $status
 	 * @param $error
 	 */
-	 function throwJsonError( $status, $error ) {
+	function throwJsonError( $status, $error ) {
 		$response = array( 'status' => $status, 'error' => $error );
 		echo json_encode( $response );
 		exit;
