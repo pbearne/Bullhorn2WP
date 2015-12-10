@@ -2,10 +2,10 @@
 /*
 Plugin Name: Fork form Marketing Press Bullhorn Integration
 Plugin URI: http://bullhorntowordpress.com / https://github.com/pbearne/Bullhorn2WP
-Description: This plugin adds Bullhorn jobs to a custom post types (Job Listings) for front-end display. Posts are auto-created by synchronizing with Bullhorn auto-deleted if not public or active on Bullhorn. There is no way to manage the Bullhorn jobs here, the admin menu for Job Listings should be used for viewing only. Any theme developed on top of this plugin should have archive-job-listing.php and single-job-listing.php template files for special layout.
+Description: This plugin adds Bullhorn jobs to a custom post types (Job Listings) for front-end display. Posts are auto-created by synchronizing with Bullhorn auto-deleted if not public or active on Bullhorn. There is no way to manage the Bullhorn jobs here, the admin menu for Job Listings should be used for viewing only. Any theme developed on top of this plugin should have archive-job-listing.php and single-job-listing.php template files for special layout. Pull request acepted at https://github.com/pbearne/Bullhorn2WP
 Version: 2.0
-Author: Marketing Press
-Author URI: http://marketingpress.com
+Author:Paul Beanre and Marketing Press
+Author URI: http://marketingpress.com / https://github.com/pbearne/
 License: GPL2
 */
 
