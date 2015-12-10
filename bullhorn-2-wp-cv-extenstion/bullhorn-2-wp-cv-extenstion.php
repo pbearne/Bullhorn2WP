@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: Marketing Press Bullhorn Integration Resume/Candidate Extension
+Plugin Name: Fork form Marketing Press Bullhorn Integration Resume/Candidate Extension
 Plugin URI: http://bullhorntowordpress.com / https://github.com/pbearne/Bullhorn2WP
 Description: This plugin is an extension for the Marketing Press Bullhorn Integration plugin that allows for resume uploads and candidate creation.
 Version: 2.0
