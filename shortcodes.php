@@ -328,7 +328,7 @@ class Shortcodes {
 	 */
 	function bullhorn_search( $atts ) {
 		if ( ! empty( $atts ) ) {
-			_doing_it_wrong( __FUNCTION__, 'bullhorn categories Shortcode does not need attributes ', 2.0 );
+			_doing_it_wrong( __FUNCTION__, __( 'bullhorn categories Shortcode does not need attributes', 'bullhorn' ) , 2.0 );
 		}
 		$form   = get_search_form( false );
 		$hidden = '<input type="hidden" name="post_type" value="bullhornjoblisting" />';

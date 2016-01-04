@@ -15,7 +15,6 @@ class Bullhorn_Custom_Post_Type {
 		add_action( 'the_content', array( __CLASS__, 'the_content' ) );
 		add_action( 'the_content', array( __CLASS__, 'add_json_ld_to_content' ) );
 
-
 		add_filter( 'comments_open', array( __CLASS__, 'comments_open' ), 10, 2 );
 	}
 
@@ -29,19 +28,19 @@ class Bullhorn_Custom_Post_Type {
 		}
 
 		$labels = array(
-			'name'               => 'Job Listings',
-			'singular_name'      => 'Job Listing',
-			'add_new'            => 'Add New',
-			'add_new_item'       => 'Add New Job Listing',
-			'edit_item'          => 'Edit Job Listing',
-			'new_item'           => 'New Job Listing',
-			'all_items'          => 'All Job Listings',
-			'view_item'          => 'View Job Listing',
-			'search_items'       => 'Search Job Listings',
-			'not_found'          => 'No job listings found',
-			'not_found_in_trash' => 'No job listings found in Trash',
+			'name'               => _x( 'Job Listings', 'Taxonomy General Name', 'bullhorn' ),
+			'singular_name'      => _x( 'Job Listing', 'Taxonomy Singular Name', 'bullhorn' ),
+			'add_new'            => __( 'Add New', 'bullhorn' ),
+			'add_new_item'       => __( 'Add New Job Listing', 'bullhorn' ),
+			'edit_item'          => __( 'Edit Job Listing', 'bullhorn' ),
+			'new_item'           => __( 'New Job Listing', 'bullhorn' ),
+			'all_items'          => __( 'All Job Listings', 'bullhorn' ),
+			'view_item'          => __( 'View Job Listing', 'bullhorn' ),
+			'search_items'       => __( 'Search Job Listings', 'bullhorn' ),
+			'not_found'          => __( 'No job listings found', 'bullhorn' ),
+			'not_found_in_trash' => __( 'No job listings found in Trash', 'bullhorn' ),
 			'parent_item_colon'  => '',
-			'menu_name'          => 'Job Listings',
+			'menu_name'          => __( 'Job Listings', 'bullhorn' ),
 		);
 		$args   = array(
 			'labels'             => $labels,
@@ -131,18 +130,18 @@ class Bullhorn_Custom_Post_Type {
 		$messages['bullhornjoblisting'] = array(
 			0  => '', // Unused. Messages start at index 1.
 			1  => sprintf( __( 'Job listing updated. <a href="%s">View job listing</a>', 'your_text_domain' ), esc_url( get_permalink( $post_ID ) ) ),
-			2  => __( 'Custom field updated.', 'your_text_domain' ),
-			3  => __( 'Custom field deleted.', 'your_text_domain' ),
-			4  => __( 'Job listing updated.', 'your_text_domain' ),
+			2  => __( 'Custom field updated.', 'bullhorn' ),
+			3  => __( 'Custom field deleted.', 'bullhorn' ),
+			4  => __( 'Job listing updated.', 'bullhorn' ),
 			/* translators: %s: date and time of the revision */
-			5  => isset( $_GET['revision'] ) ? sprintf( __( 'Job listing restored to revision from %s', 'your_text_domain' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
-			6  => sprintf( __( 'Job listing published. <a href="%s">View job listing</a>', 'your_text_domain' ), esc_url( get_permalink( $post_ID ) ) ),
-			7  => __( 'Job listing saved.', 'your_text_domain' ),
-			8  => sprintf( __( 'Job listing submitted. <a target="_blank" href="%s">Preview job listing</a>', 'your_text_domain' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
-			9  => sprintf( __( 'Job listing scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview job listing</a>', 'your_text_domain' ),
+			5  => isset( $_GET['revision'] ) ? sprintf( __( 'Job listing restored to revision from %s', 'bullhorn' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+			6  => sprintf( __( 'Job listing published. <a href="%s">View job listing</a>', 'bullhorn' ), esc_url( get_permalink( $post_ID ) ) ),
+			7  => __( 'Job listing saved.', 'bullhorn' ),
+			8  => sprintf( __( 'Job listing submitted. <a target="_blank" href="%s">Preview job listing</a>', 'bullhorn' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
+			9  => sprintf( __( 'Job listing scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview job listing</a>', 'bullhorn' ),
 				// translators: Publish box date format, see http://php.net/date
-				date_i18n( __( 'M j, Y @ G:i' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post_ID ) ) ),
-			10 => sprintf( __( 'Job listing draft updated. <a target="_blank" href="%s">Preview job listing</a>', 'your_text_domain' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
+			date_i18n( __( 'M j, Y @ G:i' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post_ID ) ) ),
+			10 => sprintf( __( 'Job listing draft updated. <a target="_blank" href="%s">Preview job listing</a>', 'bullhorn' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
 		);
 
 		return $messages;
@@ -160,22 +159,22 @@ class Bullhorn_Custom_Post_Type {
 	public function contextual_help( $contextual_help, $screen_id ) {
 		if ( 'bullhornjoblisting' === $screen_id ) {
 			$contextual_help =
-				'<p>' . __( 'Things to remember when adding or editing a job listing:', 'bullhorn_text_domain' ) . '</p>' .
+				'<p>' . __( 'Things to remember when adding or editing a job listing:', 'bullhorn' ) . '</p>' .
 				'<ul>' .
-				'<li>' . __( 'Specify the correct genre such as Mystery, or Historic.', 'bullhorn_text_domain' ) . '</li>' .
-				'<li>' . __( 'Specify the correct writer of the job listing. Remember that the Author module refers to you, the author of this job listing review.', 'bullhorn_text_domain' ) . '</li>' .
+				'<li>' . __( 'Specify the correct genre such as Mystery, or Historic.', 'bullhorn' ) . '</li>' .
+				'<li>' . __( 'Specify the correct writer of the job listing. Remember that the Author module refers to you, the author of this job listing review.', 'bullhorn' ) . '</li>' .
 				'</ul>' .
-				'<p>' . __( 'If you want to schedule the job listing to be published in the future:', 'bullhorn_text_domain' ) . '</p>' .
+				'<p>' . __( 'If you want to schedule the job listing to be published in the future:', 'bullhorn' ) . '</p>' .
 				'<ul>' .
-				'<li>' . __( 'Under the Publish module, click on the Edit link next to Publish.', 'bullhorn_text_domain' ) . '</li>' .
-				'<li>' . __( 'Change the date to the date to actual publish this article, then click on Ok.', 'bullhorn_text_domain' ) . '</li>' .
+				'<li>' . __( 'Under the Publish module, click on the Edit link next to Publish.', 'bullhorn' ) . '</li>' .
+				'<li>' . __( 'Change the date to the date to actual publish this article, then click on Ok.', 'bullhorn' ) . '</li>' .
 				'</ul>' .
-				'<p><strong>' . __( 'For more information:', 'bullhorn_text_domain' ) . '</strong></p>' .
-				'<p>' . __( '<a href="http://codex.wordpress.org/Posts_Edit_SubPanel" target="_blank">Edit Posts Documentation</a>', 'bullhorn_text_domain' ) . '</p>' .
-				'<p>' . __( '<a href="http://wordpress.org/support/" target="_blank">Support Forums</a>', 'bullhorn_text_domain' ) . '</p>';
+				'<p><strong>' . __( 'For more information:', 'bullhorn' ) . '</strong></p>' .
+				'<p>' . __( '<a href="http://codex.wordpress.org/Posts_Edit_SubPanel" target="_blank">Edit Posts Documentation</a>', 'bullhorn' ) . '</p>' .
+				'<p>' . __( '<a href="http://wordpress.org/support/" target="_blank">Support Forums</a>', 'bullhorn' ) . '</p>';
 		} elseif ( 'edit-job-listing' == $screen_id ) {
 			$contextual_help =
-				'<p>' . __( 'This is the help screen displaying the table of job listings.', 'bullhorn_text_domain' ) . '</p>';
+				'<p>' . __( 'This is the help screen displaying the table of job listings.', 'bullhorn' ) . '</p>';
 		}
 
 		return $contextual_help;
@@ -200,10 +199,10 @@ class Bullhorn_Custom_Post_Type {
 					$content .= sprintf( '<h4>%s</h4><br />' , __( 'Apply for this Now' ) );
 					$content .= do_shortcode( '[bullhorn_cv_form]' );
 				} else {
-					$content .= '<a class="button" href="' . get_permalink( $settings['form_page'] ) . '?position=' . absint( $bullhorn_job_id ) . '">Submit Resume</a>';
+					$content .= '<a class="button" href="' . get_permalink( $settings['form_page'] ) . '?position=' . absint( $bullhorn_job_id ) . '">' . __( 'Submit Resume', 'bullhorn' ) . '</a>';
 				}
 			} else {
-				$content .= '<a class="button" href="' . get_permalink( $settings['form_page'] ) . '?position=' . absint( $bullhorn_job_id ) . '">Apply Now</a>';
+				$content .= '<a class="button" href="' . get_permalink( $settings['form_page'] ) . '?position=' . absint( $bullhorn_job_id ) . '">' . __( 'Apply Now', 'bullhorn' ) . '</a>';
 			}
 		}
 		if ( isset( $_GET['bh_applied'] ) ) {
@@ -226,7 +225,6 @@ class Bullhorn_Custom_Post_Type {
 				$content = PHP_EOL . sprintf( '<script type="application/ld+json">%s</script>', wp_json_encode( $bullhorn_json_ld, $options, $depth ) ) . PHP_EOL . $content;
 			}
 		}
-
 
 		return $content;
 	}

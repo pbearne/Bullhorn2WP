@@ -20,18 +20,22 @@ LIMITS: WP Cron sync schedule should not be shortened, elongate as necessary. Ea
 DISABLING: If you disable this plugin and want to restore the original /open-positions page, go to Settings > Permalinks and click Save Changes after disabling (this will refresh the WP Rewrite cache).
 */
 
-require_once plugin_dir_path( __FILE__ ) . 'bullhorn.php';
-require_once plugin_dir_path( __FILE__ ) . 'settings.php';
-require_once plugin_dir_path( __FILE__ ) . 'custom-post-type.php';
-require_once plugin_dir_path( __FILE__ ) . 'cron.php';
-require_once plugin_dir_path( __FILE__ ) . 'shortcodes.php';
-require_once plugin_dir_path( __FILE__ ) . 'bullhorn-cv.php';
+
+$path = plugin_dir_path( __FILE__ );
+require_once $path . 'bullhorn.php';
+require_once $path . 'settings.php';
+require_once $path . 'custom-post-type.php';
+require_once $path . 'cron.php';
+require_once $path . 'shortcodes.php';
+require_once $path . 'bullhorn-cv.php';
 
 /**
  * Allow job listings to be sorted by a specified setting by the admin.
+ *
+ * @param $query WP_QUERY
  */
 function bullhorn_sort_results( $query ) {
-	if ( $query->is_archive( 'bullhornjoblisting' ) ) {
+	if ( $query->is_post_type_archive( 'bullhornjoblisting' ) ) {
 		$settings = (array) get_option( 'bullhorn_settings' );
 		if ( isset( $settings['listings_sort'] ) and ! empty( $settings['listings_sort'] ) ) {
 			// Use in_array() because this list might grow in the future

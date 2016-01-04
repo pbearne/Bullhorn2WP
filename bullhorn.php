@@ -64,7 +64,7 @@ class Bullhorn_Connection {
 
 		$logged_in = self::login();
 		if ( ! $logged_in ) {
-			throw new Exception( 'There was a problem logging into the Bullhorn API.' );
+			throw new Exception( __( 'There was a problem logging into the Bullhorn API.', 'bullhorn' ) );
 		}
 
 		wp_defer_term_counting( true );

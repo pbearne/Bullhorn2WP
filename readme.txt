@@ -1,7 +1,7 @@
 === Plugin Name ===
 Contributors: pbearne
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=MZTZ5S8MGF75C&lc=CA&item_name=Wordpress%20Development%20%2f%20Paul%20Bearne&item_number=Bullhorn%20Plugin&currency_code=CAD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
-Tags: bullhorn, Job Listing, CE upload, Resume upload, bullhorn staffing, recruitment crm, staffing, recruiting
+Tags: Bullhorn, Job Listing, CV upload, Resume upload, Bullhorn Staffing, recruitment crm, staffing, recruiting
 Requires at least: 3.6
 Tested up to: 4.4.1
 Stable tag: 2.0

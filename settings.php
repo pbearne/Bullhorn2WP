@@ -123,9 +123,9 @@ class Bullhorn_Settings {
 		}
 
 		if ( true === $this->authorize() ) {
-			echo '<div class="updated"><p>You have successfully connected to Bullhorn.</p></div>';
+			echo '<div class="updated"><p>' . __( 'You have successfully connected to Bullhorn.', 'bullhorn' ) . '</p></div>';
 		} elseif ( isset( $body['error_description'] ) ) {
-			echo '<div class="error"><p><strong>Bullhorn Error:</strong> ' . $body['error_description'] . '</p></div>';
+			echo '<div class="error"><p><strong>' . __( 'Bullhorn Error:', 'bullhorn' ) . '</strong> ' . esc_html( $body['error_description'] ) . '</p></div>';
 		}
 	}
 
@@ -170,7 +170,7 @@ class Bullhorn_Settings {
 				'auth.bullhornstaffing.com/oauth/authorize'
 			);
 
-			printf( '<a class="button" href="https://%s">%s</a>', $url, $state_string );
+			printf( '<a class="button" href="https://%s">%s</a>', esc_url( $url ), esc_html( $state_string ) );
 		}
 	}
 
@@ -185,7 +185,8 @@ class Bullhorn_Settings {
 			$client_corporation = null;
 		}
 		echo '<input type="text" size="40" name="bullhorn_settings[client_corporation]" value="' . esc_attr( $client_corporation ) . '" />';
-		echo '<br><span class="description">This field is optional, but will filter the jobs retreived from Bullhorn to only those listed under a specific Client Corporation. This must be the ID of the corporation. Leave blank to sync all job listings.</span>';
+		echo '<br><span class="description">' . __( 'This field is optional, but will filter the jobs retreived from Bullhorn to only those listed under a specific
+														Client Corporation. This must be the ID of the corporation. Leave blank to sync all job listings.', 'bullhorn') . '</span>';
 	}
 
 	/**

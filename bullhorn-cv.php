@@ -418,7 +418,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		// login to bullhorn api
 		$logged_in = self::login();
 		if ( ! $logged_in ) {
-			self::throwJsonError( 500, 'There was a problem logging into the Bullhorn API.' );
+			self::throwJsonError( 500, __( 'There was a problem logging into the Bullhorn API.', 'bullhorn' ) );
 		}
 	}
 
@@ -460,7 +460,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 						! isset( $_POST['bullhorn_cv_form'] )
 						|| ! wp_verify_nonce( $_POST['bullhorn_cv_form'], 'bullhorn_cv_form' )
 					) {
-						print 'Sorry, your nonce did not verify.';
+						print __( 'Sorry, your nonce did not verify.', 'bullhorn' );
 						die();
 
 					}
@@ -501,7 +501,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 				default:
 					$response = array(
 						'status' => 404,
-						'error'  => 'The endpoint you are trying to reach does not exist.',
+						'error'  => __( 'The endpoint you are trying to reach does not exist.', 'bullhorn' ),
 					);
 					echo json_encode( $response );
 			}
@@ -538,7 +538,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 				break;
 			default:
 				$format = '';
-				self::throwJsonError( 500, 'File format error. (txt, html, pdf, doc, docx, rft)' );
+				self::throwJsonError( 500, __( 'File format error. (txt, html, pdf, doc, docx, rft)', 'bullhorn' ) );
 
 				return array( $ext, $format );
 		}
