@@ -89,7 +89,7 @@ As forked
 
 = Integration and Support =
 This is code 'as is'. I'm not planning future development on this plugin unless contracted to do something specific.
-If you need support please contact me for a quote. via sales@bearne.ca
+If you need support please contact me for a quote. via hornbull.sales@bearne.ca
 
 = Pull requests =
 I will look at all pull requests. Please submit them here https://github.com/pbearne/Bullhorn2WP

@@ -7,7 +7,8 @@ Version: 2.0
 Author: Paul Beanre
 Author URI: https://github.com/pbearne/
 License: GPL2
-Language: bullhorn
+Text Domain: bullhorn
+Domain Path: /languages
 */
 
 /*

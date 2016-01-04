@@ -1,0 +1,439 @@
+# Copyright (C) 2016 Bullhorn Staffing and Recruitment Job Listing and CV/Resume uploader.
+# This file is distributed under the same license as the Bullhorn Staffing and Recruitment Job Listing and CV/Resume uploader. package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Bullhorn Staffing and Recruitment Job Listing and CV/"
+"Resume uploader. 2.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/bh-staffing-job-"
+"listing-and-cv-upload-for-wp\n"
+"POT-Creation-Date: 2016-01-04 23:58:17+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2016-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+
+#: bullhorn-cv.php:421 bullhorn.php:67
+msgid "There was a problem logging into the Bullhorn API."
+msgstr ""
+
+#: bullhorn-cv.php:463
+msgid "Sorry, your nonce did not verify."
+msgstr ""
+
+#: bullhorn-cv.php:504
+msgid "The endpoint you are trying to reach does not exist."
+msgstr ""
+
+#: bullhorn-cv.php:541
+msgid "File format error. (txt, html, pdf, doc, docx, rft)"
+msgstr ""
+
+#: custom-post-type.php:31
+msgctxt "Taxonomy General Name"
+msgid "Job Listings"
+msgstr ""
+
+#: custom-post-type.php:32
+msgctxt "Taxonomy Singular Name"
+msgid "Job Listing"
+msgstr ""
+
+#: custom-post-type.php:33
+msgid "Add New"
+msgstr ""
+
+#: custom-post-type.php:34
+msgid "Add New Job Listing"
+msgstr ""
+
+#: custom-post-type.php:35
+msgid "Edit Job Listing"
+msgstr ""
+
+#: custom-post-type.php:36
+msgid "New Job Listing"
+msgstr ""
+
+#: custom-post-type.php:37
+msgid "All Job Listings"
+msgstr ""
+
+#: custom-post-type.php:38
+msgid "View Job Listing"
+msgstr ""
+
+#: custom-post-type.php:39
+msgid "Search Job Listings"
+msgstr ""
+
+#: custom-post-type.php:40
+msgid "No job listings found"
+msgstr ""
+
+#: custom-post-type.php:41
+msgid "No job listings found in Trash"
+msgstr ""
+
+#: custom-post-type.php:43
+msgid "Job Listings"
+msgstr ""
+
+#: custom-post-type.php:62
+msgctxt "Taxonomy General Name"
+msgid "Categories"
+msgstr ""
+
+#: custom-post-type.php:63
+msgctxt "Taxonomy Singular Name"
+msgid "Category"
+msgstr ""
+
+#: custom-post-type.php:64
+msgid "Categories"
+msgstr ""
+
+#: custom-post-type.php:65
+msgid "All Categories"
+msgstr ""
+
+#: custom-post-type.php:66
+msgid "Parent Category"
+msgstr ""
+
+#: custom-post-type.php:67
+msgid "Parent Category:"
+msgstr ""
+
+#: custom-post-type.php:68
+msgid "New Category"
+msgstr ""
+
+#: custom-post-type.php:69
+msgid "Add New Category"
+msgstr ""
+
+#: custom-post-type.php:70
+msgid "Edit Category"
+msgstr ""
+
+#: custom-post-type.php:71
+msgid "Update Category"
+msgstr ""
+
+#: custom-post-type.php:72
+msgid "Separate categories with commas"
+msgstr ""
+
+#: custom-post-type.php:73
+msgid "Search categories"
+msgstr ""
+
+#: custom-post-type.php:74
+msgid "Add or remove categories"
+msgstr ""
+
+#: custom-post-type.php:75
+msgid "Choose from the most used categories"
+msgstr ""
+
+#: custom-post-type.php:89
+msgctxt "Taxonomy General Name"
+msgid "States"
+msgstr ""
+
+#: custom-post-type.php:90
+msgctxt "Taxonomy Singular Name"
+msgid "State"
+msgstr ""
+
+#: custom-post-type.php:91
+msgid "States"
+msgstr ""
+
+#: custom-post-type.php:92
+msgid "All States"
+msgstr ""
+
+#: custom-post-type.php:93
+msgid "Parent State"
+msgstr ""
+
+#: custom-post-type.php:94
+msgid "Parent State:"
+msgstr ""
+
+#: custom-post-type.php:95
+msgid "New State"
+msgstr ""
+
+#: custom-post-type.php:96
+msgid "Add New State"
+msgstr ""
+
+#: custom-post-type.php:97
+msgid "Edit State"
+msgstr ""
+
+#: custom-post-type.php:98
+msgid "Update State"
+msgstr ""
+
+#: custom-post-type.php:99
+msgid "Separate states with commas"
+msgstr ""
+
+#: custom-post-type.php:100
+msgid "Search states"
+msgstr ""
+
+#: custom-post-type.php:101
+msgid "Add or remove states"
+msgstr ""
+
+#: custom-post-type.php:102
+msgid "Choose from the most used states"
+msgstr ""
+
+#: custom-post-type.php:132
+msgid "Job listing updated. <a href=\"%s\">View job listing</a>"
+msgstr ""
+
+#: custom-post-type.php:133
+msgid "Custom field updated."
+msgstr ""
+
+#: custom-post-type.php:134
+msgid "Custom field deleted."
+msgstr ""
+
+#: custom-post-type.php:135
+msgid "Job listing updated."
+msgstr ""
+
+#. translators: %s: date and time of the revision
+#: custom-post-type.php:137
+msgid "Job listing restored to revision from %s"
+msgstr ""
+
+#: custom-post-type.php:138
+msgid "Job listing published. <a href=\"%s\">View job listing</a>"
+msgstr ""
+
+#: custom-post-type.php:139
+msgid "Job listing saved."
+msgstr ""
+
+#: custom-post-type.php:140
+msgid ""
+"Job listing submitted. <a target=\"_blank\" href=\"%s\">Preview job listing</"
+"a>"
+msgstr ""
+
+#: custom-post-type.php:141
+msgid ""
+"Job listing scheduled for: <strong>%1$s</strong>. <a target=\"_blank\" href="
+"\"%2$s\">Preview job listing</a>"
+msgstr ""
+
+#. translators: Publish box date format, see http:php.net/date
+#: custom-post-type.php:143
+msgid "M j, Y @ G:i"
+msgstr ""
+
+#: custom-post-type.php:144
+msgid ""
+"Job listing draft updated. <a target=\"_blank\" href=\"%s\">Preview job "
+"listing</a>"
+msgstr ""
+
+#: custom-post-type.php:162
+msgid "Things to remember when adding or editing a job listing:"
+msgstr ""
+
+#: custom-post-type.php:164
+msgid "Specify the correct genre such as Mystery, or Historic."
+msgstr ""
+
+#: custom-post-type.php:165
+msgid ""
+"Specify the correct writer of the job listing. Remember that the Author "
+"module refers to you, the author of this job listing review."
+msgstr ""
+
+#: custom-post-type.php:167
+msgid "If you want to schedule the job listing to be published in the future:"
+msgstr ""
+
+#: custom-post-type.php:169
+msgid "Under the Publish module, click on the Edit link next to Publish."
+msgstr ""
+
+#: custom-post-type.php:170
+msgid ""
+"Change the date to the date to actual publish this article, then click on Ok."
+msgstr ""
+
+#: custom-post-type.php:172
+msgid "For more information:"
+msgstr ""
+
+#: custom-post-type.php:173
+msgid ""
+"<a href=\"http://codex.wordpress.org/Posts_Edit_SubPanel\" target=\"_blank"
+"\">Edit Posts Documentation</a>"
+msgstr ""
+
+#: custom-post-type.php:174
+msgid ""
+"<a href=\"http://wordpress.org/support/\" target=\"_blank\">Support Forums</"
+"a>"
+msgstr ""
+
+#: custom-post-type.php:177
+msgid "This is the help screen displaying the table of job listings."
+msgstr ""
+
+#: custom-post-type.php:199
+msgid "Apply for this Now"
+msgstr ""
+
+#: custom-post-type.php:202
+msgid "Submit Resume"
+msgstr ""
+
+#: custom-post-type.php:205
+msgid "Apply Now"
+msgstr ""
+
+#: custom-post-type.php:209
+msgid "Thank you for uploading you resume."
+msgstr ""
+
+#: settings.php:51
+msgid "API Settings"
+msgstr ""
+
+#: settings.php:53
+msgid "Client ID"
+msgstr ""
+
+#: settings.php:54
+msgid "Client Secret"
+msgstr ""
+
+#: settings.php:56
+msgid "Client Corporation"
+msgstr ""
+
+#: settings.php:58
+msgid "Job Listings Page"
+msgstr ""
+
+#: settings.php:59
+msgid "Form Page or CV upload"
+msgstr ""
+
+#: settings.php:61
+msgid "CV Thanks Page"
+msgstr ""
+
+#: settings.php:62
+msgid "Listings Sort"
+msgstr ""
+
+#: settings.php:63
+msgid "Description Field"
+msgstr ""
+
+#: settings.php:70
+msgid "Bullhorn"
+msgstr ""
+
+#: settings.php:126
+msgid "You have successfully connected to Bullhorn."
+msgstr ""
+
+#: settings.php:128
+msgid "Bullhorn Error:"
+msgstr ""
+
+#: settings.php:188
+msgid ""
+"This field is optional, but will filter the jobs retreived from Bullhorn to "
+"only those listed under a specific\n"
+"\t\t\t\t\t\t\t\t\t\t\t\t\t\tClient Corporation. This must be the ID of the "
+"corporation. Leave blank to sync all job listings."
+msgstr ""
+
+#: settings.php:220
+msgid "Select a page..."
+msgstr ""
+
+#: settings.php:238
+msgid "Use CV upload form"
+msgstr ""
+
+#: settings.php:254
+msgid "Date"
+msgstr ""
+
+#: settings.php:255
+msgid "Employment Type"
+msgstr ""
+
+#: settings.php:256
+msgid "Name"
+msgstr ""
+
+#: settings.php:257
+msgid "State"
+msgstr ""
+
+#: settings.php:282
+msgid "Public Description"
+msgstr ""
+
+#: settings.php:329
+msgid "Save Changes"
+msgstr ""
+
+#: settings.php:331
+msgid "Sync Now"
+msgstr ""
+
+#: shortcodes.php:41
+msgid "Apply Here."
+msgstr ""
+
+#: shortcodes.php:331
+msgid "bullhorn categories Shortcode does not need attributes"
+msgstr ""
+
+#. Plugin Name of the plugin/theme
+msgid "Bullhorn Staffing and Recruitment Job Listing and CV/Resume uploader."
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "https://github.com/pbearne/Bullhorn2WP"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid ""
+"This plugin adds Bullhorn jobs to a custom post types (Job Listings) for "
+"front-end display. Posts are auto-created by synchronizing with Bullhorn "
+"auto-deleted if not public or active on Bullhorn. There is no way to manage "
+"the Bullhorn jobs here, the admin menu for Job Listings should be used for "
+"viewing only. Any theme developed on top of this plugin should have archive-"
+"job-listing.php and single-job-listing.php template files for special "
+"layout. Pull request acepted at https://github.com/pbearne/Bullhorn2WP"
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "Paul Beanre"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "https://github.com/pbearne/"
+msgstr ""
