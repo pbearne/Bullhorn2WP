@@ -7,7 +7,7 @@ Version: 2.0
 Author: Paul Beanre
 Author URI: https://github.com/pbearne/
 License: GPL2
-Text Domain: bullhorn
+Text Domain: bh-staffing-job-listing-and-cv-upload-for-wp
 Domain Path: /languages
 */
 
@@ -32,7 +32,7 @@ require_once $path . 'bullhorn-cv.php';
 
 
 function bullhorn_load_plugin_textdomain() {
-	load_plugin_textdomain( 'bullhorn', false, basename( dirname( __FILE__ ) ) . '/languages/' );
+	load_plugin_textdomain( 'bh-staffing-job-listing-and-cv-upload-for-wp', false, basename( dirname( __FILE__ ) ) . '/languages/' );
 }
 add_action( 'plugins_loaded', 'bullhorn_load_plugin_textdomain' );
 

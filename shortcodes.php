@@ -38,7 +38,7 @@ class Shortcodes {
 	public function render_cv_form() {
 		$settings = (array) get_option( 'bullhorn_settings' );
 		if ( isset( $settings['form_page'] ) && 0 < $settings['form_page'] ) {
-			return sprintf( '<a href="%s" class="bullhorn-apply-here-link">%s</a>', esc_url( get_permalink( $settings['form_page'] ) ), __( 'Apply Here.', 'bullhorn' ) );
+			return sprintf( '<a href="%s" class="bullhorn-apply-here-link">%s</a>', esc_url( get_permalink( $settings['form_page'] ) ), __( 'Apply Here.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
 		}
 
 		ob_start();
@@ -328,7 +328,7 @@ class Shortcodes {
 	 */
 	function bullhorn_search( $atts ) {
 		if ( ! empty( $atts ) ) {
-			_doing_it_wrong( __FUNCTION__, __( 'bullhorn categories Shortcode does not need attributes', 'bullhorn' ) , 2.0 );
+			_doing_it_wrong( __FUNCTION__, __( 'bullhorn categories Shortcode does not need attributes' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) , 2.0 );
 		}
 		$form   = get_search_form( false );
 		$hidden = '<input type="hidden" name="post_type" value="bullhornjoblisting" />';

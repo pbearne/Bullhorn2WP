@@ -418,7 +418,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		// login to bullhorn api
 		$logged_in = self::login();
 		if ( ! $logged_in ) {
-			self::throwJsonError( 500, __( 'There was a problem logging into the Bullhorn API.', 'bullhorn' ) );
+			self::throwJsonError( 500, __( 'There was a problem logging into the Bullhorn API.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
 		}
 	}
 
@@ -460,7 +460,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 						! isset( $_POST['bullhorn_cv_form'] )
 						|| ! wp_verify_nonce( $_POST['bullhorn_cv_form'], 'bullhorn_cv_form' )
 					) {
-						print __( 'Sorry, your nonce did not verify.', 'bullhorn' );
+						print __( 'Sorry, your nonce did not verify.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' );
 						die();
 
 					}
@@ -501,7 +501,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 				default:
 					$response = array(
 						'status' => 404,
-						'error'  => __( 'The endpoint you are trying to reach does not exist.', 'bullhorn' ),
+						'error'  => __( 'The endpoint you are trying to reach does not exist.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 					);
 					echo json_encode( $response );
 			}
@@ -538,7 +538,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 				break;
 			default:
 				$format = '';
-				self::throwJsonError( 500, __( 'File format error. (txt, html, pdf, doc, docx, rft)', 'bullhorn' ) );
+				self::throwJsonError( 500, __( 'File format error. (txt, html, pdf, doc, docx, rft)' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
 
 				return array( $ext, $format );
 		}

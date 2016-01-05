@@ -28,19 +28,19 @@ class Bullhorn_Custom_Post_Type {
 		}
 
 		$labels = array(
-			'name'               => _x( 'Job Listings', 'Taxonomy General Name', 'bullhorn' ),
-			'singular_name'      => _x( 'Job Listing', 'Taxonomy Singular Name', 'bullhorn' ),
-			'add_new'            => __( 'Add New', 'bullhorn' ),
-			'add_new_item'       => __( 'Add New Job Listing', 'bullhorn' ),
-			'edit_item'          => __( 'Edit Job Listing', 'bullhorn' ),
-			'new_item'           => __( 'New Job Listing', 'bullhorn' ),
-			'all_items'          => __( 'All Job Listings', 'bullhorn' ),
-			'view_item'          => __( 'View Job Listing', 'bullhorn' ),
-			'search_items'       => __( 'Search Job Listings', 'bullhorn' ),
-			'not_found'          => __( 'No job listings found', 'bullhorn' ),
-			'not_found_in_trash' => __( 'No job listings found in Trash', 'bullhorn' ),
+			'name'               => _x( 'Job Listings', 'Taxonomy General Name' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'singular_name'      => _x( 'Job Listing', 'Taxonomy Singular Name' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'add_new'            => __( 'Add New' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'add_new_item'       => __( 'Add New Job Listing' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'edit_item'          => __( 'Edit Job Listing' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'new_item'           => __( 'New Job Listing' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'all_items'          => __( 'All Job Listings' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'view_item'          => __( 'View Job Listing' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'search_items'       => __( 'Search Job Listings' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'not_found'          => __( 'No job listings found' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'not_found_in_trash' => __( 'No job listings found in Trash' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 			'parent_item_colon'  => '',
-			'menu_name'          => __( 'Job Listings', 'bullhorn' ),
+			'menu_name'          => __( 'Job Listings' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 		);
 		$args   = array(
 			'labels'             => $labels,
@@ -59,20 +59,20 @@ class Bullhorn_Custom_Post_Type {
 		register_post_type( 'bullhornjoblisting', $args );
 
 		$labels = array(
-			'name'                       => _x( 'Categories', 'Taxonomy General Name', 'bullhorn' ),
-			'singular_name'              => _x( 'Category', 'Taxonomy Singular Name', 'bullhorn' ),
-			'menu_name'                  => __( 'Categories', 'bullhorn' ),
-			'all_items'                  => __( 'All Categories', 'bullhorn' ),
-			'parent_item'                => __( 'Parent Category', 'bullhorn' ),
-			'parent_item_colon'          => __( 'Parent Category:', 'bullhorn' ),
-			'new_item_name'              => __( 'New Category', 'bullhorn' ),
-			'add_new_item'               => __( 'Add New Category', 'bullhorn' ),
-			'edit_item'                  => __( 'Edit Category', 'bullhorn' ),
-			'update_item'                => __( 'Update Category', 'bullhorn' ),
-			'separate_items_with_commas' => __( 'Separate categories with commas', 'bullhorn' ),
-			'search_items'               => __( 'Search categories', 'bullhorn' ),
-			'add_or_remove_items'        => __( 'Add or remove categories', 'bullhorn' ),
-			'choose_from_most_used'      => __( 'Choose from the most used categories', 'bullhorn' ),
+			'name'                       => _x( 'Categories', 'Taxonomy General Name' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'singular_name'              => _x( 'Category', 'Taxonomy Singular Name' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'menu_name'                  => __( 'Categories' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'all_items'                  => __( 'All Categories' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'parent_item'                => __( 'Parent Category' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'parent_item_colon'          => __( 'Parent Category:' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'new_item_name'              => __( 'New Category' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'add_new_item'               => __( 'Add New Category' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'edit_item'                  => __( 'Edit Category' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'update_item'                => __( 'Update Category' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'separate_items_with_commas' => __( 'Separate categories with commas' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'search_items'               => __( 'Search categories' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'add_or_remove_items'        => __( 'Add or remove categories' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'choose_from_most_used'      => __( 'Choose from the most used categories' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 		);
 		$args   = array(
 			'labels'            => $labels,
@@ -86,20 +86,20 @@ class Bullhorn_Custom_Post_Type {
 		register_taxonomy( 'bullhorn_category', 'bullhornjoblisting', $args );
 
 		$labels = array(
-			'name'                       => _x( 'States', 'Taxonomy General Name', 'bullhorn' ),
-			'singular_name'              => _x( 'State', 'Taxonomy Singular Name', 'bullhorn' ),
-			'menu_name'                  => __( 'States', 'bullhorn' ),
-			'all_items'                  => __( 'All States', 'bullhorn' ),
-			'parent_item'                => __( 'Parent State', 'bullhorn' ),
-			'parent_item_colon'          => __( 'Parent State:', 'bullhorn' ),
-			'new_item_name'              => __( 'New State', 'bullhorn' ),
-			'add_new_item'               => __( 'Add New State', 'bullhorn' ),
-			'edit_item'                  => __( 'Edit State', 'bullhorn' ),
-			'update_item'                => __( 'Update State', 'bullhorn' ),
-			'separate_items_with_commas' => __( 'Separate states with commas', 'bullhorn' ),
-			'search_items'               => __( 'Search states', 'bullhorn' ),
-			'add_or_remove_items'        => __( 'Add or remove states', 'bullhorn' ),
-			'choose_from_most_used'      => __( 'Choose from the most used states', 'bullhorn' ),
+			'name'                       => _x( 'States', 'Taxonomy General Name' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'singular_name'              => _x( 'State', 'Taxonomy Singular Name' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'menu_name'                  => __( 'States' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'all_items'                  => __( 'All States' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'parent_item'                => __( 'Parent State' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'parent_item_colon'          => __( 'Parent State:' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'new_item_name'              => __( 'New State' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'add_new_item'               => __( 'Add New State' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'edit_item'                  => __( 'Edit State' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'update_item'                => __( 'Update State' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'separate_items_with_commas' => __( 'Separate states with commas' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'search_items'               => __( 'Search states' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'add_or_remove_items'        => __( 'Add or remove states' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'choose_from_most_used'      => __( 'Choose from the most used states' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 		);
 		$args   = array(
 			'labels'            => $labels,
@@ -130,18 +130,18 @@ class Bullhorn_Custom_Post_Type {
 		$messages['bullhornjoblisting'] = array(
 			0  => '', // Unused. Messages start at index 1.
 			1  => sprintf( __( 'Job listing updated. <a href="%s">View job listing</a>', 'your_text_domain' ), esc_url( get_permalink( $post_ID ) ) ),
-			2  => __( 'Custom field updated.', 'bullhorn' ),
-			3  => __( 'Custom field deleted.', 'bullhorn' ),
-			4  => __( 'Job listing updated.', 'bullhorn' ),
+			2  => __( 'Custom field updated.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			3  => __( 'Custom field deleted.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			4  => __( 'Job listing updated.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 			/* translators: %s: date and time of the revision */
-			5  => isset( $_GET['revision'] ) ? sprintf( __( 'Job listing restored to revision from %s', 'bullhorn' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
-			6  => sprintf( __( 'Job listing published. <a href="%s">View job listing</a>', 'bullhorn' ), esc_url( get_permalink( $post_ID ) ) ),
-			7  => __( 'Job listing saved.', 'bullhorn' ),
-			8  => sprintf( __( 'Job listing submitted. <a target="_blank" href="%s">Preview job listing</a>', 'bullhorn' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
-			9  => sprintf( __( 'Job listing scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview job listing</a>', 'bullhorn' ),
+			5  => isset( $_GET['revision'] ) ? sprintf( __( 'Job listing restored to revision from %s' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+			6  => sprintf( __( 'Job listing published. <a href="%s">View job listing</a>' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ), esc_url( get_permalink( $post_ID ) ) ),
+			7  => __( 'Job listing saved.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			8  => sprintf( __( 'Job listing submitted. <a target="_blank" href="%s">Preview job listing</a>' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
+			9  => sprintf( __( 'Job listing scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview job listing</a>' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 				// translators: Publish box date format, see http://php.net/date
 			date_i18n( __( 'M j, Y @ G:i' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post_ID ) ) ),
-			10 => sprintf( __( 'Job listing draft updated. <a target="_blank" href="%s">Preview job listing</a>', 'bullhorn' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
+			10 => sprintf( __( 'Job listing draft updated. <a target="_blank" href="%s">Preview job listing</a>' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
 		);
 
 		return $messages;
@@ -159,22 +159,22 @@ class Bullhorn_Custom_Post_Type {
 	public function contextual_help( $contextual_help, $screen_id ) {
 		if ( 'bullhornjoblisting' === $screen_id ) {
 			$contextual_help =
-				'<p>' . __( 'Things to remember when adding or editing a job listing:', 'bullhorn' ) . '</p>' .
+				'<p>' . __( 'Things to remember when adding or editing a job listing:' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</p>' .
 				'<ul>' .
-				'<li>' . __( 'Specify the correct genre such as Mystery, or Historic.', 'bullhorn' ) . '</li>' .
-				'<li>' . __( 'Specify the correct writer of the job listing. Remember that the Author module refers to you, the author of this job listing review.', 'bullhorn' ) . '</li>' .
+				'<li>' . __( 'Specify the correct genre such as Mystery, or Historic.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</li>' .
+				'<li>' . __( 'Specify the correct writer of the job listing. Remember that the Author module refers to you, the author of this job listing review.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</li>' .
 				'</ul>' .
-				'<p>' . __( 'If you want to schedule the job listing to be published in the future:', 'bullhorn' ) . '</p>' .
+				'<p>' . __( 'If you want to schedule the job listing to be published in the future:' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</p>' .
 				'<ul>' .
-				'<li>' . __( 'Under the Publish module, click on the Edit link next to Publish.', 'bullhorn' ) . '</li>' .
-				'<li>' . __( 'Change the date to the date to actual publish this article, then click on Ok.', 'bullhorn' ) . '</li>' .
+				'<li>' . __( 'Under the Publish module, click on the Edit link next to Publish.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</li>' .
+				'<li>' . __( 'Change the date to the date to actual publish this article, then click on Ok.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</li>' .
 				'</ul>' .
-				'<p><strong>' . __( 'For more information:', 'bullhorn' ) . '</strong></p>' .
-				'<p>' . __( '<a href="http://codex.wordpress.org/Posts_Edit_SubPanel" target="_blank">Edit Posts Documentation</a>', 'bullhorn' ) . '</p>' .
-				'<p>' . __( '<a href="http://wordpress.org/support/" target="_blank">Support Forums</a>', 'bullhorn' ) . '</p>';
+				'<p><strong>' . __( 'For more information:' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</strong></p>' .
+				'<p>' . __( '<a href="http://codex.wordpress.org/Posts_Edit_SubPanel" target="_blank">Edit Posts Documentation</a>' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</p>' .
+				'<p>' . __( '<a href="http://wordpress.org/support/" target="_blank">Support Forums</a>' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</p>';
 		} elseif ( 'edit-job-listing' == $screen_id ) {
 			$contextual_help =
-				'<p>' . __( 'This is the help screen displaying the table of job listings.', 'bullhorn' ) . '</p>';
+				'<p>' . __( 'This is the help screen displaying the table of job listings.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</p>';
 		}
 
 		return $contextual_help;
@@ -199,10 +199,10 @@ class Bullhorn_Custom_Post_Type {
 					$content .= sprintf( '<h4>%s</h4><br />' , __( 'Apply for this Now' ) );
 					$content .= do_shortcode( '[bullhorn_cv_form]' );
 				} else {
-					$content .= '<a class="button" href="' . get_permalink( $settings['form_page'] ) . '?position=' . absint( $bullhorn_job_id ) . '">' . __( 'Submit Resume', 'bullhorn' ) . '</a>';
+					$content .= '<a class="button" href="' . get_permalink( $settings['form_page'] ) . '?position=' . absint( $bullhorn_job_id ) . '">' . __( 'Submit Resume' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</a>';
 				}
 			} else {
-				$content .= '<a class="button" href="' . get_permalink( $settings['form_page'] ) . '?position=' . absint( $bullhorn_job_id ) . '">' . __( 'Apply Now', 'bullhorn' ) . '</a>';
+				$content .= '<a class="button" href="' . get_permalink( $settings['form_page'] ) . '?position=' . absint( $bullhorn_job_id ) . '">' . __( 'Apply Now' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</a>';
 			}
 		}
 		if ( isset( $_GET['bh_applied'] ) ) {
