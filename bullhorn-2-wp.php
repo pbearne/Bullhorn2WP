@@ -30,6 +30,12 @@ require_once $path . 'cron.php';
 require_once $path . 'shortcodes.php';
 require_once $path . 'bullhorn-cv.php';
 
+
+function bullhorn_load_plugin_textdomain() {
+	load_plugin_textdomain( 'bullhorn', false, basename( dirname( __FILE__ ) ) . '/languages/' );
+}
+add_action( 'plugins_loaded', 'bullhorn_load_plugin_textdomain' );
+
 /**
  * Allow job listings to be sorted by a specified setting by the admin.
  *
