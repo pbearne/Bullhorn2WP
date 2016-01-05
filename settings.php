@@ -170,7 +170,7 @@ class Bullhorn_Settings {
 				'auth.bullhornstaffing.com/oauth/authorize'
 			);
 
-			printf( '<a class="button" href="https://%s">%s</a>', esc_url( $url ), esc_html( $state_string ) );
+			printf( '<a class="button" href="https://%s">%s</a>', $url, esc_html( $state_string ) );
 		}
 	}
 
