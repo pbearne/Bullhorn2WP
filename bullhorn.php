@@ -448,7 +448,7 @@ class Bullhorn_Connection {
 			return $country_list[ $country_id ];
 		}
 
-		return _x( '- None Specified -', ' no county set', 'bullhorn' );
+		return _x( '- None Specified -', ' no county set', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
 	}
 
 

@@ -48,26 +48,26 @@ class Bullhorn_Settings {
 
 		register_setting( 'bullhorn_settings', 'bullhorn_settings', array( $this, 'validate' ) );
 
-		add_settings_section( 'bullhorn_api', __( 'API Settings' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'api_settings' ), 'bullhornwp' );
+		add_settings_section( 'bullhorn_api', __( 'API Settings', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'api_settings' ), 'bullhornwp' );
 
-		add_settings_field( 'client_id',  __( 'Client ID','bullhorn' ), array( $this, 'client_id' ), 'bullhornwp', 'bullhorn_api' );
-		add_settings_field( 'client_secret', __( 'Client Secret' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'client_secret' ), 'bullhornwp', 'bullhorn_api' );
+		add_settings_field( 'client_id', __( 'Client ID', 'bullhorn' ), array( $this, 'client_id' ), 'bullhornwp', 'bullhorn_api' );
+		add_settings_field( 'client_secret', __( 'Client Secret', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'client_secret' ), 'bullhornwp', 'bullhorn_api' );
 
-		add_settings_field( 'client_corporation', __( 'Client Corporation' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'client_corporation' ), 'bullhornwp', 'bullhorn_api' );
+		add_settings_field( 'client_corporation', __( 'Client Corporation', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'client_corporation' ), 'bullhornwp', 'bullhorn_api' );
 
-		add_settings_field( 'listings_page', __( 'Job Listings Page' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'listings_page' ), 'bullhornwp', 'bullhorn_api' );
-		add_settings_field( 'form_page',  __( 'Form Page or CV upload','bullhorn' ), array( $this, 'form_page' ), 'bullhornwp', 'bullhorn_api' );
+		add_settings_field( 'listings_page', __( 'Job Listings Page', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'listings_page' ), 'bullhornwp', 'bullhorn_api' );
+		add_settings_field( 'form_page', __( 'Form Page or CV upload', 'bullhorn' ), array( $this, 'form_page' ), 'bullhornwp', 'bullhorn_api' );
 
-		add_settings_field( 'thanks_page', __( 'CV Thanks Page' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'thanks_page' ), 'bullhornwp', 'bullhorn_api' );
-		add_settings_field( 'listings_sort', __( 'Listings Sort' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'listings_sort' ), 'bullhornwp', 'bullhorn_api' );
-		add_settings_field( 'description_field', __( 'Description Field' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'description_field' ), 'bullhornwp', 'bullhorn_api' );
+		add_settings_field( 'thanks_page', __( 'CV Thanks Page', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'thanks_page' ), 'bullhornwp', 'bullhorn_api' );
+		add_settings_field( 'listings_sort', __( 'Listings Sort', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'listings_sort' ), 'bullhornwp', 'bullhorn_api' );
+		add_settings_field( 'description_field', __( 'Description Field', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'description_field' ), 'bullhornwp', 'bullhorn_api' );
 	}
 
 	/**
 	 * Adds a link to the Bullhorn to the Settings menu
 	 */
 	public function menu() {
-		add_options_page( 'Bullhorn', __( 'Bullhorn' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ), 'manage_options', 'bullhorn', array( $this, 'settings_page' ) );
+		add_options_page( 'Bullhorn', __( 'Bullhorn', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), 'manage_options', 'bullhorn', array( $this, 'settings_page' ) );
 	}
 
 	/**
@@ -84,8 +84,8 @@ class Bullhorn_Settings {
 
 		if (
 			isset( $settings['client_id'] ) and ! empty( $settings['client_id'] ) and
-			isset( $settings['client_secret'] ) and ! empty( $settings['client_secret'] ) and
-			isset( $_GET['code'] )
+			                                    isset( $settings['client_secret'] ) and ! empty( $settings['client_secret'] ) and
+			                                                                            isset( $_GET['code'] )
 		) {
 			$url = add_query_arg(
 				array(
@@ -107,6 +107,7 @@ class Bullhorn_Settings {
 				$body['last_refreshed'] = time();
 				update_option( 'bullhorn_api_access', $body );
 				self::$authorize = true;
+
 				return true;
 			}
 		}
@@ -123,9 +124,9 @@ class Bullhorn_Settings {
 		}
 
 		if ( true === $this->authorize() ) {
-			echo '<div class="updated"><p>' . __( 'You have successfully connected to Bullhorn.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</p></div>';
+			echo '<div class="updated"><p>' . __( 'You have successfully connected to Bullhorn.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</p></div>';
 		} elseif ( isset( $body['error_description'] ) ) {
-			echo '<div class="error"><p><strong>' . __( 'Bullhorn Error:' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</strong> ' . esc_html( $body['error_description'] ) . '</p></div>';
+			echo '<div class="error"><p><strong>' . __( 'Bullhorn Error:', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</strong> ' . esc_html( $body['error_description'] ) . '</p></div>';
 		}
 	}
 
@@ -140,6 +141,7 @@ class Bullhorn_Settings {
 			$client_id = null;
 		}
 		echo '<input type="text" size="40" name="bullhorn_settings[client_id]" value="' . esc_attr( $client_id ) . '" />';
+
 	}
 
 	/**
@@ -172,6 +174,10 @@ class Bullhorn_Settings {
 
 			printf( '<a class="button" href="https://%s">%s</a>', $url, esc_html( $state_string ) );
 		}
+		echo '<br><span class="description">' . __(
+				'Note: You will have to ask Bullhorn support to add your domain/s to the API white list for this to work',
+				'bh-staffing-job-listing-and-cv-upload-for-wp'
+			) . '</span>';
 	}
 
 	/**
@@ -186,7 +192,7 @@ class Bullhorn_Settings {
 		}
 		echo '<input type="text" size="40" name="bullhorn_settings[client_corporation]" value="' . esc_attr( $client_corporation ) . '" />';
 		echo '<br><span class="description">' . __( 'This field is optional, but will filter the jobs retreived from Bullhorn to only those listed under a specific
-														Client Corporation. This must be the ID of the corporation. Leave blank to sync all job listings.', 'bullhorn') . '</span>';
+														Client Corporation. This must be the ID of the corporation. Leave blank to sync all job listings.', 'bullhorn' ) . '</span>';
 	}
 
 	/**
@@ -217,7 +223,7 @@ class Bullhorn_Settings {
 		wp_dropdown_pages( array(
 			'name'             => 'bullhorn_settings[thanks_page]',
 			'selected'         => $thanks_page,
-			'show_option_none' => __( 'Select a page...' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'show_option_none' => __( 'Select a page...', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 		) );
 	}
 
@@ -235,7 +241,7 @@ class Bullhorn_Settings {
 		wp_dropdown_pages( array(
 			'name'             => 'bullhorn_settings[form_page]',
 			'selected'         => $form_page,
-			'show_option_none' => __( 'Use CV upload form' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'show_option_none' => __( 'Use CV upload form', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 		) );
 	}
 
@@ -251,10 +257,10 @@ class Bullhorn_Settings {
 		}
 
 		$sorts = array(
-			'date'            => __( 'Date' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-			'employment-type' => __( 'Employment Type' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-			'name'            => __( 'Name' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-			'state'           => __( 'State' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'date'            => __( 'Date', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'employment-type' => __( 'Employment Type', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'name'            => __( 'Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'state'           => __( 'State', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 		);
 
 		echo '<select name="bullhorn_settings[listings_sort]">';
@@ -279,7 +285,7 @@ class Bullhorn_Settings {
 
 		$fields = array(
 			'description'       => 'Description (default)',
-			'publicDescription' => __( 'Public Description' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'publicDescription' => __( 'Public Description', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 		);
 
 		echo '<select name="bullhorn_settings[description_field]">';
@@ -326,9 +332,9 @@ class Bullhorn_Settings {
 				<?php settings_fields( 'bullhorn_settings' ); ?>
 				<?php do_settings_sections( 'bullhornwp' ); ?>
 				<p class="submit">
-					<?php submit_button( __( 'Save Changes' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ), 'primary', 'submit', false ); ?>
+					<?php submit_button( __( 'Save Changes', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), 'primary', 'submit', false ); ?>
 					<a href="<?php echo admin_url( 'options-general.php?page=bullhorn&sync=bullhorn' ); ?>" class="button">
-						<?php _e( 'Sync Now'  , 'bh-staffing-job-listing-and-cv-upload-for-wp' ); ?>
+						<?php _e( 'Sync Now', 'bh-staffing-job-listing-and-cv-upload-for-wp' ); ?>
 					</a>
 				</p>
 			</form>
