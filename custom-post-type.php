@@ -156,7 +156,7 @@ class Bullhorn_Custom_Post_Type {
 	 *
 	 * @return string
 	 */
-	public function contextual_help( $contextual_help, $screen_id ) {
+	public static function contextual_help( $contextual_help, $screen_id ) {
 		if ( 'bullhornjoblisting' === $screen_id ) {
 			$contextual_help =
 				'<p>' . __( 'Things to remember when adding or editing a job listing:' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</p>' .
@@ -219,7 +219,10 @@ class Bullhorn_Custom_Post_Type {
 				$bullhorn_json_ld = get_post_meta( get_the_ID(), 'bullhorn_json_ld', true );
 
 				$depth   = apply_filters( 'bullhorn_json_ld_depth', 1024 );
-				$options = apply_filters( 'bullhorn_json_ld_options', 0 );
+				$options = apply_filters( 'bullhorn_json_ld_options', JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+				if ( defined( 'SCRIPT_DEBUG' ) && true === SCRIPT_DEBUG ) {
+					$options = $options | JSON_PRETTY_PRINT;
+				}
 				$bullhorn_json_ld = apply_filters( 'bullhorn_json_ld_full_array', $bullhorn_json_ld );
 
 				$content = PHP_EOL . sprintf( '<script type="application/ld+json">%s</script>', wp_json_encode( $bullhorn_json_ld, $options, $depth ) ) . PHP_EOL . $content;

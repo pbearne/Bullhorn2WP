@@ -60,11 +60,13 @@ class Bullhorn_Connection {
 	 */
 	public function sync() {
 		// Refresh the token if necessary before doing anything
-		self::refresh_token();
+		if ( false === self::refresh_token() ) {
+			return false;
+		};
 
 		$logged_in = self::login();
 		if ( ! $logged_in ) {
-			throw new Exception( __( 'There was a problem logging into the Bullhorn API.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
+			throw new Exception( __( 'There was a problem logging into the Bullhorn API.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
 		}
 
 		wp_defer_term_counting( true );
@@ -99,7 +101,9 @@ class Bullhorn_Connection {
 	 * @return boolean
 	 */
 	protected function login() {
-		self::refresh_token();
+		if ( false === self::refresh_token() ) {
+			return false;
+		};
 
 		$url = add_query_arg(
 			array(
@@ -117,7 +121,7 @@ class Bullhorn_Connection {
 
 			return true;
 		}
-
+		// TODO: make to user freindly
 		if ( isset( $body->errorMessage ) ) {
 			throw new Exception( $body->errorMessage );
 		}
@@ -133,11 +137,21 @@ class Bullhorn_Connection {
 	 * @return boolean
 	 */
 	protected function refresh_token( $force = false ) {
-		// TODO: stop re-calling evertime
+		// TODO: stop re-calling every time
 		//		$eight_mins_ago = strtotime( '8 minutes ago' );
 		//		if ( false === $force && $eight_mins_ago <= self::api_access['last_refreshed'] ) {
 		//			return true;
 		//		}
+		// TODO: return false if client not set and add handlers for the call
+		if (
+			null === self::$api_access['refresh_token'] ||
+			null === self::$settings['client_id'] ||
+			null === self::$settings['client_secret']
+		) {
+			add_action( 'admin_notices', array( __CLASS__, 'no_token_admin_notice' ) );
+
+			return false;
+		}
 
 		$url = add_query_arg(
 			array(
@@ -166,6 +180,7 @@ class Bullhorn_Connection {
 	 * @return array
 	 */
 	private function get_categories_from_bullhorn() {
+		//TODO: cache this
 		$url    = self::$url . 'options/Category';
 		$params = array(
 			'BhRestToken' => self::$session,
@@ -180,6 +195,12 @@ class Bullhorn_Connection {
 		}
 
 		return array();
+	}
+
+	public static function no_token_admin_notice() {
+		$class   = 'error';
+		$message = 'Error in saving';
+		echo "<div class=\"$class\"> <p>$message</p></div>";
 	}
 
 	/**
@@ -403,19 +424,31 @@ class Bullhorn_Connection {
 			$url = add_query_arg(
 				array(
 					'BhRestToken' => self::$session,
-					'fields'      => 'name',
-				), self::$url . 'entity/country/' . absint( $country_id )
+					//	'fields'      => 'name',
+					'count'       => '300',
+				), self::$url . 'options/Country'// . absint( $country_id )
 			);
 
+			var_dump( $country_id );
 			$response = wp_remote_get( $url, array( 'method' => 'GET' ) );
-			$body     = wp_remote_retrieve_body( $response );
-			$data     = json_decode( $body, true )['data'];
 
-			$country_list[ $country_id ] = $data['name'];
-			set_transient( $country_list_id, $country_list, DAY_IN_SECONDS * 1 );
+			if ( 200 === $response['response']['code'] ) {
+				$body         = wp_remote_retrieve_body( $response );
+				$data = json_decode( $body, true )['data'];
+
+				$country_list = array();
+				foreach ( $data as $key ) {
+					$country_list[ $key['value'] ] = $key['label'];
+				}
+
+				set_transient( $country_list_id, $country_list, HOUR_IN_SECONDS * 1 );
+			}
+		}
+		if ( isset( $country_list[ $country_id ] ) ) {
+			return $country_list[ $country_id ];
 		}
 
-		return 'Canada';
+		return _x( '- None Specified -', ' no county set', 'bullhorn' );
 	}
 
 

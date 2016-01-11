@@ -413,7 +413,9 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 */
 	private function apiAuth() {
 		// Refresh the token if necessary before doing anything
-		self::refresh_token();
+		if ( false === self::refresh_token() ) {
+			return false;
+		};
 
 		// login to bullhorn api
 		$logged_in = self::login();
@@ -441,7 +443,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 *
 	 * @return void
 	 */
-	function add_endpoint() {
+	public static function add_endpoint() {
 		add_rewrite_rule( '^api/bullhorn/([^/]+)/?', 'index.php?__api=1&endpoint=$matches[1]', 'top' );
 	}
 
