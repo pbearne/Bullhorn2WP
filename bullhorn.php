@@ -292,7 +292,7 @@ class Bullhorn_Connection {
 		);
 
 		if ( $id ) {
-			$post['ID'] = $id;
+			$post->ID = $id;
 			wp_update_post( $post_args );
 		} else {
 			$id = wp_insert_post( $post_args );
@@ -429,7 +429,6 @@ class Bullhorn_Connection {
 				), self::$url . 'options/Country'// . absint( $country_id )
 			);
 
-			var_dump( $country_id );
 			$response = wp_remote_get( $url, array( 'method' => 'GET' ) );
 
 			if ( 200 === $response['response']['code'] ) {
