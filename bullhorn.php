@@ -366,7 +366,10 @@ class Bullhorn_Connection {
 			$ld['jobLocation']['address']['addressCountry'] = $address['countryID'];
 		}
 		if ( ! empty( $address['countryID'] ) ) {
-			$ld['jobLocation']['address']['addressCountry'] = self::get_country_name( $address['countryID'] );
+			$addressCountry = self::get_country_name( $address['countryID'] );
+			if ( false !== $addressCountry ) {
+				$ld['jobLocation']['address']['addressCountry'] = $addressCountry;
+			}
 		}
 
 		if ( isset( $job->clientCorporation->name ) ) {
@@ -432,8 +435,12 @@ class Bullhorn_Connection {
 			$response = wp_remote_get( $url, array( 'method' => 'GET' ) );
 
 			if ( 200 === $response['response']['code'] ) {
-				$body         = wp_remote_retrieve_body( $response );
+				$body = wp_remote_retrieve_body( $response );
 				$data = json_decode( $body, true )['data'];
+				if ( isset( $data['data'] ) ) {
+					return false;
+				}
+				$data = $data['data'];
 
 				$country_list = array();
 				foreach ( $data as $key ) {
@@ -497,7 +504,7 @@ class Bullhorn_Connection {
 	 */
 	private function get_existing() {
 		global $wpdb;
-
+		//TODO: change this the WP_QUERY meta select
 		$posts = $wpdb->get_results( "SELECT $wpdb->posts.id, $wpdb->postmeta.meta_value FROM $wpdb->postmeta JOIN $wpdb->posts ON $wpdb->posts.id = $wpdb->postmeta.post_id WHERE meta_key = 'bullhorn_job_id'", ARRAY_A );
 
 		$existing = array();

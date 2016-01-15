@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=MZTZ5
 Tags: Bullhorn, Job Listing, CV upload, Resume upload, Bullhorn Staffing, recruitment crm, staffing, recruiting
 Requires at least: 3.6
 Tested up to: 4.4.1
-Stable tag: 2.1.1
+Stable tag: 2.1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,10 @@ Test and when happy you can remove the old pluigns
 3. Job list with CV/resume upload form via ShortCode
 
 == Changelog ==
+
+== 2.1.2 ==
+improved the messages on the settings page
+protect the country code
 
 == 2.1.1 ==
 Fixed a bug when syncing

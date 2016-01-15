@@ -55,7 +55,7 @@ class Bullhorn_Settings {
 
 		add_settings_field( 'client_corporation', __( 'Client Corporation', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'client_corporation' ), 'bullhornwp', 'bullhorn_api' );
 
-		add_settings_field( 'listings_page', __( 'Job Listings Page', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'listings_page' ), 'bullhornwp', 'bullhorn_api' );
+		add_settings_field( 'listings_page', __( 'Job Listings page slug', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'listings_page' ), 'bullhornwp', 'bullhorn_api' );
 		add_settings_field( 'form_page', __( 'Form Page or CV upload', 'bullhorn' ), array( $this, 'form_page' ), 'bullhornwp', 'bullhorn_api' );
 
 		add_settings_field( 'thanks_page', __( 'CV Thanks Page', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'thanks_page' ), 'bullhornwp', 'bullhorn_api' );
@@ -157,11 +157,11 @@ class Bullhorn_Settings {
 		echo '<input type="text" size="40" name="bullhorn_settings[client_secret]" value="' . esc_attr( $client_secret ) . '" />';
 
 		if ( isset( $settings['client_id'] ) ) {
-			$state_string = 'not ready';
+			$state_string = __( 'not ready', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
 			if ( $this->authorized() ) {
-				$state_string = 'Re-connect to Bullhorn';
+				$state_string = __( 'Re-connect to Bullhorn', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
 			} elseif ( $this->connected() ) {
-				$state_string = 'Connect to Bullhorn';
+				$state_string = __( 'Connect to Bullhorn', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
 			}
 			$url = add_query_arg(
 				array(
@@ -173,6 +173,8 @@ class Bullhorn_Settings {
 			);
 
 			printf( '<a class="button" href="https://%s">%s</a>', $url, esc_html( $state_string ) );
+		} else {
+			printf( ' <strong> %s</strong>', __( 'Enter Your Client Id and Secret', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
 		}
 		echo '<br><span class="description">' . __(
 				'Note: You will have to ask Bullhorn support to add your domain/s to the API white list for this to work',
@@ -333,9 +335,14 @@ class Bullhorn_Settings {
 				<?php do_settings_sections( 'bullhornwp' ); ?>
 				<p class="submit">
 					<?php submit_button( __( 'Save Changes', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), 'primary', 'submit', false ); ?>
-					<a href="<?php echo admin_url( 'options-general.php?page=bullhorn&sync=bullhorn' ); ?>" class="button">
-						<?php _e( 'Sync Now', 'bh-staffing-job-listing-and-cv-upload-for-wp' ); ?>
-					</a>
+					<?php
+					if ( $this->authorized() ) {
+						printf( '<a href="%s" class="button">%s</a>',
+							admin_url( 'options-general.php?page=bullhorn&sync=bullhorn' ),
+							__( 'Sync Now', 'bh-staffing-job-listing-and-cv-upload-for-wp' )
+						);
+					}
+					?>
 				</p>
 			</form>
 		</div>
