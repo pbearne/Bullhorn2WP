@@ -436,7 +436,7 @@ class Bullhorn_Connection {
 
 			if ( 200 === $response['response']['code'] ) {
 				$body = wp_remote_retrieve_body( $response );
-				$data = json_decode( $body, true )['data'];
+				$data = json_decode( $body, true );
 				if ( isset( $data['data'] ) ) {
 					return false;
 				}
