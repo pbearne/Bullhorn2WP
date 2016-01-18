@@ -169,9 +169,11 @@ class Bullhorn_Connection {
 			$body['last_refreshed'] = time();
 			update_option( 'bullhorn_api_access', $body );
 			self::$api_access = $body;
+
+			return true;
 		}
 
-		return true;
+		return false;
 	}
 
 	/**
