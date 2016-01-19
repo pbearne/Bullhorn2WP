@@ -58,6 +58,26 @@ This section describes how to install the plugin and get it working.
 
 You will need to connect to Bullhorn on the options page with your Client API Key.
 
+Enter your bullhorn client ID and key then save them
+
+Now try to connect to Bullhorn this may fail
+
+If the error is "Invalid Client Id" well check the ID
+
+if the error is "Invalid Redirect URI" then you need to have your website URL added to the allowed sites for your account by bullhorn support.
+
+When the Client ID and your site URL has been added you will be asked to login (this maybe a special account for just the API)
+
+If the Client Secret is wrong the login will fail.
+
+One you connect to Bullhorn run a manual sync to test is is all working you will be able to all your public job in the Job Listings menu item
+
+Good luck. If you have suggestion to improve these instructions please send them to me
+
+
+
+
+
 == Upgrade Notice ==
 If you are updating the version from an http://bullhorntowordpress.com, install this plugin, deactive the old version (both plugins) and then active this.
 Test and when happy you can remove the old pluigns

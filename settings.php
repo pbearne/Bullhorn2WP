@@ -176,10 +176,11 @@ class Bullhorn_Settings {
 		} else {
 			printf( ' <strong> %s</strong>', __( 'Enter Your Client Id and Secret', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
 		}
-		echo '<br><span class="description">' . __(
-				'Note: You will have to ask Bullhorn support to add your domain/s to the API white list for this to work',
-				'bh-staffing-job-listing-and-cv-upload-for-wp'
-			) . '</span>';
+		echo '<br><span class="description">' .
+		     __(
+			     'Note: You will have to ask Bullhorn support to add your domain/s to the API white list for this to work. (see the plugin install notes for more info)',
+			     'bh-staffing-job-listing-and-cv-upload-for-wp'
+		     ) . '</span>';
 	}
 
 	/**
@@ -208,7 +209,9 @@ class Bullhorn_Settings {
 			$listings_page = null;
 		}
 
-		echo '<input type="text" size="40" name="bullhorn_settings[listings_page]" value="' . esc_attr( $listings_page ) . '" />';
+		echo '<input type="text" size="40" name="bullhorn_settings[listings_page]" value="' . esc_attr( $listings_page ) . '" placeholder="bullhornjoblisting" />';
+		echo '<br><span class="description">' . __( 'This field is optional, but changing it will adjust the URL of the job listing pages from "bullhornjoblisting" to the set value.
+														You must run the sync after changing this as it changes the Custom Post Slug.', 'bullhorn' ) . '</span>';
 	}
 
 	/**
