@@ -232,7 +232,7 @@ class Shortcodes {
 	 *
 	 * @return string
 	 */
-	function bullhorn_title_like_posts_where( $where, &$wp_query ) {
+	public static function bullhorn_title_like_posts_where( $where, &$wp_query ) {
 		global $wpdb;
 
 		if ( $post_title_like = $wp_query->get( 'post_title_like' ) ) {

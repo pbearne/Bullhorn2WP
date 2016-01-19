@@ -6,7 +6,7 @@ class Bullhorn_Custom_Post_Type {
 	 * Bullhorn_Custom_Post_Type constructor.
 	 */
 	public function __construct() {
-		add_action( 'init', array( $this, 'init' ) );
+		add_action( 'init', array( __CLASS__, 'init' ) );
 
 		add_filter( 'post_updated_messages', array( __CLASS__, 'post_updated_messages' ) );
 
@@ -21,7 +21,7 @@ class Bullhorn_Custom_Post_Type {
 	/**
 	 * @return bool
 	 */
-	public function init() {
+	public static function init() {
 		$settings = (array) get_option( 'bullhorn_settings' );
 		if ( empty( $settings ) or ! isset( $settings['listings_page'] ) ) {
 			return false;
@@ -124,7 +124,7 @@ class Bullhorn_Custom_Post_Type {
 	 *
 	 * @return mixed
 	 */
-	public function post_updated_messages( $messages ) {
+	public static function post_updated_messages( $messages ) {
 		global $post, $post_ID;
 
 		$messages['bullhornjoblisting'] = array(
@@ -189,7 +189,7 @@ class Bullhorn_Custom_Post_Type {
 	 *
 	 * @return null|string
 	 */
-	public function the_content( $content = null ) {
+	public static function the_content( $content = null ) {
 
 		$settings = (array) get_option( 'bullhorn_settings' );
 		if ( isset( $settings['form_page'] ) and 'bullhornjoblisting' === get_post_type() ) {
@@ -239,7 +239,7 @@ class Bullhorn_Custom_Post_Type {
 	 *
 	 * @return bool
 	 */
-	public function comments_open( $open, $post_id ) {
+	public static function comments_open( $open, $post_id ) {
 		$post_type = get_post_type( $post_id );
 
 		if ( 'bullhornjoblisting' === $post_type ) {

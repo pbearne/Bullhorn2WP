@@ -272,7 +272,12 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 			$response = wp_remote_get( $url, array( 'method' => 'GET' ) );
 			$body = wp_remote_retrieve_body( $response );
-			$data = json_decode( $body, true )['data'];
+
+			$data = json_decode( $body, true );
+			if ( isset( $data['data'] ) ) {
+				return false;
+			}
+			$data = $data['data'];
 
 			$skill_list = array();
 			foreach ( $data as $skill ) {
@@ -431,7 +436,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 *
 	 * @return array
 	 */
-	function add_query_vars( $vars ) {
+	public static function add_query_vars( $vars ) {
 		$vars[] = '__api';
 		$vars[] = 'endpoint';
 
@@ -452,7 +457,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 *
 	 * @return void
 	 */
-	function sniff_requests() {
+	public static function sniff_requests() {
 		global $wp;
 		if ( isset( $wp->query_vars['__api'] ) && isset( $wp->query_vars['endpoint'] ) ) {
 			switch ( $wp->query_vars['endpoint'] ) {
