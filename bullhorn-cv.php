@@ -186,7 +186,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 * @return mixed
 	 */
 	public function attachWorkHistory( $resume, $candidate ) {
-		echo ( '<pre>');
+		echo( '<pre>' );
 		if ( empty( $resume->candidateWorkHistory ) ) {
 			return false;
 		}
@@ -232,7 +232,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		// API authentication
 		self::apiAuth();
 		$resume->skillList[] = 'Java';
-		$skillList = self::get_skill_list();
+		$skillList           = self::get_skill_list();
 
 		$skill_ids = array();
 		foreach ( $resume->skillList as $skill ) {
@@ -243,7 +243,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$skill_ids = array_unique( $skill_ids );
 
 		// Create the url && variables array
-		$url       = add_query_arg(
+		$url      = add_query_arg(
 			array(
 				'BhRestToken' => self::$session,
 			), self::$url . '/entity/Candidate/' . $candidate->changedEntityId . '/primarySkills/' . implode( ',', $skill_ids )
@@ -253,6 +253,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		if ( 200 === $response['response']['code'] ) {
 			return wp_remote_retrieve_body( $response );
 		}
+
 		return false;
 	}
 
@@ -264,14 +265,14 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		$skill_list = get_transient( $skill_list_id );
 		if ( false === $skill_list ) {
-			$url       = add_query_arg(
+			$url = add_query_arg(
 				array(
 					'BhRestToken' => self::$session,
 				), self::$url . 'options/Skill'
 			);
 
 			$response = wp_remote_get( $url, array( 'method' => 'GET' ) );
-			$body = wp_remote_retrieve_body( $response );
+			$body     = wp_remote_retrieve_body( $response );
 
 			$data = json_decode( $body, true );
 			if ( isset( $data['data'] ) ) {
@@ -425,7 +426,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		// login to bullhorn api
 		$logged_in = self::login();
 		if ( ! $logged_in ) {
-			self::throwJsonError( 500, __( 'There was a problem logging into the Bullhorn API.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
+			self::throwJsonError( 500, __( 'There was a problem logging into the Bullhorn API.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
 		}
 	}
 
@@ -463,18 +464,57 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			switch ( $wp->query_vars['endpoint'] ) {
 				case 'resume':
 
-					if (
-						! isset( $_POST['bullhorn_cv_form'] )
-						|| ! wp_verify_nonce( $_POST['bullhorn_cv_form'], 'bullhorn_cv_form' )
-					) {
-						print __( 'Sorry, your nonce did not verify.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' );
-						die();
+//					if (
+//						! isset( $_REQUEST['bullhorn_cv_form'] )
+//						|| ! wp_verify_nonce( $_REQUEST['bullhorn_cv_form'], 'bullhorn_cv_form' )
+//					) {
+//						wp_die( __( 'Sorry, your nonce did not verify.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
+//					}
 
+					if ( isset( $_POST['lindedin'] ) ) {
+						// redirect to linked for oAuth call https://developer.linkedin.com/docs/oauth2
+
+
+						$redirect_url = self::get_redirect_url();
+						$settings     = (array) get_option( 'bullhorn_settings' );
+						$url          = add_query_arg(
+							array(
+								'response_type' => 'code',
+								'client_id'     => $settings['linkedin_id'],
+								'redirect_uri'  => urlencode( $redirect_url ),
+								'state'         => $_POST['bullhorn_cv_form'],
+								'scope'         => urlencode( 'r_basicprofile r_emailaddress' ), //r_fullprofile r_contactinfo
+							), 'https://www.linkedin.com/uas/oauth2/authorization'
+						);
+
+						wp_redirect( $url );
 					}
+
+					if ( isset( $_REQUEST['error'] ) && 'invalid_scope' === $_REQUEST['error'] ) {
+						wp_die( __( 'Sorry, we failed to link to LinkedIn. Please upload a CV.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
+					}
+
+					if ( isset( $_GET['state'] ) ) {
+
+						if ( ! wp_verify_nonce( $_REQUEST['state'], 'bullhorn_cv_form' )	) {
+							wp_die( __( 'Sorry, your nonce did not verify.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
+						}
+
+						if ( isset( $_GET['state'] ) ) {
+							$token = self::get_linked_in_token( $_GET['code'] );
+
+							$resume = self::get_linkedin_data( $token );
+						} else {
+							wp_die( __( 'Sorry, fail to get access to LinkedIn.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
+						}
+					} else {
+						// Get Resume
+						$resume = self::parseResume();
+					}
+
 					//$bullhorn = new Bullhorn_Extended_Connection;
 
-					// Get Resume
-					$resume = self::parseResume();
+
 
 					// Create candidate
 					$candidate = self::createCandidate( $resume );
@@ -508,7 +548,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 				default:
 					$response = array(
 						'status' => 404,
-						'error'  => __( 'The endpoint you are trying to reach does not exist.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+						'error'  => __( 'The endpoint you are trying to reach does not exist.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 					);
 					echo json_encode( $response );
 			}
@@ -545,12 +585,73 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 				break;
 			default:
 				$format = '';
-				self::throwJsonError( 500, __( 'File format error. (txt, html, pdf, doc, docx, rft)' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
+				self::throwJsonError( 500, __( 'File format error. (txt, html, pdf, doc, docx, rft)', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
 
 				return array( $ext, $format );
 		}
 
 		return array( $ext, $format );
+	}
+
+	/**
+	 *
+	 *
+	 * @static
+	 *
+	 * @param $code
+	 */
+	private static function get_linked_in_token( $code ) {
+		$settings     = (array) get_option( 'bullhorn_settings' );
+
+
+		$redirect_url = self::get_redirect_url();
+
+		$args = array(
+			'headers' => array(
+				'Content-Type' => 'application/x-www-form-urlencoded',
+				'Host' => 'www.linkedin.com',
+				),
+			'body' => array(
+				'grant_type' => 'authorization_code',
+				'code' => $code,
+				'redirect_uri' => urlencode( $redirect_url ),
+				'client_id' => $settings['linkedin_id'],
+				'client_secret' => $settings['linkedin_secret'],
+			),
+
+			);
+
+		$response = wp_remote_post( 'https://www.linkedin.com/uas/oauth2/accessToken', $args );
+		//$response = wp_safe_remote_post( 'http://httpbin.org', $args );
+		echo '<pre>';
+		var_dump($args);
+var_dump($response);
+		die();
+		wp_die( ' not yet coded ' );
+
+		if ( 200 === $response['response']['code'] ) {
+			$responses[] = wp_remote_retrieve_body( $response );
+		}
+
+
+	}
+
+	/**
+	 *
+	 *
+	 * @static
+	 * @return string
+	 */
+	private static function get_redirect_url() {
+		$jobOrder = ( isset( $_REQUEST['position'] ) ) ? absint( $_REQUEST['position'] ) : false;
+		$redirect_url = add_query_arg(
+			array(
+				'bullhorn_cv_form' => $_REQUEST['bullhorn_cv_form'],
+				'position' => $jobOrder,
+			), get_site_url() . '/api/bullhorn/resume'
+		);
+
+		return $redirect_url;
 	}
 }
 

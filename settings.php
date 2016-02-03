@@ -55,6 +55,9 @@ class Bullhorn_Settings {
 
 		add_settings_field( 'client_corporation', __( 'Client Corporation', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'client_corporation' ), 'bullhornwp', 'bullhorn_api' );
 
+		add_settings_field( 'linkedin_id', __( 'LinkedIn Client Id', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'linkedin_id' ), 'bullhornwp', 'bullhorn_api' );
+		add_settings_field( 'linkedin_secret', __( 'LinkedIn Client Secret:', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'linkedin_secret' ), 'bullhornwp', 'bullhorn_api' );
+
 		add_settings_field( 'listings_page', __( 'Job Listings page slug', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'listings_page' ), 'bullhornwp', 'bullhorn_api' );
 		add_settings_field( 'form_page', __( 'Form Page or CV upload', 'bullhorn' ), array( $this, 'form_page' ), 'bullhornwp', 'bullhorn_api' );
 
@@ -195,9 +198,39 @@ class Bullhorn_Settings {
 		}
 		echo '<input type="text" size="40" name="bullhorn_settings[client_corporation]" value="' . esc_attr( $client_corporation ) . '" />';
 		echo '<br><span class="description">' . __( 'This field is optional, but will filter the jobs retreived from Bullhorn to only those listed under a specific
-														Client Corporation. This must be the ID of the corporation. Leave blank to sync all job listings.', 'bullhorn' ) . '</span>';
+														Client Corporation. This must be the ID of the corporation. Leave blank to sync all job listings.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</span>';
 	}
 
+	/**
+	 * Displays the settings field for setting the linkedIn ID.
+	 */
+	public function linkedin_id() {
+		$settings = (array) get_option( 'bullhorn_settings' );
+		if ( isset( $settings['linkedin_id'] ) ) {
+			$linkedin_id = $settings['linkedin_id'];
+		} else {
+			$linkedin_id = null;
+		}
+		echo '<input type="text" size="40" name="bullhorn_settings[linkedin_id]" value="' . esc_attr( $linkedin_id ) . '" />';
+		echo '<br><span class="description">' . __( 'If this is set we will provide an option to "apply with Linkedin".
+		                                            Get the id from https://www.linkedin.com/developer/apps/4234923/auth. and https://developer.linkedin.com/partner-programs', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</span>';
+	}
+
+	/**
+	 * Displays the settings field for setting the linkedIn Secret.
+	 */
+	public function linkedin_secret() {
+		$settings = (array) get_option( 'bullhorn_settings' );
+		if ( isset( $settings['linkedin_secret'] ) ) {
+			$linkedin_secret = $settings['linkedin_secret'];
+		} else {
+			$linkedin_secret = null;
+		}
+		echo '<input type="text" size="40" name="bullhorn_settings[linkedin_secret]" value="' . esc_attr( $linkedin_secret ) . '" />';
+			echo '<br><span class="description">';
+		printf( __( 'You also need to add the <strong>Authorized Redirect URLs:</strong> Set it to this URL for this site <strong>%s</strong>".', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</span>',
+			esc_url( get_site_url() . '/api/bullhorn/resume' ) );
+	}
 	/**
 	 * Displays the job listings page settings field.
 	 */
@@ -211,7 +244,7 @@ class Bullhorn_Settings {
 
 		echo '<input type="text" size="40" name="bullhorn_settings[listings_page]" value="' . esc_attr( $listings_page ) . '" placeholder="bullhornjoblisting" />';
 		echo '<br><span class="description">' . __( 'This field is optional, but changing it will adjust the URL of the job listing pages from "bullhornjoblisting" to the set value.
-														You must run the sync after changing this as it changes the Custom Post Slug.', 'bullhorn' ) . '</span>';
+														You must run the sync after changing this as it changes the Custom Post Slug.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</span>';
 	}
 
 	/**

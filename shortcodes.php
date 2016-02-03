@@ -38,7 +38,7 @@ class Shortcodes {
 	public function render_cv_form() {
 		$settings = (array) get_option( 'bullhorn_settings' );
 		if ( isset( $settings['form_page'] ) && 0 < $settings['form_page'] ) {
-			return sprintf( '<a href="%s" class="bullhorn-apply-here-link">%s</a>', esc_url( get_permalink( $settings['form_page'] ) ), __( 'Apply Here.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
+			return sprintf( '<a href="%s" class="bullhorn-apply-here-link">%s</a>', esc_url( get_permalink( $settings['form_page'] ) ), __( 'Apply Here.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
 		}
 
 		ob_start();
@@ -55,48 +55,80 @@ class Shortcodes {
 			<br/><br/>
 			<?php
 			if ( isset( $_GET['position'] ) ) {
-				printf( '<input id="position" name="position" type="hidden" value="%s" />',	esc_attr( $_GET['position'] ) );
+				printf( '<input id="position" name="position" type="hidden" value="%s" />', esc_attr( $_GET['position'] ) );
 			} elseif ( 'bullhornjoblisting' === get_post_type() ) {
-				printf( '<input id="position" name="position" type="hidden" value="%s" />',	esc_attr( get_post_meta( get_the_ID(), 'bullhorn_job_id', true ) ) );
+				printf( '<input id="position" name="position" type="hidden" value="%s" />', esc_attr( get_post_meta( get_the_ID(), 'bullhorn_job_id', true ) ) );
 			}
 
 			wp_nonce_field( 'bullhorn_cv_form', 'bullhorn_cv_form' );
+
+			printf( '<input name="submit" type="submit" value="%s"/>', __( 'Upload Resume', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
+
+
 			?>
-			<input name="submit" type="submit" value="Upload Resume"/>
 		</form>
+		<?php
+		if ( isset( $settings['linkedin_id'] ) &&  isset( $settings['linkedin_secret'] )  ) {
+			echo '<form id="bullhorn-lindedin" action="/api/bullhorn/resume"  method="post">';
+			wp_nonce_field( 'bullhorn_cv_form', 'bullhorn_cv_form' );
+			printf( '<br> <input id="bullhorn-lindedin" name="lindedin" type="submit" value="%s"/>', __( 'Apply with LinkedIn', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
+			echo '</form>';
+		}
+		?>
+
+		<style type="text/css">
+			input#bullhorn-lindedin {
+				background-image: url("<?php echo esc_url( plugin_dir_url( __FILE__ ) . 'img / Apply - Small ---Default.png' ); ?>");
+				background-color: transparent;
+				border: none;
+				text-indent: -1000px;
+				background-size: cover;
+				width: 230px;
+				margin-top: 1em;
+			}
+
+			input#bullhorn-lindedin:hover {
+				background-image: url("<?php echo esc_url( plugin_dir_url( __FILE__ ) . 'img / Apply - Small ---Hover . png' ); ?>");
+			}
+
+			input#bullhorn-lindedin:active {
+				background-image: url("<?php echo esc_url( plugin_dir_url( __FILE__ ) . 'img / Apply - Small ---Active . png' ); ?>");
+			}
+		</style>
 		<script type="application/javascript">
 
-			jQuery(document).ready( function () {
+			jQuery(document).ready(function () {
 				var error_color = '#FFDFE0';
-				var defaut_file_color = jQuery('#fileToUpload').css('background-color'); //'#fff';
-				var defaut_color = jQuery('#email').css('background-color'); //'#d0eafa';
-				jQuery('#bullhorn-resume').on('submit', function () {
+				var defaut_file_color = jQuery('#fileToUpload'). css('background-color'); //'#fff';
+				var defaut_color = jQuery('#email'). css('background-color'); //'#d0eafa';
+				jQuery('#bullhorn-resume'). on('submit', function () {
+					//TODO: handle linked in submit
 
-
-					var $email = jQuery('#email'),
+					var
+						$email = jQuery('#email'),
 						$no_error = true,
 						$name,
 						$fileToUpload;
 
-					if (( 3 > $email.val().length ) || !isValidEmailAddress($email.val())) {
-						$email.css('background-color', error_color);
+					if (( 3 > $email. val().length ) || !isValidEmailAddress($email. val())) {
+						$email. css('background-color', error_color);
 						$no_error = false;
 					} else {
-						$email.css('background-color', defaut_color);
+						$email. css('background-color', defaut_color);
 					}
 					$name = jQuery('#name');
-					if (3 > $name.val().length) {
-						$name.css('background-color', error_color);
+					if (3 > $name. val().length) {
+						$name. css('background-color', error_color);
 						$no_error = false;
 					} else {
-						$name.css('background-color', defaut_color);
+						$name. css('background-color', defaut_color);
 					}
 					$fileToUpload = jQuery('#fileToUpload');
-					if (3 > $fileToUpload.val().length) {
-						$fileToUpload.css('background-color', error_color);
+					if (3 > $fileToUpload. val().length) {
+						$fileToUpload. css('background-color', error_color);
 						$no_error = false;
 					} else {
-						$fileToUpload.css('background-color', defaut_file_color);
+						$fileToUpload. css('background-color', defaut_file_color);
 					}
 
 					//	e.preventDefault();
@@ -104,11 +136,12 @@ class Shortcodes {
 				});
 
 				function isValidEmailAddress(emailAddress) {
-					var pattern = /^([a-z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+(\.[a-z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+)*|"((([ \t]*\r\n)?[ \t]+)?([\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|\\[\x01-\x09\x0b\x0c\x0d-\x7f\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))*(([ \t]*\r\n)?[ \t]+)?")@(([a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.)+([a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.?$/i;
-					return pattern.test(emailAddress);
+					var
+						pattern = /^( [ a - z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+(\.[a-z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+)*|"((([ \t]*\r\n)?[ \t]+)?([\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|\\[\x01-\x09\x0b\x0c\x0d-\x7f\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))*(([ \t]*\r\n)?[ \t]+)?")@(([a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.)+([a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.?$/i;
+					return pattern. test(emailAddress);
 				}
 			});
-		</script>
+			</script >
 		<?php
 		$content = ob_get_contents();
 		ob_end_clean();
@@ -328,7 +361,7 @@ class Shortcodes {
 	 */
 	function bullhorn_search( $atts ) {
 		if ( ! empty( $atts ) ) {
-			_doing_it_wrong( __FUNCTION__, __( 'bullhorn categories Shortcode does not need attributes' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) , 2.0 );
+			_doing_it_wrong( __FUNCTION__, __( 'bullhorn categories Shortcode does not need attributes', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), 2.0 );
 		}
 		$form   = get_search_form( false );
 		$hidden = '<input type="hidden" name="post_type" value="bullhornjoblisting" />';
