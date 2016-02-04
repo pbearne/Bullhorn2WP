@@ -24,9 +24,9 @@ class Shortcodes {
 		add_shortcode( 'bullhorn_states', array( __CLASS__, 'bullhorn_states' ) );
 		add_shortcode( 'bullhorn_search', array( __CLASS__, 'bullhorn_search' ) );
 
-		add_shortcode ( 'b2wp_resume_form',  array( __CLASS__, 'render_cv_only' ) );
-		add_shortcode ( 'b2wp_application', array( __CLASS__, 'render_cv_form' ) );
-		add_shortcode ( 'b2wp_shortapp', array( __CLASS__, 'render_cv_appication' ) );
+		add_shortcode( 'b2wp_resume_form',  array( __CLASS__, 'render_cv_only' ) );
+		add_shortcode( 'b2wp_application', array( __CLASS__, 'render_cv_form' ) );
+		add_shortcode( 'b2wp_shortapp', array( __CLASS__, 'render_cv_appication' ) );
 
 		add_filter( 'posts_where', array( __CLASS__, 'bullhorn_title_like_posts_where' ), 10, 2 );
 
@@ -35,24 +35,35 @@ class Shortcodes {
 		 */
 		add_filter( 'widget_text', 'do_shortcode' );
 	}
-	public function render_cv_only() {
-		self::render_cv();
+	public static function render_cv_only() {
+
+		return self::render_cv();
 	}
-	public function render_cv_form() {
-		self::render_cv( array( 'name', 'email', 'phone' ) );
+	public static function render_cv_form() {
+
+		return self::render_cv( array( 'name', 'email', 'phone' ) );
 	}
 
-	public function render_cv_appication() {
-		self::render_cv( array( 'name', 'email', 'phone', 'address' ) );
+	public  static function render_cv_appication() {
+
+		return self::render_cv( array( 'name', 'email', 'phone', 'address' ) );
 	}
+
 
 	/**
+	 *
+	 *
+	 * @static
+	 *
+	 * @param array $element_to_show
+	 *
 	 * @return string
 	 */
-	public function render_cv( $element_to_show = array() ) {
+	public static function render_cv( $element_to_show = array() ) {
+
 		$settings = (array) get_option( 'bullhorn_settings' );
 		if ( isset( $settings['form_page'] ) && 0 < $settings['form_page'] ) {
-			return sprintf( '<a href="%s" class="bullhorn-apply-here-link">%s</a>', esc_url( get_permalink( $settings['form_page'] ) ), __( 'Apply Here.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
+			return sprintf( 'ssssss<a href="%s" class="bullhorn-apply-here-link">%s</a>', esc_url( get_permalink( $settings['form_page'] ) ), __( 'Apply Here.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
 		}
 
 		ob_start();
@@ -76,9 +87,9 @@ class Shortcodes {
 				<label for="address2"><?php _e( 'Address Cont', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>
 				<input id="address2" name="address2" type="text"/>
 				<label for="address1"><?php _e( 'City', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>
-				<input id="addres1s" name="address1" type="text"/>
-				<label for="address1"><?php _e( 'ZIP Code', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>
-				<input id="addres1s" name="address1" type="text"/>
+				<input id="address1" name="address1" type="text"/>
+				<label for="zip"><?php _e( 'ZIP Code', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>
+				<input id="zip" name="zip" type="text"/>
 			<?php }?>
 
 
