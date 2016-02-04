@@ -24,6 +24,10 @@ class Shortcodes {
 		add_shortcode( 'bullhorn_states', array( __CLASS__, 'bullhorn_states' ) );
 		add_shortcode( 'bullhorn_search', array( __CLASS__, 'bullhorn_search' ) );
 
+		add_shortcode ( 'b2wp_resume_form',  array( __CLASS__, 'render_cv_only' ) );
+		add_shortcode ( 'b2wp_application', array( __CLASS__, 'render_cv_form' ) );
+		add_shortcode ( 'b2wp_shortapp', array( __CLASS__, 'render_cv_appication' ) );
+
 		add_filter( 'posts_where', array( __CLASS__, 'bullhorn_title_like_posts_where' ), 10, 2 );
 
 		/**
@@ -31,11 +35,21 @@ class Shortcodes {
 		 */
 		add_filter( 'widget_text', 'do_shortcode' );
 	}
+	public function render_cv_only() {
+		self::render_cv();
+	}
+	public function render_cv_form() {
+		self::render_cv( array( 'name', 'email', 'phone' ) );
+	}
+
+	public function render_cv_appication() {
+		self::render_cv( array( 'name', 'email', 'phone', 'address' ) );
+	}
 
 	/**
 	 * @return string
 	 */
-	public function render_cv_form() {
+	public function render_cv( $element_to_show = array() ) {
 		$settings = (array) get_option( 'bullhorn_settings' );
 		if ( isset( $settings['form_page'] ) && 0 < $settings['form_page'] ) {
 			return sprintf( '<a href="%s" class="bullhorn-apply-here-link">%s</a>', esc_url( get_permalink( $settings['form_page'] ) ), __( 'Apply Here.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
@@ -44,12 +58,30 @@ class Shortcodes {
 		ob_start();
 		?>
 		<form id="bullhorn-resume" action="/api/bullhorn/resume" enctype="multipart/form-data" method="post">
-			<label for="name">Name<span class="gfield_required"> *</span></label>
+			<?php if ( array_search( 'name' , $element_to_show )  ) { ?>
+			<label for="name"><?php _e( 'Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?> <span class="gfield_required"> *</span></label>
 			<input id="name" name="name" type="text"/>
-			<label for="email">Email<span class="gfield_required"> *</span></label>
+			<?php }?>
+			<?php if ( array_search( 'email' , $element_to_show )  ) { ?>
+			<label for="email"><?php _e( 'Email', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?><span class="gfield_required"> *</span></label>
 			<input id="email" name="email" type="text"/>
-			<label for="phone">Phone</label>
+			<?php }?>
+			<?php if ( array_search( 'phone' , $element_to_show )  ) { ?>
+			<label for="phone"><?php _e( 'Phone', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>
 			<input id="phone" name="phone" type="text"/>
+			<?php }?>
+			<?php if ( array_search( 'address' , $element_to_show )  ) { ?>
+				<label for="address1"><?php _e( 'Address', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>
+				<input id="address1" name="address1" type="text"/>
+				<label for="address2"><?php _e( 'Address Cont', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>
+				<input id="address2" name="address2" type="text"/>
+				<label for="address1"><?php _e( 'City', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>
+				<input id="addres1s" name="address1" type="text"/>
+				<label for="address1"><?php _e( 'ZIP Code', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>
+				<input id="addres1s" name="address1" type="text"/>
+			<?php }?>
+
+
 			<label for="fileToUpload">Your Resume<span class="gfield_required"> *</span></label>
 			<input id="fileToUpload" name="resume" type="file"/>
 			<br/><br/>

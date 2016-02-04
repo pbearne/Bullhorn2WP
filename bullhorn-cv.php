@@ -114,6 +114,22 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			$resume->candidate->name = esc_attr( $_POST['name'] );
 		}
 
+
+		$address_fields = array( 'address1', 'address2', 'city', 'state', 'zip' );
+		$address_data = array();
+
+		foreach ( $address_fields as $key ) {
+			if ( isset( $_POST[ $key ] ) ) {
+				$address_data[ $key ] = $_POST[ $key ];
+			}
+		}
+
+		$resume->candidate->address = $address_data;
+		$current_site = get_current_site();
+		$resume->candidate->source = 'Website Application from: ' . $current_site->site_name;
+
+
+
 		//$candidate_data = json_encode( $resume->candidate );
 
 		// API authentication
