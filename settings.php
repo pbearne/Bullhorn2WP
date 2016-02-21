@@ -12,16 +12,16 @@ class Bullhorn_Settings {
 			add_action( 'admin_init', 'bullhorn_sync' );
 		}
 
-		add_action( 'admin_init', array( $this, 'init' ) );
-		add_action( 'current_screen', array( $this, 'tasks' ) );
-		add_action( 'admin_menu', array( $this, 'menu' ) );
+		add_action( 'admin_init', array( __CLASS__, 'init' ) );
+		add_action( 'current_screen', array( __CLASS__, 'tasks' ) );
+		add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
 	}
 
 
 	/**
 	 *
 	 */
-	public function tasks() {
+	public static function tasks() {
 		// If being redirected back to the site with a code, we need to auth
 		// with the API and save the access_token.
 		$currentScreen = get_current_screen();
@@ -30,7 +30,7 @@ class Bullhorn_Settings {
 		}
 
 		if ( isset( $_GET['code'] ) ) {
-			$this->authorize();
+			self::authorize();
 		}
 		//if ( isset( $_GET['sync'] ) && 'bullhorn' === $_GET['sync'] ) {
 		//	add_action( 'admin_init', 'bullhorn_sync' );
@@ -40,40 +40,40 @@ class Bullhorn_Settings {
 	/**
 	 * Sets up the plugin by adding the settings link on the GF Settings page
 	 */
-	public function init() {
+	public static function init() {
 
 		if ( isset( $_GET['sync'] ) && 'bullhorn' === $_GET['sync'] ) {
 			wp_redirect( admin_url( 'options-general.php?page=bullhorn' ) );
 		}
 
-		register_setting( 'bullhorn_settings', 'bullhorn_settings', array( $this, 'validate' ) );
+		register_setting( 'bullhorn_settings', 'bullhorn_settings', array( __CLASS__, 'validate' ) );
 
-		add_settings_section( 'bullhorn_api', __( 'API Settings', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'api_settings' ), 'bullhornwp' );
+		add_settings_section( 'bullhorn_api', __( 'API Settings', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'api_settings' ), 'bullhornwp' );
 
-		add_settings_field( 'client_id', __( 'Client ID', 'bullhorn' ), array( $this, 'client_id' ), 'bullhornwp', 'bullhorn_api' );
-		add_settings_field( 'client_secret', __( 'Client Secret', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'client_secret' ), 'bullhornwp', 'bullhorn_api' );
+		add_settings_field( 'client_id', __( 'Client ID', 'bullhorn' ), array( __CLASS__, 'client_id' ), 'bullhornwp', 'bullhorn_api' );
+		add_settings_field( 'client_secret', __( 'Client Secret', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'client_secret' ), 'bullhornwp', 'bullhorn_api' );
 
-		add_settings_field( 'client_corporation', __( 'Client Corporation', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'client_corporation' ), 'bullhornwp', 'bullhorn_api' );
+		add_settings_field( 'client_corporation', __( 'Client Corporation', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'client_corporation' ), 'bullhornwp', 'bullhorn_api' );
 
-		add_settings_field( 'listings_page', __( 'Job Listings page slug', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'listings_page' ), 'bullhornwp', 'bullhorn_api' );
-		add_settings_field( 'form_page', __( 'Form Page or CV upload', 'bullhorn' ), array( $this, 'form_page' ), 'bullhornwp', 'bullhorn_api' );
+		add_settings_field( 'listings_page', __( 'Job Listings page slug', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'listings_page' ), 'bullhornwp', 'bullhorn_api' );
+		add_settings_field( 'form_page', __( 'Form Page or CV upload', 'bullhorn' ), array( __CLASS__, 'form_page' ), 'bullhornwp', 'bullhorn_api' );
 
-		add_settings_field( 'thanks_page', __( 'CV Thanks Page', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'thanks_page' ), 'bullhornwp', 'bullhorn_api' );
-		add_settings_field( 'listings_sort', __( 'Listings Sort', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'listings_sort' ), 'bullhornwp', 'bullhorn_api' );
-		add_settings_field( 'description_field', __( 'Description Field', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( $this, 'description_field' ), 'bullhornwp', 'bullhorn_api' );
+		add_settings_field( 'thanks_page', __( 'CV Thanks Page', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'thanks_page' ), 'bullhornwp', 'bullhorn_api' );
+		add_settings_field( 'listings_sort', __( 'Listings Sort', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'listings_sort' ), 'bullhornwp', 'bullhorn_api' );
+		add_settings_field( 'description_field', __( 'Description Field', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'description_field' ), 'bullhornwp', 'bullhorn_api' );
 	}
 
 	/**
 	 * Adds a link to the Bullhorn to the Settings menu
 	 */
-	public function menu() {
-		add_options_page( 'Bullhorn', __( 'Bullhorn', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), 'manage_options', 'bullhorn', array( $this, 'settings_page' ) );
+	public static function menu() {
+		add_options_page( 'Bullhorn', __( 'Bullhorn', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), 'manage_options', 'bullhorn', array( __CLASS__, 'settings_page' ) );
 	}
 
 	/**
 	 * @return array|bool
 	 */
-	public function authorize() {
+	public static function authorize() {
 
 		// check for
 		if ( null !== self::$authorize ) {
@@ -118,12 +118,12 @@ class Bullhorn_Settings {
 	/**
 	 * Callback for the API settings section, which is left blank
 	 */
-	public function api_settings() {
+	public static function api_settings() {
 		if ( ! isset( $_GET['code'] ) ) {
 			return;
 		}
 
-		if ( true === $this->authorize() ) {
+		if ( true === self::authorize() ) {
 			echo '<div class="updated"><p>' . __( 'You have successfully connected to Bullhorn.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</p></div>';
 		} elseif ( isset( $body['error_description'] ) ) {
 			echo '<div class="error"><p><strong>' . __( 'Bullhorn Error:', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</strong> ' . esc_html( $body['error_description'] ) . '</p></div>';
@@ -133,7 +133,7 @@ class Bullhorn_Settings {
 	/**
 	 * Displays the API key settings field
 	 */
-	public function client_id() {
+	public static function client_id() {
 		$settings = (array) get_option( 'bullhorn_settings' );
 		if ( isset( $settings['client_id'] ) ) {
 			$client_id = $settings['client_id'];
@@ -147,7 +147,7 @@ class Bullhorn_Settings {
 	/**
 	 * Displays the API key settings field
 	 */
-	public function client_secret() {
+	public static function client_secret() {
 		$settings = (array) get_option( 'bullhorn_settings' );
 		if ( isset( $settings['client_secret'] ) ) {
 			$client_secret = $settings['client_secret'];
@@ -158,9 +158,9 @@ class Bullhorn_Settings {
 
 		if ( isset( $settings['client_id'] ) ) {
 			$state_string = __( 'not ready', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
-			if ( $this->authorized() ) {
+			if ( self::authorized() ) {
 				$state_string = __( 'Re-connect to Bullhorn', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
-			} elseif ( $this->connected() ) {
+			} elseif ( self::connected() ) {
 				$state_string = __( 'Connect to Bullhorn', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
 			}
 			$url = add_query_arg(
@@ -186,7 +186,7 @@ class Bullhorn_Settings {
 	/**
 	 * Displays the settings field for picking the client corporation.
 	 */
-	public function client_corporation() {
+	public static function client_corporation() {
 		$settings = (array) get_option( 'bullhorn_settings' );
 		if ( isset( $settings['client_corporation'] ) ) {
 			$client_corporation = $settings['client_corporation'];
@@ -201,7 +201,7 @@ class Bullhorn_Settings {
 	/**
 	 * Displays the job listings page settings field.
 	 */
-	public function listings_page() {
+	public static function listings_page() {
 		$settings = (array) get_option( 'bullhorn_settings' );
 		if ( isset( $settings['listings_page'] ) ) {
 			$listings_page = $settings['listings_page'];
@@ -217,7 +217,7 @@ class Bullhorn_Settings {
 	/**
 	 * Displays the job listings page settings field.
 	 */
-	public function thanks_page() {
+	public static function thanks_page() {
 		$settings = (array) get_option( 'bullhorn_settings' );
 		if ( isset( $settings['thanks_page'] ) ) {
 			$thanks_page = $settings['thanks_page'];
@@ -235,7 +235,7 @@ class Bullhorn_Settings {
 	/**
 	 * Displays the job listings page settings field.
 	 */
-	public function form_page() {
+	public static function form_page() {
 		$settings = (array) get_option( 'bullhorn_settings' );
 		if ( isset( $settings['form_page'] ) ) {
 			$form_page = $settings['form_page'];
@@ -253,7 +253,7 @@ class Bullhorn_Settings {
 	/**
 	 * Displays the job listings sort settings field.
 	 */
-	public function listings_sort() {
+	public static function listings_sort() {
 		$settings = (array) get_option( 'bullhorn_settings' );
 		if ( isset( $settings['listings_sort'] ) ) {
 			$listings_sort = $settings['listings_sort'];
@@ -280,7 +280,7 @@ class Bullhorn_Settings {
 	/**
 	 * Displays the description field settings field.
 	 */
-	public function description_field() {
+	public static function description_field() {
 		$settings = (array) get_option( 'bullhorn_settings' );
 		if ( isset( $settings['description_field'] ) ) {
 			$description_field = $settings['description_field'];
@@ -309,7 +309,7 @@ class Bullhorn_Settings {
 	 *
 	 * @return array        Sanitized POST data
 	 */
-	public function validate( $input ) {
+	public static function validate( $input ) {
 		$input['client_id']         = esc_html( $input['client_id'] );
 		$input['client_secret']     = esc_html( $input['client_secret'] );
 		$input['listings_page']     = esc_html( $input['listings_page'] );
@@ -328,7 +328,7 @@ class Bullhorn_Settings {
 	/**
 	 * Output the main settings page with the title and form
 	 */
-	public function settings_page() {
+	public static function settings_page() {
 		?>
 		<div class="wrap">
 			<div id="icon-options-general" class="icon32"><br></div>
@@ -339,7 +339,7 @@ class Bullhorn_Settings {
 				<p class="submit">
 					<?php submit_button( __( 'Save Changes', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), 'primary', 'submit', false ); ?>
 					<?php
-					if ( $this->authorized() ) {
+					if ( self::authorized() ) {
 						printf( '<a href="%s" class="button">%s</a>',
 							admin_url( 'options-general.php?page=bullhorn&sync=bullhorn' ),
 							__( 'Sync Now', 'bh-staffing-job-listing-and-cv-upload-for-wp' )
@@ -357,7 +357,7 @@ class Bullhorn_Settings {
 	 *
 	 * @return boolean
 	 */
-	public function authorized() {
+	public static function authorized() {
 		$settings = get_option( 'bullhorn_api_access' );
 
 		return ( $settings and isset( $settings['access_token'] ) );
@@ -369,7 +369,7 @@ class Bullhorn_Settings {
 	 *
 	 * @return boolean
 	 */
-	public function connected() {
+	public static function connected() {
 		$settings = get_option( 'bullhorn_settings' );
 
 		return (

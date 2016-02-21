@@ -25,13 +25,99 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		add_action( 'parse_request', array( __CLASS__, 'sniff_requests' ) );
 	}
 
+	/**
+	 * Update vars
+	 *
+	 * @param $vars
+	 *
+	 * @return array
+	 */
+	public static function add_query_vars( $vars ) {
+		$vars[] = '__api';
+		$vars[] = 'endpoint';
+
+		return $vars;
+	}
+
+	/**
+	 * Initialize the reqrite rule
+	 *
+	 * @return void
+	 */
+	public static function add_endpoint() {
+		add_rewrite_rule( '^api/bullhorn/([^/]+)/?', 'index.php?__api=1&endpoint=$matches[1]', 'top' );
+	}
+
+	/**
+	 * Check to see if the request is a bullhorn API request
+	 *
+	 * @return void
+	 */
+	public static function sniff_requests() {
+		global $wp;
+		if ( isset( $wp->query_vars['__api'] ) && isset( $wp->query_vars['endpoint'] ) ) {
+			switch ( $wp->query_vars['endpoint'] ) {
+				case 'resume':
+
+					if (
+						! isset( $_POST['bullhorn_cv_form'] )
+						|| ! wp_verify_nonce( $_POST['bullhorn_cv_form'], 'bullhorn_cv_form' )
+					) {
+						print __( 'Sorry, your nonce did not verify.', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
+						die();
+
+					}
+					//$bullhorn = new Bullhorn_Extended_Connection;
+
+					// Get Resume
+					$resume = self::parseResume();
+
+					// Create candidate
+					$candidate = self::createCandidate( $resume );
+
+					// Attach education to candidate
+					self::attachEducation( $resume, $candidate );
+
+					// Attach work history to candidate
+					self::attachWorkHistory( $resume, $candidate );
+					//var_dump($resume->candidateWorkHistory);
+
+					// Attach work history to candidate
+					self::attachSkills( $resume, $candidate );
+
+					// Attach resume file to candidate
+					error_log( 'wp_upload_file_request: ' . self::wp_upload_file_request( $candidate ) );
+
+					// link to job
+					self::link_candidate_to_job( $candidate );
+
+					// Redirect
+					$settings  = (array) get_option( 'bullhorn_extension_settings' );
+					$permalink = add_query_arg( array(
+						'bh_applied' => true,
+					), get_permalink( $settings['thanks_page'] ) );
+
+					header( "location: $permalink" );
+					exit;
+
+					break;
+				default:
+					$response = array(
+						'status' => 404,
+						'error'  => __( 'The endpoint you are trying to reach does not exist.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+					);
+					echo json_encode( $response );
+			}
+			exit;
+		}
+	}
 
 	/**
 	 * Takes the posted 'resume' file and returns a parsed version from bullhorn
 	 *
 	 * @return mixed
 	 */
-	public function parseResume() {
+	public static function parseResume() {
 
 		// check to make sure file was posted
 		if ( ! isset( $_FILES['resume'] ) ) {
@@ -77,11 +163,84 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		);
 
 		$response = wp_remote_request( $url, $args );
-		if ( 200 === $response['response']['code'] ) {
+
+		if ( is_wp_error( $response ) ) {
+			return false;
+		}
+
+		if ( is_array( $response ) && 200 === $response['response']['code'] ) {
+
 			return json_decode( $response['body'] );
 		}
 
 		return false;
+	}
+
+	/**
+	 * Send a json error to the screen
+	 *
+	 * @param $status
+	 * @param $error
+	 */
+	function throwJsonError( $status, $error ) {
+		$response = array( 'status' => $status, 'error' => $error );
+		echo json_encode( $response );
+		exit;
+	}
+
+	/**
+	 * @return array
+	 */
+	private static function get_filetype() {
+		// Get file extension
+		$file_type = wp_check_filetype_and_ext( $_FILES['resume']['tmp_name'], $_FILES['resume']['name'] );
+		$ext       = $file_type['type'];
+
+		switch ( strtolower( $ext ) ) {
+			case 'text/plain':
+				$format = 'TEXT';
+				break;
+			case 'application/msword':
+				$format = 'DOC';
+				break;
+			case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+				$format = 'DOCX';
+				break;
+			case 'application/pdf':
+				$format = 'PDF';
+				break;
+			case 'text/rtf':
+				$format = 'RTF';
+				break;
+			case 'text/html':
+				$format = 'HTML';
+				break;
+			default:
+				$format = '';
+				self::throwJsonError( 500, __( 'File format error. (txt, html, pdf, doc, docx, rft)', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
+
+				return array( $ext, $format );
+		}
+
+		return array( $ext, $format );
+	}
+
+	/**
+	 * Run this before any api call.
+	 *
+	 * @return void
+	 */
+	private static function apiAuth() {
+		// Refresh the token if necessary before doing anything
+		if ( false === self::refresh_token() ) {
+			return false;
+		};
+
+		// login to bullhorn api
+		$logged_in = self::login();
+		if ( ! $logged_in ) {
+			self::throwJsonError( 500, __( 'There was a problem logging into the Bullhorn API.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
+		}
 	}
 
 	/**
@@ -91,10 +250,10 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 *
 	 * @return mixed
 	 */
-	public function createCandidate( $resume ) {
+	public static function createCandidate( $resume ) {
 
 		// Make sure country ID is correct
-		if ( is_null( $resume->candidate->address->countryID ) ) {
+		if ( isset( $resume->candidate->address ) && is_null( $resume->candidate->address->countryID ) ) {
 			$resume->candidate->address->countryID = 1;
 		}
 
@@ -114,23 +273,20 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			$resume->candidate->name = esc_attr( $_POST['name'] );
 		}
 
+		if ( isset( $_POST['address1'] ) ) {
+			$cv_address     = $resume->candidate->address;
+			$address_fields = array( 'address1', 'address2', 'city', 'state', 'zip' );
+			$address_data   = array();
 
-		$address_fields = array( 'address1', 'address2', 'city', 'state', 'zip' );
-		$address_data = array();
-
-		foreach ( $address_fields as $key ) {
-			if ( isset( $_POST[ $key ] ) ) {
-				$address_data[ $key ] = $_POST[ $key ];
+			foreach ( $address_fields as $key ) {
+				$address_data[ $key ] = ( isset( $_POST[ $key ] ) ) ? $_POST[ $key ] : '';
 			}
+			$resume->candidate->address          = $address_data;
+			$resume->candidate->secondaryAddress = $cv_address;
+
 		}
 
-		$resume->candidate->address = $address_data;
-		$current_site = get_current_site();
-		$resume->candidate->source = 'Website Application from: ' . $current_site->site_name;
-
-
-
-		//$candidate_data = json_encode( $resume->candidate );
+		$resume->candidate->source = 'Website Application from: ';
 
 		// API authentication
 		self::apiAuth();
@@ -143,7 +299,8 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		$response = wp_remote_get( $url, array( 'body' => json_encode( $resume->candidate ), 'method' => 'PUT' ) );
 
-		if ( 200 === $response['response']['code'] ) {
+		if ( ! is_wp_error( $response ) && 200 === $response['response']['code'] ) {
+
 			return json_decode( $response['body'] );
 		}
 
@@ -158,7 +315,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 *
 	 * @return mixed
 	 */
-	public function attachEducation( $resume, $candidate ) {
+	public static function attachEducation( $resume, $candidate ) {
 
 		if ( empty( $resume->candidateEducation ) ) {
 			return false;
@@ -201,8 +358,8 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 *
 	 * @return mixed
 	 */
-	public function attachWorkHistory( $resume, $candidate ) {
-		echo ( '<pre>');
+	public static function attachWorkHistory( $resume, $candidate ) {
+
 		if ( empty( $resume->candidateWorkHistory ) ) {
 			return false;
 		}
@@ -240,26 +397,29 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 *
 	 * @return mixed
 	 */
-	public function attachSkills( $resume, $candidate ) {
+	public static function attachSkills( $resume, $candidate ) {
 
 		if ( empty( $resume->skillList ) ) {
 			return false;
 		}
 		// API authentication
 		self::apiAuth();
-		$resume->skillList[] = 'Java';
+
 		$skillList = self::get_skill_list();
 
 		$skill_ids = array();
-		foreach ( $resume->skillList as $skill ) {
-			if ( false !== $key = array_search( strtolower( $skill ), $skillList ) ) {
-				$skill_ids[] = $key;
+		if ( ! empty( $skill_ids ) ) {
+			foreach ( $resume->skillList as $skill ) {
+				if ( false !== $key = array_search( strtolower( $skill ), $skillList ) ) {
+					$skill_ids[] = $key;
+				}
 			}
+			$skill_ids = array_unique( $skill_ids );
 		}
-		$skill_ids = array_unique( $skill_ids );
+
 
 		// Create the url && variables array
-		$url       = add_query_arg(
+		$url      = add_query_arg(
 			array(
 				'BhRestToken' => self::$session,
 			), self::$url . '/entity/Candidate/' . $candidate->changedEntityId . '/primarySkills/' . implode( ',', $skill_ids )
@@ -269,6 +429,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		if ( 200 === $response['response']['code'] ) {
 			return wp_remote_retrieve_body( $response );
 		}
+
 		return false;
 	}
 
@@ -280,18 +441,19 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		$skill_list = get_transient( $skill_list_id );
 		if ( false === $skill_list ) {
-			$url       = add_query_arg(
+			$skill_list = array();
+			$url        = add_query_arg(
 				array(
 					'BhRestToken' => self::$session,
 				), self::$url . 'options/Skill'
 			);
 
 			$response = wp_remote_get( $url, array( 'method' => 'GET' ) );
-			$body = wp_remote_retrieve_body( $response );
+			$body     = wp_remote_retrieve_body( $response );
 
 			$data = json_decode( $body, true );
 			if ( isset( $data['data'] ) ) {
-				return false;
+				return $skill_list;
 			}
 			$data = $data['data'];
 
@@ -312,13 +474,12 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		return $label;
 	}
 
-
 	/**
 	 * @param $candidate
 	 *
 	 * @return array|bool|mixed|object
 	 */
-	public function wp_upload_file_request( $candidate ) {
+	public static function wp_upload_file_request( $candidate ) {
 
 		list( $ext, $format ) = self::get_filetype();
 
@@ -357,6 +518,11 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		);
 		$response = wp_remote_request( $url, $args );
 
+		// try once more if we get an error
+		if ( is_wp_error( $response ) || 200 !== $response['response']['code'] ) {
+			$response = wp_remote_request( $url, $args );
+		}
+
 		if ( 200 === $response['response']['code'] ) {
 			return json_decode( $response['body'] );
 		}
@@ -365,7 +531,6 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 	}
 
-
 	/**
 	 * Link a candidate to job.
 	 *
@@ -373,7 +538,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 *
 	 * @return mixed
 	 */
-	public function link_candidate_to_job( $candidate ) {
+	public static function link_candidate_to_job( $candidate ) {
 		// API authentication
 		self::apiAuth();
 
@@ -404,7 +569,6 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		return false;
 	}
 
-
 	/**
 	 * get time in microseconds
 	 * @return float
@@ -413,160 +577,6 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		list( $usec, $sec ) = explode( ' ', microtime() );
 
 		return ( (float) $usec + (float) $sec ) * 100;
-	}
-
-	/**
-	 * Send a json error to the screen
-	 *
-	 * @param $status
-	 * @param $error
-	 */
-	function throwJsonError( $status, $error ) {
-		$response = array( 'status' => $status, 'error' => $error );
-		echo json_encode( $response );
-		exit;
-	}
-
-	/**
-	 * Run this before any api call.
-	 *
-	 * @return void
-	 */
-	private function apiAuth() {
-		// Refresh the token if necessary before doing anything
-		if ( false === self::refresh_token() ) {
-			return false;
-		};
-
-		// login to bullhorn api
-		$logged_in = self::login();
-		if ( ! $logged_in ) {
-			self::throwJsonError( 500, __( 'There was a problem logging into the Bullhorn API.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
-		}
-	}
-
-	/**
-	 * Update vars
-	 *
-	 * @param $vars
-	 *
-	 * @return array
-	 */
-	public static function add_query_vars( $vars ) {
-		$vars[] = '__api';
-		$vars[] = 'endpoint';
-
-		return $vars;
-	}
-
-	/**
-	 * Initialize the reqrite rule
-	 *
-	 * @return void
-	 */
-	public static function add_endpoint() {
-		add_rewrite_rule( '^api/bullhorn/([^/]+)/?', 'index.php?__api=1&endpoint=$matches[1]', 'top' );
-	}
-
-	/**
-	 * Check to see if the request is a bullhorn API request
-	 *
-	 * @return void
-	 */
-	public static function sniff_requests() {
-		global $wp;
-		if ( isset( $wp->query_vars['__api'] ) && isset( $wp->query_vars['endpoint'] ) ) {
-			switch ( $wp->query_vars['endpoint'] ) {
-				case 'resume':
-
-					if (
-						! isset( $_POST['bullhorn_cv_form'] )
-						|| ! wp_verify_nonce( $_POST['bullhorn_cv_form'], 'bullhorn_cv_form' )
-					) {
-						print __( 'Sorry, your nonce did not verify.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' );
-						die();
-
-					}
-					//$bullhorn = new Bullhorn_Extended_Connection;
-
-					// Get Resume
-					$resume = self::parseResume();
-
-					// Create candidate
-					$candidate = self::createCandidate( $resume );
-
-					// Attach education to candidate
-					self::attachEducation( $resume, $candidate );
-
-					// Attach work history to candidate
-					self::attachWorkHistory( $resume, $candidate );
-					//var_dump($resume->candidateWorkHistory);
-
-					// Attach work history to candidate
-					self::attachSkills( $resume, $candidate );
-
-					// Attach resume file to candidate
-					self::wp_upload_file_request( $candidate );
-
-					// link to job
-					self::link_candidate_to_job( $candidate );
-
-					// Redirect
-					$settings  = (array) get_option( 'bullhorn_extension_settings' );
-					$permalink = add_query_arg( array(
-						'bh_applied' => true,
-					), get_permalink( $settings['thanks_page'] ) );
-
-					header( "location: $permalink" );
-					exit;
-
-					break;
-				default:
-					$response = array(
-						'status' => 404,
-						'error'  => __( 'The endpoint you are trying to reach does not exist.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-					);
-					echo json_encode( $response );
-			}
-			exit;
-		}
-	}
-
-	/**
-	 * @return array
-	 */
-	private static function get_filetype() {
-		// Get file extension
-		$file_type = wp_check_filetype_and_ext( $_FILES['resume']['tmp_name'], $_FILES['resume']['name'] );
-		$ext       = $file_type['type'];
-
-		switch ( strtolower( $ext ) ) {
-			case 'text/plain':
-				$format = 'TEXT';
-				break;
-			case 'application/msword':
-				$format = 'DOC';
-				break;
-			case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-				$format = 'DOCX';
-				break;
-			case 'application/pdf':
-				$format = 'PDF';
-				break;
-			case 'text/rtf':
-				$format = 'RTF';
-				break;
-			case 'text/html':
-				$format = 'HTML';
-				break;
-			default:
-				$format = '';
-				self::throwJsonError( 500, __( 'File format error. (txt, html, pdf, doc, docx, rft)' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
-
-				return array( $ext, $format );
-		}
-
-		return array( $ext, $format );
 	}
 }
 

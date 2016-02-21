@@ -58,7 +58,7 @@ class Bullhorn_Connection {
 	 * @throws Exception
 	 * @return boolean
 	 */
-	public function sync() {
+	public static function sync() {
 		// Refresh the token if necessary before doing anything
 		if ( false === self::refresh_token() ) {
 			return false;
@@ -100,7 +100,7 @@ class Bullhorn_Connection {
 	 * @throws Exception
 	 * @return boolean
 	 */
-	protected function login() {
+	protected static function login() {
 		if ( false === self::refresh_token() ) {
 			return false;
 		};
@@ -136,7 +136,7 @@ class Bullhorn_Connection {
 	 *
 	 * @return boolean
 	 */
-	protected function refresh_token( $force = false ) {
+	protected static function refresh_token( $force = false ) {
 		// TODO: stop re-calling every time
 		//		$eight_mins_ago = strtotime( '8 minutes ago' );
 		//		if ( false === $force && $eight_mins_ago <= self::api_access['last_refreshed'] ) {
@@ -163,6 +163,10 @@ class Bullhorn_Connection {
 		);
 
 		$response = wp_remote_post( $url );
+
+		if ( ! is_array( $response ) ) {
+			return false;
+		}
 		$body     = json_decode( $response['body'], true );
 
 		if ( isset( $body['access_token'] ) ) {
@@ -171,6 +175,8 @@ class Bullhorn_Connection {
 			self::$api_access = $body;
 
 			return true;
+		} elseif ( isset( $body['error_description'] ) ) {
+			wp_die( $body['error_description'] );
 		}
 
 		return false;
@@ -181,7 +187,7 @@ class Bullhorn_Connection {
 	 *
 	 * @return array
 	 */
-	private function get_categories_from_bullhorn() {
+	private static function get_categories_from_bullhorn() {
 		//TODO: cache this
 		$url    = self::$url . 'options/Category';
 		$params = array(
@@ -210,7 +216,7 @@ class Bullhorn_Connection {
 	 *
 	 * @return string
 	 */
-	private function get_description_field() {
+	private static function get_description_field() {
 		if ( isset( self::$settings['description_field'] ) ) {
 			$description = self::$settings['description_field'];
 		} else {
@@ -225,7 +231,7 @@ class Bullhorn_Connection {
 	 *
 	 * @return array
 	 */
-	private function get_jobs_from_bullhorn() {
+	private static function get_jobs_from_bullhorn() {
 		// Use the specified description field if set, otherwise the default
 		$description = self::get_description_field();
 
@@ -281,7 +287,7 @@ class Bullhorn_Connection {
 	 * @return bool
 	 * @throws Exception
 	 */
-	private function sync_job( $job, $id = null ) {
+	private static function sync_job( $job, $id = null ) {
 		global $post;
 		$description = self::get_description_field();
 
@@ -468,7 +474,7 @@ class Bullhorn_Connection {
 	 *
 	 * @return boolean
 	 */
-	private function remove_old( $jobs ) {
+	private static function remove_old( $jobs ) {
 		$ids = array();
 		foreach ( $jobs as $job ) {
 			$ids[] = $job->id;
@@ -504,7 +510,7 @@ class Bullhorn_Connection {
 	 *
 	 * @return array
 	 */
-	private function get_existing() {
+	private static function get_existing() {
 		global $wpdb;
 		//TODO: change this the WP_QUERY meta select
 		$posts = $wpdb->get_results( "SELECT $wpdb->posts.id, $wpdb->postmeta.meta_value FROM $wpdb->postmeta JOIN $wpdb->posts ON $wpdb->posts.id = $wpdb->postmeta.post_id WHERE meta_key = 'bullhorn_job_id'", ARRAY_A );
@@ -525,7 +531,7 @@ class Bullhorn_Connection {
 	 * @return array
 	 * @throws Exception
 	 */
-	public function request( $url ) {
+	public static function request( $url ) {
 		$response = wp_remote_get( $url, array( 'timeout' => 180 ) );
 		if ( is_wp_error( $response ) ) {
 			throw new Exception( $response->get_error_message() );

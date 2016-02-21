@@ -25,8 +25,8 @@ class Shortcodes {
 		add_shortcode( 'bullhorn_search', array( __CLASS__, 'bullhorn_search' ) );
 
 		add_shortcode( 'b2wp_resume_form',  array( __CLASS__, 'render_cv_only' ) );
-		add_shortcode( 'b2wp_application', array( __CLASS__, 'render_cv_form' ) );
-		add_shortcode( 'b2wp_shortapp', array( __CLASS__, 'render_cv_appication' ) );
+		add_shortcode( 'b2wp_application', array( __CLASS__, 'render_cv_appication' ) );
+		add_shortcode( 'b2wp_shortapp', array( __CLASS__, 'render_cv_form' ) );
 
 		add_filter( 'posts_where', array( __CLASS__, 'bullhorn_title_like_posts_where' ), 10, 2 );
 
@@ -62,8 +62,9 @@ class Shortcodes {
 	public static function render_cv( $element_to_show = array() ) {
 
 		$settings = (array) get_option( 'bullhorn_settings' );
-		if ( isset( $settings['form_page'] ) && 0 < $settings['form_page'] ) {
-			return sprintf( 'ssssss<a href="%s" class="bullhorn-apply-here-link">%s</a>', esc_url( get_permalink( $settings['form_page'] ) ), __( 'Apply Here.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
+
+		if ( isset( $settings['form_page'] ) && 0 < $settings['form_page'] && get_the_ID() !== $settings['form_page'] ) {
+			return sprintf( '<a href="%s" class="bullhorn-apply-here-link">%s</a>', esc_url( get_permalink( $settings['form_page'] ) ), __( 'Apply Here.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
 		}
 
 		ob_start();
