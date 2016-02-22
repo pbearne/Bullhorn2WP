@@ -58,7 +58,6 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		if ( isset( $wp->query_vars['__api'] ) && isset( $wp->query_vars['endpoint'] ) ) {
 			switch ( $wp->query_vars['endpoint'] ) {
 				case 'resume':
-
 					if (
 						! isset( $_POST['bullhorn_cv_form'] )
 						|| ! wp_verify_nonce( $_POST['bullhorn_cv_form'], 'bullhorn_cv_form' )
@@ -71,6 +70,17 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 					// Get Resume
 					$resume = self::parseResume();
+
+					if ( false === $resume ) {
+						// Redirect
+						$settings  = (array) get_option( 'bullhorn_settings' );
+						$permalink = add_query_arg( array(
+							'bh_applied' => false,
+						), get_permalink( $settings['thanks_page'] ) );
+
+						header( "location: $permalink" );
+						exit;
+					}
 
 					// Create candidate
 					$candidate = self::createCandidate( $resume );
@@ -92,7 +102,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 					self::link_candidate_to_job( $candidate );
 
 					// Redirect
-					$settings  = (array) get_option( 'bullhorn_extension_settings' );
+					$settings  = (array) get_option( 'bullhorn_settings' );
 					$permalink = add_query_arg( array(
 						'bh_applied' => true,
 					), get_permalink( $settings['thanks_page'] ) );
@@ -251,6 +261,10 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 * @return mixed
 	 */
 	public static function createCandidate( $resume ) {
+
+		if( ! isset( $resume->candidate ) ){
+			return false;
+		}
 
 		// Make sure country ID is correct
 		if ( isset( $resume->candidate->address ) && is_null( $resume->candidate->address->countryID ) ) {

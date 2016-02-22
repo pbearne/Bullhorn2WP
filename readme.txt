@@ -3,8 +3,8 @@ Contributors: pbearne
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=MZTZ5S8MGF75C&lc=CA&item_name=Wordpress%20Development%20%2f%20Paul%20Bearne&item_number=Bullhorn%20Plugin&currency_code=CAD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Tags: Bullhorn, Job Listing, CV upload, Resume upload, Bullhorn Staffing, recruitment crm, staffing, recruiting
 Requires at least: 3.6
-Tested up to: 4.4.1
-Stable tag: 2.1.4
+Tested up to: 4.4.2
+Stable tag: 2.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -88,6 +88,10 @@ Test and when happy you can remove the old pluigns
 3. Job list with CV/resume upload form via ShortCode
 
 == Changelog ==
+
+== 2.2.0 ==
+Fix an error in the options name that was breaking the CV upload redirect to the thank you page
+Fix calls to non static functions
 
 == 2.1.4 ==
 fixed typo

@@ -174,8 +174,8 @@ class Shortcodes {
 	 *
 	 * @return string
 	 */
-	function bullhorn_shortcode( $atts ) {
-		shortcode_atts( array(
+	public static function bullhorn_shortcode( $atts ) {
+		$atts  = shortcode_atts( array(
 			'limit'     => 5,
 			'show_date' => false,
 			'state'     => null,
@@ -294,7 +294,7 @@ class Shortcodes {
 	 *
 	 * @return string
 	 */
-	function bullhorn_categories( $atts ) {
+	public static function bullhorn_categories( $atts ) {
 		if ( ! empty( $atts ) ) {
 			_doing_it_wrong( __FUNCTION__, 'bullhorn categories Shortcode does not need attributes ', 2.0 );
 		}
@@ -332,7 +332,7 @@ class Shortcodes {
 	 *
 	 * @return string
 	 */
-	function bullhorn_states( $atts ) {
+	public static function bullhorn_states( $atts ) {
 		if ( ! empty( $atts ) ) {
 			_doing_it_wrong( __FUNCTION__, 'bullhorn categories Shortcode does not need attributes ', 2.0 );
 		}
@@ -370,7 +370,7 @@ class Shortcodes {
 	 *
 	 * @return string
 	 */
-	function bullhorn_search( $atts ) {
+	public static function bullhorn_search( $atts ) {
 		if ( ! empty( $atts ) ) {
 			_doing_it_wrong( __FUNCTION__, __( 'bullhorn categories Shortcode does not need attributes' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) , 2.0 );
 		}
