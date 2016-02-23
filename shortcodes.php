@@ -60,7 +60,6 @@ class Shortcodes {
 	 * @return string
 	 */
 	public static function render_cv( $element_to_show = array() ) {
-
 		$settings = (array) get_option( 'bullhorn_settings' );
 
 		if ( isset( $settings['form_page'] ) && 0 < $settings['form_page'] && get_the_ID() !== $settings['form_page'] ) {
@@ -70,26 +69,28 @@ class Shortcodes {
 		ob_start();
 		?>
 		<form id="bullhorn-resume" action="/api/bullhorn/resume" enctype="multipart/form-data" method="post">
-			<?php if ( array_search( 'name' , $element_to_show )  ) { ?>
+			<?php if ( false !== array_search( 'name' , $element_to_show )  ) { ?>
 			<label for="name"><?php _e( 'Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?> <span class="gfield_required"> *</span></label>
 			<input id="name" name="name" type="text"/>
 			<?php }?>
-			<?php if ( array_search( 'email' , $element_to_show )  ) { ?>
+			<?php if ( false !== array_search( 'email' , $element_to_show )  ) { ?>
 			<label for="email"><?php _e( 'Email', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?><span class="gfield_required"> *</span></label>
 			<input id="email" name="email" type="text"/>
 			<?php }?>
-			<?php if ( array_search( 'phone' , $element_to_show )  ) { ?>
+			<?php if ( false !== array_search( 'phone' , $element_to_show )  ) { ?>
 			<label for="phone"><?php _e( 'Phone', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>
 			<input id="phone" name="phone" type="text"/>
 			<?php }?>
-			<?php if ( array_search( 'address' , $element_to_show )  ) { ?>
+			<?php if ( false !== array_search( 'address' , $element_to_show )  ) { ?>
 				<label for="address1"><?php _e( 'Address', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>
 				<input id="address1" name="address1" type="text"/>
 				<label for="address2"><?php _e( 'Address Cont', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>
 				<input id="address2" name="address2" type="text"/>
-				<label for="address1"><?php _e( 'City', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>
-				<input id="address1" name="address1" type="text"/>
-				<label for="zip"><?php _e( 'ZIP Code', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>
+				<label for="city"><?php _e( 'City', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>
+				<input id="city" name="city" type="text"/>
+				<label for="state"><?php _e( 'State/Province', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>
+				<input id="state" name="state" type="text"/>
+				<label for="zip"><?php _e( 'Zip/Postal Code', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>
 				<input id="zip" name="zip" type="text"/>
 			<?php }?>
 

@@ -92,6 +92,7 @@ Test and when happy you can remove the old pluigns
 == 2.2.0 ==
 Fix an error in the options name that was breaking the CV upload redirect to the thank you page
 Fix calls to non static functions
+added shortcodes for "b2wp_resume_form", "b2wp_application", "b2wp_shortapp" for compatibility
 
 == 2.1.4 ==
 fixed typo
