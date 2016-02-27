@@ -338,8 +338,13 @@ class Bullhorn_Connection {
 		$create_json_ld = self::create_json_ld( $job, $categories );
 
 		foreach ( $create_json_ld as $key => $val ) {
-			echo update_post_meta( $id, $key, $val );
+			update_post_meta( $id, $key, $val );
 		}
+
+		update_post_meta( $id, 'city', $create_json_ld['jobLocation']['address']['addressLocality'] );
+		update_post_meta( $id, 'state', $create_json_ld['jobLocation']['address']['addressRegion'] );
+		update_post_meta( $id, 'Country', $create_json_ld['jobLocation']['address']['addressCountry'] );
+		update_post_meta( $id, 'zip', $create_json_ld['jobLocation']['address']['postalCode'] );
 
 		$custom_fields = array(
 			'bullhorn_job_id'      => $job->id,
@@ -348,7 +353,7 @@ class Bullhorn_Connection {
 		);
 
 		foreach ( $custom_fields as $key => $val ) {
-			echo update_post_meta( $id, $key, $val );
+			update_post_meta( $id, $key, $val );
 		}
 		return true;
 	}
