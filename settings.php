@@ -56,7 +56,9 @@ class Bullhorn_Settings {
 		add_settings_field( 'client_corporation', __( 'Client Corporation', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'client_corporation' ), 'bullhornwp', 'bullhorn_api' );
 
 		add_settings_field( 'listings_page', __( 'Job Listings page slug', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'listings_page' ), 'bullhornwp', 'bullhorn_api' );
-		add_settings_field( 'form_page', __( 'Form Page or CV upload', 'bullhorn' ), array( __CLASS__, 'form_page' ), 'bullhornwp', 'bullhorn_api' );
+		add_settings_field( 'form_page', __( 'Form Page or CV upload', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'form_page' ), 'bullhornwp', 'bullhorn_api' );
+		add_settings_field( 'default_shortcode', __( 'Default form inputs', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'default_shortcode' ), 'bullhornwp', 'bullhorn_api' );
+
 
 		add_settings_field( 'thanks_page', __( 'CV Thanks Page', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'thanks_page' ), 'bullhornwp', 'bullhorn_api' );
 		add_settings_field( 'listings_sort', __( 'Listings Sort', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'listings_sort' ), 'bullhornwp', 'bullhorn_api' );
@@ -250,15 +252,44 @@ class Bullhorn_Settings {
 		) );
 	}
 
+
+	/**
+	 * Displays the job listings page settings field.
+	 */
+	public static function default_shortcode() {
+		$settings = (array) get_option( 'bullhorn_settings' );
+
+
+		if ( isset( $settings['default_shortcode'] ) ) {
+			$default_shortcode = $settings['default_shortcode'];
+		}
+
+		$sorts = array(
+			'name'=> __( 'Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'email'=> __( 'Email', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'phone'=> __( 'Phone', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'address'=> __( 'Address', 'bh-staffing-job-listing-and-cv-upload-for-wp' )
+		);
+
+		foreach ( $sorts as $value => $name ) {
+			$checked = in_array( $value, $default_shortcode );
+			printf( '<label for="%1$s">%s&nbsp;<input name="bullhorn_settings[default_shortcode][]" id="%1$s" value="%1$s" type="checkbox" %3$s>&nbsp;</label>',
+				esc_attr( $value ),
+				esc_attr( $name ),
+				checked( $checked, true, false )
+			);
+		}
+
+	}
+
 	/**
 	 * Displays the job listings sort settings field.
 	 */
 	public static function listings_sort() {
 		$settings = (array) get_option( 'bullhorn_settings' );
+		$listings_sort = null;
 		if ( isset( $settings['listings_sort'] ) ) {
 			$listings_sort = $settings['listings_sort'];
-		} else {
-			$listings_sort = null;
 		}
 
 		$sorts = array(
@@ -271,7 +302,7 @@ class Bullhorn_Settings {
 		echo '<select name="bullhorn_settings[listings_sort]">';
 		echo '<option value="">Select a field to sort by...</option>';
 		foreach ( $sorts as $value => $name ) {
-			$selected = ( $listings_sort === $value ) ? ' selected="selected"' : '';
+			$selected = selected( $listings_sort, $value, false );
 			echo '<option value="' . $value . '"' . $selected . '>' . $name . '</option>';
 		}
 		echo '</select>';

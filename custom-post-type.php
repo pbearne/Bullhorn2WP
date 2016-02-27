@@ -197,7 +197,10 @@ class Bullhorn_Custom_Post_Type {
 			if ( is_single() ) {
 				if ( apply_filters( 'bullhorn_show_form_on_job_page', true ) ) {
 					$content .= sprintf( '<h4>%s</h4><br />' , __( 'Apply for this Now' ) );
-					$content .= do_shortcode( '[bullhorn_cv_form]' );
+
+					$settings = (array) get_option( 'bullhorn_settings' );
+					$inputs = ( isset( $settings['default_shortcode'] ) ) ? $settings['default_shortcode'] : array( 'name', 'email', 'phone' );
+					$content .= \bullhorn_2_wp\Shortcodes::render_cv( $inputs );
 				} else {
 					$content .= '<a class="button" href="' . get_permalink( $settings['form_page'] ) . '?position=' . absint( $bullhorn_job_id ) . '">' . __( 'Submit Resume' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</a>';
 				}

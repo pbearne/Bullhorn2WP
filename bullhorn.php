@@ -335,15 +335,21 @@ class Bullhorn_Connection {
 		wp_set_object_terms( $id, $categories, 'bullhorn_category' );
 		wp_set_object_terms( $id, array( $job->address->state ), 'bullhorn_state' );
 
-		$custom_fields = array(
-			'bullhorn_job_id'      => $job->id,
-			'bullhorn_job_address' => implode( ' ', $address ),
-			'bullhorn_json_ld'     => self::create_json_ld( $job, $categories ),
-		);
-		foreach ( $custom_fields as $key => $val ) {
+		$create_json_ld = self::create_json_ld( $job, $categories );
+
+		foreach ( $create_json_ld as $key => $val ) {
 			echo update_post_meta( $id, $key, $val );
 		}
 
+		$custom_fields = array(
+			'bullhorn_job_id'      => $job->id,
+			'bullhorn_job_address' => implode( ' ', $address ),
+			'bullhorn_json_ld'     => $create_json_ld,
+		);
+
+		foreach ( $custom_fields as $key => $val ) {
+			echo update_post_meta( $id, $key, $val );
+		}
 		return true;
 	}
 

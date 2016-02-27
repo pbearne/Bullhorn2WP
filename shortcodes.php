@@ -66,6 +66,10 @@ class Shortcodes {
 			return sprintf( '<a href="%s" class="bullhorn-apply-here-link">%s</a>', esc_url( get_permalink( $settings['form_page'] ) ), __( 'Apply Here.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
 		}
 
+		if ( null === $element_to_show ){
+			$element_to_show = array( 'name', 'email', 'phone' );
+		}
+
 		ob_start();
 		?>
 		<form id="bullhorn-resume" action="/api/bullhorn/resume" enctype="multipart/form-data" method="post">
