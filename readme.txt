@@ -89,6 +89,12 @@ Test and when happy you can remove the old pluigns
 
 == Changelog ==
 
+== 2.2.2 ==
+some fixes for PHP errors
+add more content to job post meta
+added option select which field to show in CV form
+more short code support
+
 == 2.2.0 ==
 Fix an error in the options name that was breaking the CV upload redirect to the thank you page
 Fix calls to non static functions
