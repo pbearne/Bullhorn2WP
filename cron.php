@@ -5,7 +5,22 @@
  */
 function bullhorn_sync() {
 	$bullhorn_connection = new Bullhorn_Connection;
-	$bullhorn_connection->sync();
+
+	$settings = (array) get_option( 'bullhorn_settings' );
+
+	if ( isset( $settings['run_cron'] ) ) {
+		$run_cron = $settings['run_cron'];
+		if ( $run_cron ) {
+			$sync = $bullhorn_connection->sync();
+			error_log( 'bullhorn sync ran and returned ' . serialize( $sync ) );
+		}
+	}
+}
+
+
+function bullhorn_sync_now() {
+	$bullhorn_connection = new Bullhorn_Connection;
+	return $bullhorn_connection->sync();
 }
 
 

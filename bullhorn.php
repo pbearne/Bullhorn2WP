@@ -167,7 +167,7 @@ class Bullhorn_Connection {
 		if ( ! is_array( $response ) ) {
 			return false;
 		}
-		$body     = json_decode( $response['body'], true );
+		$body = json_decode( $response['body'], true );
 
 		if ( isset( $body['access_token'] ) ) {
 			$body['last_refreshed'] = time();
@@ -235,6 +235,17 @@ class Bullhorn_Connection {
 		// Use the specified description field if set, otherwise the default
 		$description = self::get_description_field();
 
+		$where = 'isPublic=1 AND isOpen=true AND isDeleted=false';
+
+		$settings = (array) get_option( 'bullhorn_settings' );
+
+		if ( isset( $settings['is_public'] ) ) {
+			$is_public = $settings['is_public'];
+			if ( false === $is_public ) {
+				$where = 'isOpen=true AND isDeleted=false';
+			}
+		}
+
 		$start = 0;
 		$page  = 100;
 		$jobs  = array();
@@ -244,7 +255,7 @@ class Bullhorn_Connection {
 				'BhRestToken' => self::$session,
 				'fields'      => 'id,title,' . $description . ',dateAdded,categories,address,benefits,salary,educationDegree,employmentType,yearsRequired,clientCorporation,degreeList,skillList,bonusPackage',
 				//'fields'=> '*',
-				'where'       => 'isPublic=1 AND isOpen=true AND isDeleted=false',
+				'where'       => $where,
 				'count'       => $page,
 				'start'       => $start,
 			);
@@ -355,6 +366,7 @@ class Bullhorn_Connection {
 		foreach ( $custom_fields as $key => $val ) {
 			update_post_meta( $id, $key, $val );
 		}
+
 		return true;
 	}
 

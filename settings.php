@@ -9,7 +9,7 @@ class Bullhorn_Settings {
 	 */
 	public function __construct() {
 		if ( isset( $_GET['sync'] ) && 'bullhorn' === $_GET['sync'] ) {
-			add_action( 'admin_init', 'bullhorn_sync' );
+			add_action( 'admin_init', 'bullhorn_sync_now' );
 		}
 
 		add_action( 'admin_init', array( __CLASS__, 'init' ) );
@@ -63,6 +63,10 @@ class Bullhorn_Settings {
 		add_settings_field( 'thanks_page', __( 'CV Thanks Page', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'thanks_page' ), 'bullhornwp', 'bullhorn_api' );
 		add_settings_field( 'listings_sort', __( 'Listings Sort', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'listings_sort' ), 'bullhornwp', 'bullhorn_api' );
 		add_settings_field( 'description_field', __( 'Description Field', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'description_field' ), 'bullhornwp', 'bullhorn_api' );
+
+		add_settings_field( 'run_cron', __( 'Auto-sync', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'run_cron' ), 'bullhornwp', 'bullhorn_api' );
+		add_settings_field( 'is_public', __( 'Filter isPublic', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'is_public' ), 'bullhornwp', 'bullhorn_api' );
+
 	}
 
 	/**
@@ -197,7 +201,7 @@ class Bullhorn_Settings {
 		}
 		echo '<input type="text" size="40" name="bullhorn_settings[client_corporation]" value="' . esc_attr( $client_corporation ) . '" />';
 		echo '<br><span class="description">' . __( 'This field is optional, but will filter the jobs retreived from Bullhorn to only those listed under a specific
-														Client Corporation. This must be the ID of the corporation. Leave blank to sync all job listings.', 'bullhorn' ) . '</span>';
+														Client Corporation. This must be the ID of the corporation. Leave blank to sync all job listings.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</span>';
 	}
 
 	/**
@@ -213,7 +217,7 @@ class Bullhorn_Settings {
 
 		echo '<input type="text" size="40" name="bullhorn_settings[listings_page]" value="' . esc_attr( $listings_page ) . '" placeholder="bullhornjoblisting" />';
 		echo '<br><span class="description">' . __( 'This field is optional, but changing it will adjust the URL of the job listing pages from "bullhornjoblisting" to the set value.
-														You must run the sync after changing this as it changes the Custom Post Slug.', 'bullhorn' ) . '</span>';
+														You must run the sync after changing this as it changes the Custom Post Slug.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</span>';
 	}
 
 	/**
@@ -257,23 +261,23 @@ class Bullhorn_Settings {
 	 * Displays the job listings page settings field.
 	 */
 	public static function default_shortcode() {
-		$settings = (array) get_option( 'bullhorn_settings' );
-
+		$settings          = (array) get_option( 'bullhorn_settings' );
+		$default_shortcode = array( 'name', 'email', 'phone' );
 
 		if ( isset( $settings['default_shortcode'] ) ) {
 			$default_shortcode = $settings['default_shortcode'];
 		}
 
 		$sorts = array(
-			'name'=> __( 'Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-			'email'=> __( 'Email', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-			'phone'=> __( 'Phone', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-			'address'=> __( 'Address', 'bh-staffing-job-listing-and-cv-upload-for-wp' )
+			'name'    => __( 'Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'email'   => __( 'Email', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'phone'   => __( 'Phone', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'address' => __( 'Address', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 		);
 
 		foreach ( $sorts as $value => $name ) {
 			$checked = in_array( $value, $default_shortcode );
-			printf( '<label for="%1$s">%s&nbsp;<input name="bullhorn_settings[default_shortcode][]" id="%1$s" value="%1$s" type="checkbox" %3$s>&nbsp;</label>',
+			printf( '<label for="%1$s">%2$s&nbsp;<input name="bullhorn_settings[default_shortcode][]" id="%1$s" value="%1$s" type="checkbox" %3$s>&nbsp;</label>',
 				esc_attr( $value ),
 				esc_attr( $name ),
 				checked( $checked, true, false )
@@ -283,10 +287,65 @@ class Bullhorn_Settings {
 	}
 
 	/**
+	 * Displays the job listings page settings field.
+	 */
+	public static function is_public() {
+		$settings  = (array) get_option( 'bullhorn_settings' );
+		$is_public = 'true';
+
+		if ( isset( $settings['is_public'] ) ) {
+			$is_public = $settings['is_public'];
+		}
+
+		$sorts = array(
+			'true'  => __( 'On', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'false' => __( 'Off', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+		);
+
+		foreach ( $sorts as $value => $name ) {
+			printf( '<label for="%1$s">%2$s&nbsp;<input name="bullhorn_settings[is_public]" id="%1$s" value="%1$s" type="radio" %3$s>&nbsp;</label>',
+				esc_attr( $value ),
+				esc_attr( $name ),
+				checked( $is_public, $value, false )
+			);
+		}
+		echo '<br><span class="description">' . __( 'By Default the isPublic field is hidden in Vacancy by default if no job as syniced try set to this to false.
+						To show the field the steps are : Fields Mapping Vacancy isPublic, uncheck "hidden"  .', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</span>';
+
+
+	}
+
+	/**
+	 * Displays the job listings page settings field.
+	 */
+	public static function run_cron() {
+		$settings = (array) get_option( 'bullhorn_settings' );
+		$run_cron = 'true';
+
+		if ( isset( $settings['run_cron'] ) ) {
+			$run_cron = $settings['run_cron'];
+		}
+
+		$sorts = array(
+			'true'  => __( 'On', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'false' => __( 'Off', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+		);
+
+		foreach ( $sorts as $value => $name ) {
+			printf( '<label for="%1$s">%2$s&nbsp;<input name="bullhorn_settings[run_cron]" id="%1$s" value="%1$s" type="radio" %3$s>&nbsp;</label>',
+				esc_attr( $value ),
+				esc_attr( $name ),
+				checked( $run_cron, $value, false )
+			);
+		}
+		echo '<br><span class="description">' . __( 'Fetch Jobs from Bullhorn every hour or using the manual sync button below ( shows once you have connected to Bullhorn ).', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</span>';
+	}
+
+	/**
 	 * Displays the job listings sort settings field.
 	 */
 	public static function listings_sort() {
-		$settings = (array) get_option( 'bullhorn_settings' );
+		$settings      = (array) get_option( 'bullhorn_settings' );
 		$listings_sort = null;
 		if ( isset( $settings['listings_sort'] ) ) {
 			$listings_sort = $settings['listings_sort'];
@@ -348,6 +407,8 @@ class Bullhorn_Settings {
 		$input['listings_sort']     = esc_html( $input['listings_sort'] );
 		$input['description_field'] = esc_html( $input['description_field'] );
 		$input['thanks_page']       = intval( $input['thanks_page'] );
+		$input['run_cron']          = esc_attr( $input['run_cron'] );
+		$input['is_public']         = esc_attr( $input['is_public'] );
 
 		// Since the listings page has probably been updated, we need to flush
 		// the rewrite rules for the site.
