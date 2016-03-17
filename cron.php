@@ -10,7 +10,7 @@ function bullhorn_sync() {
 
 	if ( isset( $settings['run_cron'] ) ) {
 		$run_cron = $settings['run_cron'];
-		if ( $run_cron ) {
+		if ( 'false' !== $run_cron ) {
 			$sync = $bullhorn_connection->sync();
 			error_log( 'bullhorn sync ran and returned ' . serialize( $sync ) );
 		}

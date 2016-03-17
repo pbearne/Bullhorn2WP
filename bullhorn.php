@@ -241,7 +241,7 @@ class Bullhorn_Connection {
 
 		if ( isset( $settings['is_public'] ) ) {
 			$is_public = $settings['is_public'];
-			if ( false === $is_public ) {
+			if ( 'false' === $is_public ) {
 				$where = 'isOpen=true AND isDeleted=false';
 			}
 		}
