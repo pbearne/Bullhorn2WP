@@ -508,10 +508,16 @@ class Bullhorn_Connection {
 			'post_status'    => 'any',
 			'posts_per_page' => 500,
 			'meta_query'     => array(
+				'relation' => 'AND',
 				array(
 					'key'     => 'bullhorn_job_id',
-					'value'   => $ids,
 					'compare' => 'NOT IN',
+					'value'   => $ids,
+				),
+				array(
+					'key' => 'bullhorn_job_id',
+					'compare' => 'EXISTS', // works!
+					'value' => '', // This is ignored, but is necessary...
 				),
 			),
 		) );
