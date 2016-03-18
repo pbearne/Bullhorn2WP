@@ -357,8 +357,6 @@ class Bullhorn_Connection {
 		update_post_meta( $id, 'Country', $create_json_ld['jobLocation']['address']['addressCountry'] );
 		update_post_meta( $id, 'zip', $create_json_ld['jobLocation']['address']['postalCode'] );
 
-		update_post_meta( $id, );
-
 		$custom_fields = array(
 			'bullhorn_job_id'      => $job->id,
 			'bullhorn_job_address' => implode( ' ', $address ),
