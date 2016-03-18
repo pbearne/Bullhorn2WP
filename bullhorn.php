@@ -357,10 +357,13 @@ class Bullhorn_Connection {
 		update_post_meta( $id, 'Country', $create_json_ld['jobLocation']['address']['addressCountry'] );
 		update_post_meta( $id, 'zip', $create_json_ld['jobLocation']['address']['postalCode'] );
 
+		update_post_meta( $id, );
+
 		$custom_fields = array(
 			'bullhorn_job_id'      => $job->id,
 			'bullhorn_job_address' => implode( ' ', $address ),
 			'bullhorn_json_ld'     => $create_json_ld,
+			'employmentType'       => $job->employmentType,
 		);
 
 		foreach ( $custom_fields as $key => $val ) {
@@ -515,9 +518,9 @@ class Bullhorn_Connection {
 					'value'   => $ids,
 				),
 				array(
-					'key' => 'bullhorn_job_id',
+					'key'     => 'bullhorn_job_id',
 					'compare' => 'EXISTS', // works!
-					'value' => '', // This is ignored, but is necessary...
+					'value'   => '', // This is ignored, but is necessary...
 				),
 			),
 		) );
