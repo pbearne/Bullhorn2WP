@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=MZTZ5
 Tags: Bullhorn, Job Listing, CV upload, Resume upload, Bullhorn Staffing, recruitment crm, staffing, recruiting
 Requires at least: 3.6
 Tested up to: 4.4.2
-Stable tag: 2.2.0
+Stable tag: 2.3.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -89,6 +89,12 @@ Test and when happy you can remove the old pluigns
 
 == Changelog ==
 
+== 2.3.0 ==
+Added option to disable auto sysnic
+Added option to not filter the jobs by isPublic location setting
+Other small fixes
+
+more short code support
 == 2.2.2 ==
 some fixes for PHP errors
 add more content to job post meta
