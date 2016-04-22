@@ -66,8 +66,10 @@ function bullhorn_sort_results( $query ) {
 	$tax_queries  = array_filter( (array) $query->get( 'tax_query' ) );
 	if ( count( $tax_queries ) > 0 ) {
 		foreach ( $tax_queries as $tax_query ) {
-			if ( strstr( $tax_query['taxonomy'], 'bullhorn_' ) !== false ) {
-				$modify_query = true;
+			if ( isset( $tax_query['taxonomy'] ) ) {
+				if ( false !== strstr( $tax_query['taxonomy'], 'bullhorn_' ) ) {
+					$modify_query = true;
+				}
 			}
 		}
 	}
