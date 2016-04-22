@@ -80,10 +80,12 @@ class Bullhorn_Connection {
 
 		if ( count( $jobs ) ) {
 			foreach ( $jobs as $job ) {
-				if ( isset( $existing[ $job->id ] ) ) {
-					self::sync_job( $job, $existing[ $job->id ] );
-				} else {
-					self::sync_job( $job );
+				if ( 'Archive' !== $job->status ) {
+					if ( isset( $existing[ $job->id ] )  ) {
+						self::sync_job( $job, $existing[ $job->id ] );
+					} else {
+						self::sync_job( $job );
+					}
 				}
 			}
 		}
@@ -138,10 +140,10 @@ class Bullhorn_Connection {
 	 */
 	protected static function refresh_token( $force = false ) {
 		// TODO: stop re-calling every time
-		//		$eight_mins_ago = strtotime( '8 minutes ago' );
-		//		if ( false === $force && $eight_mins_ago <= self::api_access['last_refreshed'] ) {
-		//			return true;
-		//		}
+		//      $eight_mins_ago = strtotime( '8 minutes ago' );
+		//      if ( false === $force && $eight_mins_ago <= self::api_access['last_refreshed'] ) {
+		//         return true;
+		//      }
 		// TODO: return false if client not set and add handlers for the call
 		if (
 			null === self::$api_access['refresh_token'] ||
@@ -253,8 +255,8 @@ class Bullhorn_Connection {
 			$url    = self::$url . 'query/JobOrder';
 			$params = array(
 				'BhRestToken' => self::$session,
-				'fields'      => 'id,title,' . $description . ',dateAdded,categories,address,benefits,salary,educationDegree,employmentType,yearsRequired,clientCorporation,degreeList,skillList,bonusPackage',
-				//'fields'=> '*',
+				'fields'      => 'id,title,' . $description . ',dateAdded,categories,address,benefits,salary,educationDegree,employmentType,yearsRequired,clientCorporation,degreeList,skillList,bonusPackage,status',
+				//'fields'        => '*',
 				'where'       => $where,
 				'count'       => $page,
 				'start'       => $start,
@@ -310,8 +312,8 @@ class Bullhorn_Connection {
 			'post_date'    => date( 'Y-m-d H:i:s', $job->dateAdded / 1000 ),
 		);
 
-		if ( $id ) {
-			$post->ID = $id;
+		if ( null !== $id ) {
+			$post_args['ID'] = $id;
 			wp_update_post( $post_args );
 		} else {
 			$id = wp_insert_post( $post_args );
@@ -362,6 +364,7 @@ class Bullhorn_Connection {
 			'bullhorn_job_address' => implode( ' ', $address ),
 			'bullhorn_json_ld'     => $create_json_ld,
 			'employmentType'       => $job->employmentType,
+			'baseSalary'           => $job->salary,
 		);
 
 		foreach ( $custom_fields as $key => $val ) {
@@ -459,7 +462,7 @@ class Bullhorn_Connection {
 			$url = add_query_arg(
 				array(
 					'BhRestToken' => self::$session,
-					//	'fields'      => 'name',
+					//   'fields'      => 'name',
 					'count'       => '300',
 				), self::$url . 'options/Country'// . absint( $country_id )
 			);
@@ -501,7 +504,9 @@ class Bullhorn_Connection {
 	private static function remove_old( $jobs ) {
 		$ids = array();
 		foreach ( $jobs as $job ) {
-			$ids[] = $job->id;
+			if ( 'Archive' !== $job->status ) {
+				$ids[] = $job->id;
+			}
 		}
 
 		$jobs = new WP_Query( array(
@@ -509,7 +514,7 @@ class Bullhorn_Connection {
 			'post_status'    => 'any',
 			'posts_per_page' => 500,
 			'meta_query'     => array(
-				'relation' => 'AND',
+				'relation' => 'OR',
 				array(
 					'key'     => 'bullhorn_job_id',
 					'compare' => 'NOT IN',

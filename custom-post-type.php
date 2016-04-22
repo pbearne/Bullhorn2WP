@@ -196,7 +196,7 @@ class Bullhorn_Custom_Post_Type {
 			$bullhorn_job_id = get_post_meta( get_the_ID(), 'bullhorn_job_id', true );
 			if ( is_single() ) {
 				if ( apply_filters( 'bullhorn_show_form_on_job_page', true ) ) {
-					$content .= sprintf( '<h4>%s</h4><br />' , __( 'Apply for this Now' ) );
+					$content .= sprintf( '<h4>%s</h4><br />' , apply_filters( 'wp-buulhorn_apply_now_text', __( 'Apply for this Now', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ) );
 
 					$settings = (array) get_option( 'bullhorn_settings' );
 					$inputs = ( isset( $settings['default_shortcode'] ) ) ? $settings['default_shortcode'] : array( 'name', 'email', 'phone' );
@@ -212,7 +212,7 @@ class Bullhorn_Custom_Post_Type {
 			$content = sprintf( ' <h3 style="text-align: center">%s</h3>', __( 'Thank you for uploading you resume.' ) ) . $content;
 		}
 
-		return $content;
+		return apply_filters( 'wp-buulhorn_the_content_filter', $content );
 	}
 
 	public static function add_json_ld_to_content( $content = null ) {

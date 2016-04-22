@@ -8,8 +8,7 @@ Stable tag: 2.3.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-This plugin adds job listings to your WordPress site from your Bullhorn account for front-end display, also providing a CV uploader.
-The plugin automatically synchronizes with Bullhorn.
+This plugin adds / synchronizes job listings to your WordPress site from your Bullhorn account for front-end display, also providing a CV uploader.
 
 == Description ==
 

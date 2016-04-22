@@ -533,7 +533,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$response = wp_remote_request( $url, $args );
 
 		// try once more if we get an error
-		if ( is_wp_error( $response ) || 200 !== $response['response']['code'] ) {
+		if ( is_wp_error( $response ) || 201 !== $response['response']['code'] ) {
 			$response = wp_remote_request( $url, $args );
 		}
 
