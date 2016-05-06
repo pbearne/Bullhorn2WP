@@ -101,6 +101,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 					// link to job
 					self::link_candidate_to_job( $candidate );
 
+					do_action( 'wp-bullhorn-cv-upload-complete', $candidate, $resume );
 					// Redirect
 					$settings  = (array) get_option( 'bullhorn_settings' );
 					$permalink = add_query_arg( array(

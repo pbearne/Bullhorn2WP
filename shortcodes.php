@@ -67,13 +67,17 @@ class Shortcodes {
 		}
 
 		if ( null === $element_to_show ){
-			$element_to_show = array( 'name', 'email', 'phone' );
+			$element_to_show = apply_filters( 'wp_bullhorn_render_cv_to_show', array( 'name', 'email', 'phone' ), $settings );
 		}
 
 		ob_start();
 		?>
 		<form id="bullhorn-resume" action="/api/bullhorn/resume" enctype="multipart/form-data" method="post">
-			<?php if ( false !== array_search( 'name' , $element_to_show )  ) { ?>
+
+			<?php
+			do_action( 'wp_bullhorn_render_cv_form_top', $element_to_show, $settings );
+
+			if ( false !== array_search( 'name' , $element_to_show )  ) { ?>
 			<label for="name"><?php _e( 'Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?> <span class="gfield_required"> *</span></label>
 			<input id="name" name="name" type="text"/>
 			<?php }?>
@@ -96,11 +100,15 @@ class Shortcodes {
 				<input id="state" name="state" type="text"/>
 				<label for="zip"><?php _e( 'Zip/Postal Code', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>
 				<input id="zip" name="zip" type="text"/>
-			<?php }?>
+			<?php }
+
+			do_action( 'wp_bullhorn_render_cv_form_pre_cv', $element_to_show, $settings );
+
+			?>
 
 
-			<label for="fileToUpload">Your Resume<span class="gfield_required"> *</span></label>
-			<input id="fileToUpload" name="resume" type="file"/>
+			<label for="fileToUpload"><?php esc_html__( 'Your Resume', 'bh-staffing-job-listing-and-cv-upload-for-wp' ); ?><span class="gfield_required"> *</span></label>
+			<span class="<?php echo apply_filters( 'wp_bullhorn_render_cv_form_file_input_styles', 'file-to-upload-wrap' ); ?>"><input id="fileToUpload" name="resume" type="file"/></span>
 			<br/><br/>
 			<?php
 			if ( isset( $_GET['position'] ) ) {
@@ -110,8 +118,10 @@ class Shortcodes {
 			}
 
 			wp_nonce_field( 'bullhorn_cv_form', 'bullhorn_cv_form' );
+			do_action( 'wp_bullhorn_render_cv_form_bottom', $element_to_show, $settings );
 			?>
 			<input name="submit" type="submit" value="Upload Resume"/>
+			<?php do_action( 'wp_bullhorn_render_cv_form_close', $element_to_show, $settings ); ?>
 		</form>
 		<script type="application/javascript">
 
@@ -162,7 +172,7 @@ class Shortcodes {
 		$content = ob_get_contents();
 		ob_end_clean();
 
-		return $content;
+		return apply_filters( 'wp_bullhorn_render_cv_return_html', $content, $element_to_show, $settings );
 	}
 
 	/**
