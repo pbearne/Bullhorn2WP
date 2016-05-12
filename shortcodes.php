@@ -71,6 +71,9 @@ class Shortcodes {
 		}
 
 		ob_start();
+		if ( isset( $_GET['bh-message'] ) ) {
+			printf( '<div class="bh-message"><strong>%s</strong></div>', esc_html( apply_filters( 'bh-message', wp_unslash( $_GET['bh-message'] ) ) ) );
+		}
 		?>
 		<form id="bullhorn-resume" action="/api/bullhorn/resume" enctype="multipart/form-data" method="post">
 
@@ -88,6 +91,8 @@ class Shortcodes {
 			<?php if ( false !== array_search( 'phone' , $element_to_show )  ) { ?>
 			<label for="phone"><?php _e( 'Phone', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>
 			<input id="phone" name="phone" type="text"/>
+				<label for="message"><?php _e( '<br/>Message<br/>', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>
+				<textarea name="message" cols="40" rows="10" id="message"></textarea>
 			<?php }?>
 			<?php if ( false !== array_search( 'address' , $element_to_show )  ) { ?>
 				<label for="address1"><?php _e( 'Address', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>

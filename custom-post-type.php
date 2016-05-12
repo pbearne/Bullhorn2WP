@@ -212,7 +212,7 @@ class Bullhorn_Custom_Post_Type {
 			$content = sprintf( ' <h3 style="text-align: center">%s</h3>', __( 'Thank you for uploading you resume.' ) ) . $content;
 		}
 
-		return apply_filters( 'wp-buulhorn_the_content_filter', $content );
+		return apply_filters( 'wp_buulhorn_the_content_filter', $content );
 	}
 
 	public static function add_json_ld_to_content( $content = null ) {

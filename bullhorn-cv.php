@@ -82,6 +82,16 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 						exit;
 					}
 
+					if ( is_array( $resume ) ) {
+						$orig_url = $_POST['_wp_http_referer'];
+						$url = add_query_arg(
+							array(
+								'bh-message' => rawurlencode( $resume['errorMessage'] ),
+							), $orig_url
+						);
+						wp_safe_redirect( $url );
+						die();
+					}
 					// Create candidate
 					$candidate = self::createCandidate( $resume );
 
@@ -97,6 +107,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 					// Attach resume file to candidate
 					error_log( 'wp_upload_file_request: ' . self::wp_upload_file_request( $candidate ) );
+				//	error_log( 'wp_upload_file_request: ' . self::wp_upload_html_request( $candidate ) );
 
 					// link to job
 					self::link_candidate_to_job( $candidate );
@@ -170,6 +181,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			array(
 				'BhRestToken' => self::$session,
 				'format'      => $format,
+				'populateDescription' => 'html',
 			), self::$url . 'resume/parseToCandidate'
 		);
 
@@ -184,7 +196,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			return json_decode( $response['body'] );
 		}
 
-		return false;
+		return json_decode( $response['body'], true  );
 	}
 
 	/**
@@ -511,6 +523,85 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$payload .= 'Content-Transfer-Encoding: binary' . "\r\n";
 		$payload .= "\r\n";
 		$payload .= file_get_contents( $local_file );
+		$payload .= "\r\n";
+		$payload .= '--' . $boundary . '--';
+		$payload .= "\r\n\r\n";
+		$args = array(
+			'method'  => 'PUT',
+			'headers' => array(
+				'accept'       => 'application/json', // The API returns JSON
+				'content-type' => 'multipart/form-data;boundary=' . $boundary, // Set content type to multipart/form-data
+			),
+			'body'    => $payload,
+		);
+		$url      = add_query_arg(
+			array(
+				'BhRestToken' => self::$session,
+				'externalID'  => 'Portfolio',
+				'fileType'    => 'SAMPLE',
+			), self::$url . '/file/Candidate/' . $candidate->changedEntityId . '/raw'
+		);
+		$response = wp_remote_request( $url, $args );
+		// try once more if we get an error
+		if ( is_wp_error( $response ) || 201 !== $response['response']['code'] ) {
+			$response = wp_remote_request( $url, $args );
+		}
+		if ( 200 === $response['response']['code'] ) {
+			return json_decode( $response['body'] );
+		}
+		return false;
+	}
+	/**
+	 * @param $candidate
+	 *
+	 * @return array|bool|mixed|object
+	 */
+	public static function wp_upload_html_request( $candidate ) {
+		list( $ext, $format ) = self::get_filetype();
+		$local_file = $_FILES['resume']['tmp_name'];
+		// wp_remote_request way
+		//https://github.com/jeckman/wpgplus/blob/master/gplus.php#L554
+		$boundary = md5( time() . $ext );
+		$payload  = '';
+		$payload .= '--' . $boundary;
+		$payload .= "\r\n";
+		$payload .= 'Content-Disposition: form-data; name="photo_upload_file_name"; filename="' . $_FILES['resume']['name'] . '"' . "\r\n";
+		$payload .= 'Content-Type: ' . $format . '\r\n'; // If you	know the mime-type
+		$payload .= 'Content-Transfer-Encoding: binary' . "\r\n";
+		$payload .= "\r\n";
+		$payload .= file_get_contents( $local_file );
+		$payload .= "\r\n";
+		$payload .= '--' . $boundary . '--';
+		$payload .= "\r\n\r\n";
+		$args = array(
+			'method'  => 'PUT',
+			'headers' => array(
+				'accept'       => 'application/json', // The API returns JSON
+				'content-type' => 'multipart/form-data;boundary=' . $boundary, // Set content type to multipart/form-data
+			),
+			'body'    => $payload,
+		);
+		$url      = add_query_arg(
+			array(
+				'BhRestToken' => self::$session,
+				'format'  => $ext,
+			), self::$url . '}/resume/convertToHTML'
+		);
+		$response = wp_remote_request( $url, $args );
+		// try once more if we get an error
+		if ( is_wp_error( $response ) || 201 !== $response['response']['code'] ) {
+			$response = wp_remote_request( $url, $args );
+		}
+		//https://github.com/jeckman/wpgplus/blob/master/gplus.php#L554
+		$boundary = md5( time() . $ext );
+		$payload  = '';
+		$payload .= '--' . $boundary;
+		$payload .= "\r\n";
+		$payload .= 'Content-Disposition: form-data; name="photo_upload_file_name"; filename="' . $_FILES['resume']['name'] . '"' . "\r\n";
+		$payload .= 'Content-Type: ' . $format . '\r\n'; // If you	know the mime-type
+		$payload .= 'Content-Transfer-Encoding: binary' . "\r\n";
+		$payload .= "\r\n";
+		$payload .= $response;
 		$payload .= "\r\n";
 		$payload .= '--' . $boundary . '--';
 		$payload .= "\r\n\r\n";
