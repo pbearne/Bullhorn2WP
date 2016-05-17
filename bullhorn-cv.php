@@ -73,7 +73,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 					if ( false === $resume ) {
 						// Redirect
-						$settings  = (array) get_option( 'bullhorn_settings' );
+						$settings = (array) get_option( 'bullhorn_settings' );
 						$permalink = add_query_arg( array(
 							'bh_applied' => false,
 						), get_permalink( $settings['thanks_page'] ) );
@@ -86,7 +86,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 						$orig_url = $_POST['_wp_http_referer'];
 						$url = add_query_arg(
 							array(
-								'bh-message' => rawurlencode( $resume['errorMessage'] ),
+								'bh-message' => rawurlencode( apply_filters( 'parse_resume_failed_text', $resume['errorMessage'] ) ),
 							), $orig_url
 						);
 						wp_safe_redirect( $url );
@@ -107,14 +107,14 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 					// Attach resume file to candidate
 					error_log( 'wp_upload_file_request: ' . self::wp_upload_file_request( $candidate ) );
-				//	error_log( 'wp_upload_file_request: ' . self::wp_upload_html_request( $candidate ) );
+					//	error_log( 'wp_upload_file_request: ' . self::wp_upload_html_request( $candidate ) );
 
 					// link to job
 					self::link_candidate_to_job( $candidate );
 
 					do_action( 'wp-bullhorn-cv-upload-complete', $candidate, $resume );
 					// Redirect
-					$settings  = (array) get_option( 'bullhorn_settings' );
+					$settings = (array) get_option( 'bullhorn_settings' );
 					$permalink = add_query_arg( array(
 						'bh_applied' => true,
 					), get_permalink( $settings['thanks_page'] ) );
@@ -126,7 +126,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 				default:
 					$response = array(
 						'status' => 404,
-						'error'  => __( 'The endpoint you are trying to reach does not exist.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+						'error' => __( 'The endpoint you are trying to reach does not exist.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 					);
 					echo json_encode( $response );
 			}
@@ -156,7 +156,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		//https://github.com/jeckman/wpgplus/blob/master/gplus.php#L554
 		$boundary = md5( time() );
-		$payload  = '';
+		$payload = '';
 		$payload .= '--' . $boundary;
 		$payload .= "\r\n";
 		$payload .= 'Content-Disposition: form-data; name="photo_upload_file_name"; filename="' . $_FILES['resume']['name'] . '"' . "\r\n";
@@ -169,23 +169,35 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$payload .= "\r\n\r\n";
 
 		$args = array(
-			'method'  => 'POST',
+			'method' => 'POST',
 			'headers' => array(
-				'accept'       => 'application/json', // The API returns JSON
+				'accept' => 'application/json', // The API returns JSON
 				'content-type' => 'multipart/form-data;boundary=' . $boundary, // Set content type to multipart/form-data
 			),
-			'body'    => $payload,
+			'body' => $payload,
 		);
 
 		$url = add_query_arg(
 			array(
 				'BhRestToken' => self::$session,
-				'format'      => $format,
+				'format' => $format,
 				'populateDescription' => 'html',
 			), self::$url . 'resume/parseToCandidate'
 		);
 
-		$response = wp_remote_request( $url, $args );
+		$safety_count = 0;
+
+		while ( 10 > $safety_count ) {
+			// make call to the parse the CV
+			$response = wp_remote_request( $url, $args );
+			// sometime we will get an REX error this is due to a comms fail between bullhorn servers aand the 3rd party servers
+			if ( ! isset( $resume['errorMessage'] ) && - 1 === strpos( $resume['errorMessage'], 'Rex has not been initalized' ) ) {
+				$safety_count = 99;
+				break;
+			}
+			$safety_count ++;
+		}
+
 
 		if ( is_wp_error( $response ) ) {
 			return false;
@@ -196,7 +208,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			return json_decode( $response['body'] );
 		}
 
-		return json_decode( $response['body'], true  );
+		return json_decode( $response['body'], true );
 	}
 
 	/**
@@ -217,7 +229,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	private static function get_filetype() {
 		// Get file extension
 		$file_type = wp_check_filetype_and_ext( $_FILES['resume']['tmp_name'], $_FILES['resume']['name'] );
-		$ext       = $file_type['type'];
+		$ext = $file_type['type'];
 
 		switch ( strtolower( $ext ) ) {
 			case 'text/plain':
@@ -275,7 +287,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 */
 	public static function createCandidate( $resume ) {
 
-		if( ! isset( $resume->candidate ) ){
+		if ( ! isset( $resume->candidate ) ) {
 			return false;
 		}
 
@@ -287,13 +299,13 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		if ( isset( $_POST['email'] ) ) {
 			$cv_email = $resume->candidate->email;
 
-			$resume->candidate->email  = esc_attr( $_POST['email'] );
+			$resume->candidate->email = esc_attr( $_POST['email'] );
 			$resume->candidate->email2 = esc_attr( $cv_email );
 		}
 		if ( isset( $_POST['phone'] ) ) {
 			$cv_phone = $resume->candidate->phone;
 
-			$resume->candidate->phone  = esc_attr( $_POST['phone'] );
+			$resume->candidate->phone = esc_attr( $_POST['phone'] );
 			$resume->candidate->phone2 = esc_attr( $cv_phone );
 		}
 		if ( isset( $_POST['name'] ) ) {
@@ -301,14 +313,14 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		}
 
 		if ( isset( $_POST['address1'] ) ) {
-			$cv_address     = $resume->candidate->address;
+			$cv_address = $resume->candidate->address;
 			$address_fields = array( 'address1', 'address2', 'city', 'state', 'zip' );
-			$address_data   = array();
+			$address_data = array();
 
 			foreach ( $address_fields as $key ) {
-				$address_data[ $key ] = ( isset( $_POST[ $key ] ) ) ? $_POST[ $key ] : '';
+				$address_data[$key] = ( isset( $_POST[$key] ) ) ? $_POST[$key] : '';
 			}
-			$resume->candidate->address          = $address_data;
+			$resume->candidate->address = $address_data;
 			$resume->candidate->secondaryAddress = $cv_address;
 
 		}
@@ -352,14 +364,14 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		self::apiAuth();
 
 		$responses = array();
-		$url       = add_query_arg(
+		$url = add_query_arg(
 			array(
 				'BhRestToken' => self::$session,
 			), self::$url . 'entity/CandidateEducation'
 		);
 
 		foreach ( $resume->candidateEducation as $edu ) {
-			$edu->candidate     = new stdClass;
+			$edu->candidate = new stdClass;
 			$edu->candidate->id = $candidate->changedEntityId;
 			if ( ! is_int( $edu->gpa ) || ! is_float( $edu->gpa ) ) {
 				unset( $edu->gpa );
@@ -395,7 +407,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		// Create the url && variables array
 		$responses = array();
-		$url       = add_query_arg(
+		$url = add_query_arg(
 			array(
 				'BhRestToken' => self::$session,
 			), self::$url . 'entity/CandidateWorkHistory'
@@ -403,7 +415,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		foreach ( $resume->candidateWorkHistory as $job ) {
 
-			$job->candidate     = new stdClass;
+			$job->candidate = new stdClass;
 			$job->candidate->id = $candidate->changedEntityId;
 
 			$response = wp_remote_get( $url, array( 'body' => json_encode( $job ), 'method' => 'PUT' ) );
@@ -446,7 +458,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 
 		// Create the url && variables array
-		$url      = add_query_arg(
+		$url = add_query_arg(
 			array(
 				'BhRestToken' => self::$session,
 			), self::$url . '/entity/Candidate/' . $candidate->changedEntityId . '/primarySkills/' . implode( ',', $skill_ids )
@@ -469,14 +481,14 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$skill_list = get_transient( $skill_list_id );
 		if ( false === $skill_list ) {
 			$skill_list = array();
-			$url        = add_query_arg(
+			$url = add_query_arg(
 				array(
 					'BhRestToken' => self::$session,
 				), self::$url . 'options/Skill'
 			);
 
 			$response = wp_remote_get( $url, array( 'method' => 'GET' ) );
-			$body     = wp_remote_retrieve_body( $response );
+			$body = wp_remote_retrieve_body( $response );
 
 			$data = json_decode( $body, true );
 			if ( isset( $data['data'] ) ) {
@@ -486,7 +498,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 			$skill_list = array();
 			foreach ( $data as $skill ) {
-				$skill_list[ $skill['value'] ] = self::clean_skill_label( $skill['label'] );
+				$skill_list[$skill['value']] = self::clean_skill_label( $skill['label'] );
 			}
 
 			set_transient( $skill_list_id, $skill_list, HOUR_IN_SECONDS * 6 );
@@ -515,7 +527,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		//https://github.com/jeckman/wpgplus/blob/master/gplus.php#L554
 		$boundary = md5( time() . $ext );
-		$payload  = '';
+		$payload = '';
 		$payload .= '--' . $boundary;
 		$payload .= "\r\n";
 		$payload .= 'Content-Disposition: form-data; name="photo_upload_file_name"; filename="' . $_FILES['resume']['name'] . '"' . "\r\n";
@@ -527,18 +539,18 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$payload .= '--' . $boundary . '--';
 		$payload .= "\r\n\r\n";
 		$args = array(
-			'method'  => 'PUT',
+			'method' => 'PUT',
 			'headers' => array(
-				'accept'       => 'application/json', // The API returns JSON
+				'accept' => 'application/json', // The API returns JSON
 				'content-type' => 'multipart/form-data;boundary=' . $boundary, // Set content type to multipart/form-data
 			),
-			'body'    => $payload,
+			'body' => $payload,
 		);
-		$url      = add_query_arg(
+		$url = add_query_arg(
 			array(
 				'BhRestToken' => self::$session,
-				'externalID'  => 'Portfolio',
-				'fileType'    => 'SAMPLE',
+				'externalID' => 'Portfolio',
+				'fileType' => 'SAMPLE',
 			), self::$url . '/file/Candidate/' . $candidate->changedEntityId . '/raw'
 		);
 		$response = wp_remote_request( $url, $args );
@@ -551,6 +563,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		}
 		return false;
 	}
+
 	/**
 	 * @param $candidate
 	 *
@@ -562,7 +575,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		// wp_remote_request way
 		//https://github.com/jeckman/wpgplus/blob/master/gplus.php#L554
 		$boundary = md5( time() . $ext );
-		$payload  = '';
+		$payload = '';
 		$payload .= '--' . $boundary;
 		$payload .= "\r\n";
 		$payload .= 'Content-Disposition: form-data; name="photo_upload_file_name"; filename="' . $_FILES['resume']['name'] . '"' . "\r\n";
@@ -574,17 +587,17 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$payload .= '--' . $boundary . '--';
 		$payload .= "\r\n\r\n";
 		$args = array(
-			'method'  => 'PUT',
+			'method' => 'PUT',
 			'headers' => array(
-				'accept'       => 'application/json', // The API returns JSON
+				'accept' => 'application/json', // The API returns JSON
 				'content-type' => 'multipart/form-data;boundary=' . $boundary, // Set content type to multipart/form-data
 			),
-			'body'    => $payload,
+			'body' => $payload,
 		);
-		$url      = add_query_arg(
+		$url = add_query_arg(
 			array(
 				'BhRestToken' => self::$session,
-				'format'  => $ext,
+				'format' => $ext,
 			), self::$url . '}/resume/convertToHTML'
 		);
 		$response = wp_remote_request( $url, $args );
@@ -594,7 +607,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		}
 		//https://github.com/jeckman/wpgplus/blob/master/gplus.php#L554
 		$boundary = md5( time() . $ext );
-		$payload  = '';
+		$payload = '';
 		$payload .= '--' . $boundary;
 		$payload .= "\r\n";
 		$payload .= 'Content-Disposition: form-data; name="photo_upload_file_name"; filename="' . $_FILES['resume']['name'] . '"' . "\r\n";
@@ -607,19 +620,19 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$payload .= "\r\n\r\n";
 
 		$args = array(
-			'method'  => 'PUT',
+			'method' => 'PUT',
 			'headers' => array(
-				'accept'       => 'application/json', // The API returns JSON
+				'accept' => 'application/json', // The API returns JSON
 				'content-type' => 'multipart/form-data;boundary=' . $boundary, // Set content type to multipart/form-data
 			),
-			'body'    => $payload,
+			'body' => $payload,
 		);
 
-		$url      = add_query_arg(
+		$url = add_query_arg(
 			array(
 				'BhRestToken' => self::$session,
-				'externalID'  => 'Portfolio',
-				'fileType'    => 'SAMPLE',
+				'externalID' => 'Portfolio',
+				'fileType' => 'SAMPLE',
 			), self::$url . '/file/Candidate/' . $candidate->changedEntityId . '/raw'
 		);
 		$response = wp_remote_request( $url, $args );
@@ -660,9 +673,9 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		);
 
 		$body = array(
-			'candidate'       => array( 'id' => absint( $candidate->changedEntityId ) ),
-			'jobOrder'        => array( 'id' => absint( $jobOrder ) ),
-			'status'          => 'New Lead',
+			'candidate' => array( 'id' => absint( $candidate->changedEntityId ) ),
+			'jobOrder' => array( 'id' => absint( $jobOrder ) ),
+			'status' => 'New Lead',
 			'dateWebResponse' => self::microtime_float(), //date( 'u', $date ),// time(),
 		);
 

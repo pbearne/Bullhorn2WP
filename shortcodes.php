@@ -262,6 +262,7 @@ class Shortcodes {
 
 		$jobs = new \WP_Query( $args );
 		if ( $jobs->have_posts() ) {
+
 			$output .= '<ul class="bullhorn-listings">';
 			while ( $jobs->have_posts() ) {
 				$jobs->the_post();
