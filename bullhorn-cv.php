@@ -92,6 +92,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 						wp_safe_redirect( $url );
 						die();
 					}
+
 					// Create candidate
 					$candidate = self::createCandidate( $resume );
 
@@ -186,15 +187,19 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		);
 
 		$safety_count = 0;
-
+		// make call to the parse the CV
+		$response = wp_remote_request( $url, $args );
 		while ( 10 > $safety_count ) {
-			// make call to the parse the CV
-			$response = wp_remote_request( $url, $args );
-			// sometime we will get an REX error this is due to a comms fail between bullhorn servers aand the 3rd party servers
-			if ( ! isset( $resume['errorMessage'] ) && - 1 === strpos( $resume['errorMessage'], 'Rex has not been initalized' ) ) {
-				$safety_count = 99;
+
+			// sometime we will get an REX error this is due to a comms failer between bullhorn servers aand the 3rd party servers
+
+			// if are good exit while loop
+			if ( ! is_wp_error( $response ) && isset( $response['body'] ) && false === strpos( strtolower( $response['body'] ), 'convert failed' ) ) {
 				break;
 			}
+			error_log( 'CV parse looped with : ' . $response['errorMessage'] . ': ' . $safety_count );
+			// make a attempt call to the parse the CV
+			$response = wp_remote_request( $url, $args );
 			$safety_count ++;
 		}
 
@@ -203,8 +208,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			return false;
 		}
 
-		if ( is_array( $response ) && 200 === $response['response']['code'] ) {
-
+		if ( 200 === $response['response']['code'] ) {
 			return json_decode( $response['body'] );
 		}
 
