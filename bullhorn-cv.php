@@ -191,13 +191,19 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$response = wp_remote_request( $url, $args );
 		while ( 10 > $safety_count ) {
 
-			// sometime we will get an REX error this is due to a comms failer between bullhorn servers aand the 3rd party servers
+			// sometime we will get an REX error this is due to a comms failer between bullhorn servers and the 3rd party servers
 
 			// if are good exit while loop
 			if ( ! is_wp_error( $response ) && isset( $response['body'] ) && false === strpos( strtolower( $response['body'] ), 'convert failed' ) ) {
 				break;
 			}
-			error_log( 'CV parse looped with : ' . $response['errorMessage'] . ': ' . $safety_count );
+
+			if ( is_wp_error( $response ) ) {
+				error_log( 'CV parse looped with : ' . serialize( $response ) . ': ' . $safety_count );
+			} elseif ( isset( $response['errorMessage'] ) ) {
+				error_log( 'CV parse looped with : ' . $response['errorMessage'] . ': ' . $safety_count );
+			}
+			
 			// make a attempt call to the parse the CV
 			$response = wp_remote_request( $url, $args );
 			$safety_count ++;
