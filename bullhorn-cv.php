@@ -172,6 +172,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		$args = array(
 			'method' => 'POST',
+			'timeout' => 120, // default is 45 set to 2 minets for this one call
 			'headers' => array(
 				'accept' => 'application/json', // The API returns JSON
 				'content-type' => 'multipart/form-data;boundary=' . $boundary, // Set content type to multipart/form-data
@@ -192,7 +193,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$response = wp_remote_request( $url, $args );
 		while ( 10 > $safety_count ) {
 
-			// sometime we will get an REX error this is due to a comms failer between bullhorn servers aand the 3rd party servers
+			// sometimes we will get an REX error this is due to a comms failing between bullhorn servers aand the 3rd party servers
 
 			// if are good exit while loop
 			if ( ! is_wp_error( $response ) && isset( $response['body'] ) && false === strpos( strtolower( $response['body'] ), 'convert failed' ) ) {
