@@ -115,6 +115,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 					error_log( 'wp_upload_file_request: ' . self::wp_upload_file_request( $candidate ) );
 
 					do_action( 'wp-bullhorn-cv-upload-complete', $candidate, $resume );
+
 					// Redirect
 					$settings = (array) get_option( 'bullhorn_settings' );
 					$permalink = add_query_arg( array(
@@ -315,31 +316,38 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		}
 
 		if ( isset( $_POST['email'] ) ) {
-			$cv_email = $resume->candidate->email;
+			if ( isset( $resume->candidate->email ) ) {
+				$resume->candidate->email2 = $resume->candidate->email;
+			}
+
 
 			$resume->candidate->email = esc_attr( $_POST['email'] );
-			$resume->candidate->email2 = esc_attr( $cv_email );
 		}
+
 		if ( isset( $_POST['phone'] ) ) {
-			$cv_phone = $resume->candidate->phone;
+			if ( isset( $resume->candidate->email ) ) {
+				$resume->candidate->phone2 = $resume->candidate->phone;
+			}
 
 			$resume->candidate->phone = esc_attr( $_POST['phone'] );
-			$resume->candidate->phone2 = esc_attr( $cv_phone );
 		}
+
 		if ( isset( $_POST['name'] ) ) {
 			$resume->candidate->name = esc_attr( $_POST['name'] );
 		}
 
 		if ( isset( $_POST['address1'] ) ) {
-			$cv_address = $resume->candidate->address;
+			if ( isset( $resume->candidate->address ) ) {
+
+				$resume->candidate->secondaryAddress = $resume->candidate->address;;
+			}
 			$address_fields = array( 'address1', 'address2', 'city', 'state', 'zip' );
 			$address_data = array();
 
 			foreach ( $address_fields as $key ) {
-				$address_data[$key] = ( isset( $_POST[$key] ) ) ? $_POST[$key] : '';
+				$address_data[ $key ] = ( isset( $_POST[ $key ] ) ) ? $_POST[ $key ] : '';
 			}
 			$resume->candidate->address = $address_data;
-			$resume->candidate->secondaryAddress = $cv_address;
 
 		}
 
@@ -581,7 +589,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		}
 
 		if ( 200 === $response['response']['code'] ) {
-			return json_decode( $response['body'] );
+			return json_decode( $response );
 		}
 
 		return false;
