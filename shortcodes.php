@@ -113,8 +113,10 @@ class Shortcodes {
 
 
 			<label for="fileToUpload"><?php esc_html__( 'Your Resume', 'bh-staffing-job-listing-and-cv-upload-for-wp' ); ?><span class="gfield_required"> *</span></label>
-			<span class="<?php echo apply_filters( 'wp_bullhorn_render_cv_form_file_input_styles', 'file-to-upload-wrap' ); ?>"><input id="fileToUpload" name="resume" type="file"/></span>
-			<br/><br/>
+			<span class="<?php echo apply_filters( 'wp_bullhorn_render_cv_form_file_input_styles', 'file-to-upload-wrap' ); ?>">
+				<input id="fileToUpload" name="resume" type="file" accept=".pdf,.docx,.doc,.text,.rft,.html"/>
+			</span>
+				<br/><br/>
 			<?php
 			if ( isset( $_GET['position'] ) ) {
 				printf( '<input id="position" name="position" type="hidden" value="%s" />',	esc_attr( $_GET['position'] ) );

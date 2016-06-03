@@ -58,7 +58,7 @@ class Bullhorn_Connection {
 	 * @throws Exception
 	 * @return boolean
 	 */
-	public static function sync() {
+	public static function sync( $throw = true ) {
 		// Refresh the token if necessary before doing anything
 		if ( false === self::refresh_token() ) {
 			return false;
@@ -66,16 +66,27 @@ class Bullhorn_Connection {
 
 		$logged_in = self::login();
 		if ( ! $logged_in ) {
-			throw new Exception( __( 'There was a problem logging into the Bullhorn API.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
+			if ( $throw ) {
+				throw new Exception( __( 'There was a problem logging into the Bullhorn API.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
+			} else {
+				return __( 'There was a problem logging into the Bullhorn API.', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
+			}
 		}
 
 		wp_defer_term_counting( true );
 
-		self::get_categories_from_bullhorn();
+		$response = self::get_categories_from_bullhorn();
+		if ( is_wp_error( $response ) ) {
+			return $response->get_error_message();
+		}
 
 		$jobs     = self::get_jobs_from_bullhorn();
-		$existing = self::get_existing();
+		if ( is_wp_error( $jobs ) ) {
+			return $jobs;
+		}
 
+		$existing = self::get_existing();
+		// emove job on in current job list
 		self::remove_old( $jobs );
 
 		if ( count( $jobs ) ) {
@@ -196,7 +207,10 @@ class Bullhorn_Connection {
 			'BhRestToken' => self::$session,
 		);
 
-		$response = self::request( $url . '?' . http_build_query( $params ) );
+		$response = self::request( $url . '?' . http_build_query( $params ), false );
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
 		$body     = json_decode( $response['body'] );
 		if ( isset( $body->data ) ) {
 			foreach ( $body->data as $category ) {
@@ -269,7 +283,8 @@ class Bullhorn_Connection {
 				$params['where'] .= ' AND (clientCorporation.id=' . implode( ' OR clientCorporation.id=', $ids ) . ')';
 			}
 
-			$response = self::request( $url . '?' . http_build_query( $params ) );
+			$response = self::request( $url . '?' . http_build_query( $params ), false );
+
 			$body     = json_decode( $response['body'] );
 
 			if ( isset( $body->data ) ) {
@@ -566,10 +581,14 @@ class Bullhorn_Connection {
 	 * @return array
 	 * @throws Exception
 	 */
-	public static function request( $url ) {
+	public static function request( $url, $throw = true ) {
 		$response = wp_remote_get( $url, array( 'timeout' => 180 ) );
 		if ( is_wp_error( $response ) ) {
-			throw new Exception( $response->get_error_message() );
+			if ( $throw ) {
+				throw new Exception( $response->get_error_message() );
+			} else {
+				return $response;
+			}
 		}
 
 		return $response;

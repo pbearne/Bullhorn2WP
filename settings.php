@@ -65,6 +65,8 @@ class Bullhorn_Settings {
 		add_settings_field( 'description_field', __( 'Description Field', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'description_field' ), 'bullhornwp', 'bullhorn_api' );
 
 		add_settings_field( 'run_cron', __( 'Auto-sync', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'run_cron' ), 'bullhornwp', 'bullhorn_api' );
+		add_settings_field( 'cron_error_email', __( 'Auto-sync Error Email', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'cron_error_email' ), 'bullhornwp', 'bullhorn_api' );
+
 		add_settings_field( 'is_public', __( 'Filter isPublic', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'is_public' ), 'bullhornwp', 'bullhorn_api' );
 
 	}
@@ -320,7 +322,7 @@ class Bullhorn_Settings {
 	 */
 	public static function run_cron() {
 		$settings = (array) get_option( 'bullhorn_settings' );
-		$run_cron = 'true';
+		$run_cron = 'false';
 
 		if ( isset( $settings['run_cron'] ) ) {
 			$run_cron = $settings['run_cron'];
@@ -341,6 +343,31 @@ class Bullhorn_Settings {
 		echo '<br><span class="description">' . __( 'Fetch Jobs from Bullhorn every hour or using the manual sync button below ( shows once you have connected to Bullhorn ).', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</span>';
 	}
 
+	/**
+	 * Displays the job listings page settings field.
+	 */
+	public static function cron_error_email() {
+		$settings = (array) get_option( 'bullhorn_settings' );
+		$cron_error_email = 'true';
+
+		if ( isset( $settings['cron_error_email'] ) ) {
+			$cron_error_email = $settings['cron_error_email'];
+		}
+
+		$sorts = array(
+			'true'  => __( 'On', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'false' => __( 'Off', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+		);
+
+		foreach ( $sorts as $value => $name ) {
+			printf( '<label for="%1$s">%2$s&nbsp;<input name="bullhorn_settings[cron_error_email]" id="%1$s" value="%1$s" type="radio" %3$s>&nbsp;</label>',
+				esc_attr( $value ),
+				esc_attr( $name ),
+				checked( $cron_error_email, $value, false )
+			);
+		}
+		echo '<br><span class="description">' . __( 'Send an Email to the WP admin email address if the synic errors.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</span>';
+	}
 	/**
 	 * Displays the job listings sort settings field.
 	 */
@@ -408,6 +435,7 @@ class Bullhorn_Settings {
 		$input['description_field'] = esc_html( $input['description_field'] );
 		$input['thanks_page']       = intval( $input['thanks_page'] );
 		$input['run_cron']          = esc_attr( $input['run_cron'] );
+		$input['cron_error_email']  = esc_attr( $input['cron_error_email'] );
 		$input['is_public']         = esc_attr( $input['is_public'] );
 
 		// Since the listings page has probably been updated, we need to flush
