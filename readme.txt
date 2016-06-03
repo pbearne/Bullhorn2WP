@@ -17,10 +17,9 @@ I was hired by a client to fix the plugin he had bought. By the time I had fixed
 
 Your need an account at http://www.bullhorn.com/industry/staffing-recruiting/ or http://www.bullhorn.com/products/recruitment-crm/ to use this plugin (please tell them you came from this plugin!)
 
-The plugin adds Bullhorn jobs to a custom post types (Job Listings) for front-end display.
-Posts are auto-created by synchronizing with Bullhorn and are auto-deleted if not public or active on Bullhorn.
-There is no way to manage the Bullhorn jobs here, the admin menu for Job Listings should be used for viewing only.
-Any theme developed on top of this plugin should have archive-job-listing.php and single-job-listing.php template files for special layout.
+This plugin adds Bullhorn jobs to a custom post (Job Listings) for front-end display.
+New and deleted jobs are synchronized every hour with Bullhorn. This is a 'pull' process only - any job created locally is not pushed to Bullhorn!
+Any theme developed on top of this plugin should have archive-job-listing.php and single-job-listing.php template files if a special layout is needed.
 
 There are also shortcodes that can be used in sidebar widgets, other pages, etc. 
 Example usages:
