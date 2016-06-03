@@ -1,18 +1,18 @@
-=== Plugin Name ===
+=== Bullhorn Staffing and Recruitment Job Listing and CV/Resume Uploader for WordPress ===
 Contributors: pbearne
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=MZTZ5S8MGF75C&lc=CA&item_name=Wordpress%20Development%20%2f%20Paul%20Bearne&item_number=Bullhorn%20Plugin&currency_code=CAD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Tags: Bullhorn, Job Listing, CV upload, Resume upload, Bullhorn Staffing, recruitment crm, staffing, recruiting
 Requires at least: 3.6
-Tested up to: 4.4.2
-Stable tag: 2.3.0
+Tested up to: 4.5.2
+Stable tag: 2.4.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-This plugin adds / synchronizes job listings to your WordPress site from your Bullhorn account for front-end display, also providing a CV uploader.
+This plugin adds job listings to your WordPress site from your Bullhorn account for front-end display, also providing a CV uploader.
 
 == Description ==
 
-This plugin is a fork of the code for sale at http://bullhorntowordpress.com and additionally incorporates a resume upload extension.
+This plugin is a fork of the code for sale at http://bullhorntowordpress.com and additionally incorporates a resume upload extension. It automatically synchronizes with Bullhorn.
 I was hired by a client to fix the plugin he had bought. By the time I had fixed it, it was effectively a new version with lots of updates and fixes. So I have released my version to WordPress.org so that others can have access to these.
 
 Your need an account at http://www.bullhorn.com/industry/staffing-recruiting/ or http://www.bullhorn.com/products/recruitment-crm/ to use this plugin (please tell them you came from this plugin!)
@@ -22,7 +22,8 @@ Posts are auto-created by synchronizing with Bullhorn and are auto-deleted if no
 There is no way to manage the Bullhorn jobs here, the admin menu for Job Listings should be used for viewing only.
 Any theme developed on top of this plugin should have archive-job-listing.php and single-job-listing.php template files for special layout.
 
-There are also shortcodes that can be used in sidebar widgets, other pages, etc. Example usages:
+There are also shortcodes that can be used in sidebar widgets, other pages, etc. 
+Example usages:
 Default usage:
 [bullhorn]
 
@@ -40,7 +41,7 @@ You can use the following shortcodes to create a list of categories and states a
 [bullhorn_states]
 
 To have the jobs display in two, three or four columns add:
-columns=X to the shortcode on site. Replace X with the number of desired columns.
+columns=X to the shortcode on site. Replace X with the desired number of columns.
 
 The following shortcode generates a search form to search job listings:
 [bullhorn_search]
@@ -48,77 +49,91 @@ The following shortcode generates a search form to search job listings:
 This shortcode will display the resume upload form:
 [bullhorn_cv_form]
 
+There are lots of hooks and filters but I haven't documented them all yet so you will have to read the code
+
 == Installation ==
 
 This section describes how to install the plugin and get it working.
 
-1. Upload the `bullhorn` folder to the `/wp-content/plugins/` directory
-2. Activate the plugin through the 'Plugins' menu in WordPress
+1. Upload the `bh-staffing-job-listing-and-cv-upload-for-wp` folder to the `/wp-content/plugins/` directory
+2. Activate the plugin through the 'Plugins' menu in WordPress.
+
+You need to ask Bullhorn support to activate the API for your URL - this is not turned on by default.
 
 You will need to connect to Bullhorn on the options page with your Client API Key.
 
-Enter your bullhorn client ID and key then save them
+Enter your Bullhorn client ID and key, then save them.
 
-Now try to connect to Bullhorn this may fail
+Now try to connect to Bullhorn - this may fail!
 
-If the error is "Invalid Client Id" well check the ID
+If you received an error "Invalid Client Id" you need to recheck your Bullhorn Client ID.
 
-if the error is "Invalid Redirect URI" then you need to have your website URL added to the allowed sites for your account by bullhorn support.
+If the error is "Invalid Redirect URI" then you need to have your website URL added to the allowed sites for your account by Bullhorn support. 
 
-When the Client ID and your site URL has been added you will be asked to login (this maybe a special account for just the API)
+When the Client ID and your site URL have been added you will be asked to login (this may be a special account for just the API).
 
 If the Client Secret is wrong the login will fail.
 
-One you connect to Bullhorn run a manual sync to test is is all working you will be able to all your public job in the Job Listings menu item
+Once you connect to Bullhorn, run a manual sync to test that all is working. You will be able to see all your jobs with  'public' locations set 'true' in the Job Listings section in your WordPress site. 
 
-Good luck. If you have suggestion to improve these instructions please send them to me
+The 'public' setting is under 'locations' and is not visible by default. There is an option in the settings to ignore this setting and pull 'private' locations as well should you wish.
+
+Good luck! If you have suggestions to improve these instructions, please send them to me.
 
 
 
 
 
 == Upgrade Notice ==
-If you are updating the version from an http://bullhorntowordpress.com, install this plugin, deactive the old version (both plugins) and then active this.
-Test and when happy you can remove the old pluigns
+If you are updating the version from an http://bullhorntowordpress.com, install this plugin, deactivate the old version (both plugins) and then activate this.
+Test and, when happy, you can remove the old plugins.
 
 == Screenshots ==
 1. Options page
 2. CV/resume upload form
 3. Job list with CV/resume upload form via ShortCode
 
-== Changelog ==
+== Changelog == 
 
-== 2.3.0 ==
-Added option to disable auto sysnic
-Added option to not filter the jobs by isPublic location setting
-Other small fixes
+= 2.4.0 =
+Added retries to the CV upload to re-attempt CV parsing failures (a known Bullhorn issue - "Convert failed, resume mirror status: -1 - Rex has not been initialized").
+Increased the timeout for CV parsing to 2 mins
+Added error email option
+Added lots of extra checks for bad data back to Bullhorn API
+Enabled a copy of the CV to be inserted into the description as HTML.
+Numerous other bug-fixs and extra filters.
 
-more short code support
-== 2.2.2 ==
-some fixes for PHP errors
-add more content to job post meta
-added option select which field to show in CV form
-more short code support
+= 2.3.0 =
+Added option to disable auto syncing.
+Added option to not filter the jobs by isPublic location setting.
+Other small fixes.
+More short code support.
 
-== 2.2.0 ==
-Fix an error in the options name that was breaking the CV upload redirect to the thank you page
-Fix calls to non static functions
-added shortcodes for "b2wp_resume_form", "b2wp_application", "b2wp_shortapp" for compatibility
+= 2.2.2 =
+Some fixes for PHP errors.
+Added more content to job post meta.
+Added option select which field to show in CV form.
+More short code support.
 
-== 2.1.4 ==
-fixed typo
+= 2.2.0 =
+Fixed an error in the options name that was breaking the CV upload redirect to the thank you page.
+Fixed calls to non static functions.
+Added shortcodes for "b2wp_resume_form", "b2wp_application", "b2wp_shortapp" for compatibility.
 
-== 2.1.2 ==
-improved the messages on the settings page
-protect the country code
+= 2.1.4 =
+Fixed typo.
 
-== 2.1.1 ==
-Fixed a bug when syncing
+= 2.1.2 =
+Improved the messages on the settings page.
+Protected the country code.
+
+= 2.1.1 =
+Fixed a bug when syncing.
 
 
 = 2.1 =
-fixed the country fetch
-handle running the plugin without being linked to bullhorn
+Fixed the country fetch.
+Handle running the plugin without being linked to bullhorn.
 
 = 2.0 =
 Merged CV upload.
@@ -145,4 +160,3 @@ If you need support please contact me for a quote. via hornbull.sales@bearne.ca
 
 = Pull requests =
 I will look at all pull requests. Please submit them here https://github.com/pbearne/Bullhorn2WP
-
