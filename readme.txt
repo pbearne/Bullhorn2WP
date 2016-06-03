@@ -93,6 +93,11 @@ Added option to disable auto sysnic
 Added option to not filter the jobs by isPublic location setting
 Other small fixes
 
+== 2.3.0 ==
+Added option to disable auto sysnic
+Added option to not filter the jobs by isPublic location setting
+Other small fixes
+
 more short code support
 == 2.2.2 ==
 some fixes for PHP errors
