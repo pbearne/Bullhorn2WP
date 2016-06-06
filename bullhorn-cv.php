@@ -167,6 +167,15 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		do_action( 'add_bullhorn_candidate_complete', $candidate, $resume, $profile_data, $file_data );
 		return true;
 	}
+
+	public static function update_bullhorn_candidate ( $profile_data, $file_data ) {
+
+
+		
+		do_action( 'update_bullhorn_candidate_complete', $candidate, $resume, $profile_data, $file_data );
+		return true;
+	}
+
 	/**
 	 * Takes the posted 'resume' file and returns a parsed version from bullhorn
 	 *
