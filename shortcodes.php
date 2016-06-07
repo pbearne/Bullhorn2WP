@@ -13,6 +13,8 @@ use WP_Query;
 
 class Shortcodes {
 
+	public static $show_content_count;
+
 	/**
 	 * Shortcodes constructor.
 	 */
@@ -202,8 +204,10 @@ class Shortcodes {
 			'show_date' => false,
 			'state'     => null,
 			'type'      => null,
-			'title'     => null,
+			'title'     => true,
 			'columns'   => 1,
+			'show_content' => false, // full, 10 (words), true ( extract )
+			'meta_to_show' => '', // 'bullhorn_job_id','bullhorn_job_address','bullhorn_json_ld','employmentType','baseSalary','city','state','Country','zip',
 		), $atts );
 
 		$output = null;
@@ -212,8 +216,10 @@ class Shortcodes {
 		$show_date = (bool) $atts['show_date'];
 		$state     = esc_attr( $atts['state'] );
 		$type      = esc_attr( $atts['type'] );
-		$title     = esc_attr( $atts['title'] );
+		$title     = (bool) esc_attr( $atts['title'] );
 		$columns   = absint( $atts['columns'] );
+		$show_content = esc_attr( $atts['show_content'] );
+		$meta_to_show = explode( ',', esc_attr( $atts['meta_to_show'] ) );
 
 		// Only allow up to two columns for now
 		if ( $columns > 4 or $columns < 1 ) {
@@ -261,6 +267,21 @@ class Shortcodes {
 		if ( $title ) {
 			$args['post_title_like'] = $title;
 		}
+		$possible_fields = apply_filters( 'bullhorn_shortcode_possiable_fields_and_order', array(
+			'bullhorn_job_id',
+			'title',
+			'type',
+			'show_date',
+			'show_content',
+			'bullhorn_job_address',
+			'bullhorn_json_ld',
+			'employmentType',
+			'baseSalary',
+			'city',
+			'state',
+			'Country',
+			'zip',
+		) );
 
 		$jobs = new \WP_Query( $args );
 		if ( $jobs->have_posts() ) {
@@ -268,12 +289,49 @@ class Shortcodes {
 			$output .= '<ul class="bullhorn-listings">';
 			while ( $jobs->have_posts() ) {
 				$jobs->the_post();
+				$id = get_the_ID();
+				$output .= sprintf( '<li id="job-%s">', $id );
+				do_action( 'bullhorn_shortcode_top_job', $id );
+				foreach ( $possible_fields as $possible_field ) {
+					switch ( $possible_field ) {
 
-				$output .= '<li>';
-				$output .= '<a href="' . get_permalink() . '">' . get_the_title() . '</a>';
-				if ( $show_date ) {
-					$output .= ' posted on ' . get_the_date( 'F jS, Y' );
+						case 'title':
+
+							if ( $title ) {
+								$output .= sprintf( '<a href="%s">%s</a>', esc_url_raw( get_permalink() ), esc_html( get_the_title() ) );
+							}
+							if ( $show_date ) {
+								$output .= sprintf( '<span class="date"> posted on %s</span>', esc_html( get_the_date( 'F jS, Y' ) ) );
+							}
+
+							break;
+						case 'show_content':
+
+							if ( 'full' === $show_content ) {
+								$output .= sprintf( '<div class="%s %s">%s</div>', $possible_field, $show_content , wp_kses_post( get_the_content() ) );
+							} elseif ( is_numeric( $show_content ) || 'true' === $show_content ) {
+								if ( is_numeric( $show_content ) ) {
+									self::$show_content_count = $show_content;
+									add_filter( 'excerpt_length', function( $length ) {
+										return self::$show_content_count; }
+									, 999 );
+								}
+								$output .= sprintf( '<div class="%s %s">%s</div>', $possible_field, $show_content , wp_kses_post( get_the_excerpt() ) );
+							}
+							break;
+
+						default:
+							if ( in_array( $possible_field, $meta_to_show, true ) ) {
+								$meta_value = get_post_meta( $id, $possible_field, true );
+								if ( false !== $meta_value ) {
+									$meta_value = apply_filters( 'bullhorn-shortcode-' . $possible_field . '-meta-value', $meta_value, $possible_field, $id );
+									$output .= sprintf( '<div class="%s">%s</div>', esc_attr( $possible_field ), esc_html( $meta_value ) );
+								}
+							}
+						break;
+					}
 				}
+				do_action( 'bullhorn_shortcode_bottom_job', $id );
 				$output .= '</li>';
 			}
 			$output .= '</ul>';
