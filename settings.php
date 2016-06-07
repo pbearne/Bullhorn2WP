@@ -68,7 +68,7 @@ class Bullhorn_Settings {
 		add_settings_field( 'cron_error_email', __( 'Auto-sync Error Email', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'cron_error_email' ), 'bullhornwp', 'bullhorn_api' );
 
 		add_settings_field( 'is_public', __( 'Filter isPublic', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'is_public' ), 'bullhornwp', 'bullhorn_api' );
-
+		add_settings_field( 'mark_submitted', __( 'Mark Submitted', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'mark_submitted' ), 'bullhornwp', 'bullhorn_api' );
 	}
 
 	/**
@@ -311,12 +311,39 @@ class Bullhorn_Settings {
 				checked( $is_public, $value, false )
 			);
 		}
-		echo '<br><span class="description">' . __( 'By Default the isPublic field is hidden in Vacancy by default if no job as syniced try set to this to false.
+		echo '<br><span class="description">' . esc_html__( 'By Default the isPublic field is hidden in Vacancy by default if no job as syniced try set to this to false.
 						To show the field the steps are : Fields Mapping Vacancy isPublic, uncheck "hidden"  .', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</span>';
 
 
 	}
 
+	/**
+	 * Displays the job listings page settings field.
+	 */
+	public static function mark_submitted() {
+		$settings  = (array) get_option( 'bullhorn_settings' );
+		$mark_submitted = 'true';
+
+		if ( isset( $settings['mark_submitted'] ) ) {
+			$mark_submitted = $settings['mark_submitted'];
+		}
+
+		$sorts = array(
+			'true'  => __( 'Submitted', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'false' => __( 'New Lead', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+		);
+
+		foreach ( $sorts as $value => $name ) {
+			printf( '<label for="%1$s">%2$s&nbsp;<input name="bullhorn_settings[is_public]" id="%1$s" value="%1$s" type="radio" %3$s>&nbsp;</label>',
+				esc_attr( $value ),
+				esc_attr( $name ),
+				checked( $mark_submitted, $value, false )
+			);
+		}
+		echo '<br><span class="description">' . esc_html__( 'Choose if to mark a submission to a job as "Submitted" or as "New Lead".', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</span>';
+
+
+	}
 	/**
 	 * Displays the job listings page settings field.
 	 */

@@ -781,10 +781,16 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			), self::$url . 'entity/JobSubmission'
 		);
 
+		$settings  = (array) get_option( 'bullhorn_settings' );
+		$mark_submitted = 'true';
+		if ( isset( $settings['mark_submitted'] ) ) {
+			$mark_submitted = $settings['mark_submitted'];
+		}
+
 		$body = array(
 			'candidate' => array( 'id' => absint( $candidate->changedEntityId ) ),
 			'jobOrder' => array( 'id' => absint( $jobOrder ) ),
-			'status' => 'New Lead',
+			'status' => ( $mark_submitted ) ? 'Submitted' : 'New Lead',
 			'dateWebResponse' => self::microtime_float(), //date( 'u', $date ),// time(),
 		);
 
