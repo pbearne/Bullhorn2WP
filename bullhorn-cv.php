@@ -171,8 +171,8 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	public static function update_bullhorn_candidate ( $profile_data, $file_data ) {
 
 
-		
-		do_action( 'update_bullhorn_candidate_complete', $candidate, $resume, $profile_data, $file_data );
+
+	//	do_action( 'update_bullhorn_candidate_complete', $candidate, $resume, $profile_data, $file_data );
 		return true;
 	}
 
@@ -788,7 +788,14 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			'dateWebResponse' => self::microtime_float(), //date( 'u', $date ),// time(),
 		);
 
-		$response = wp_remote_get( $url, array( 'body' => json_encode( $body ), 'method' => 'PUT' ) );
+		$response = wp_remote_get( $url, array( 'body' => wp_json_encode( $body ), 'method' => 'PUT' ) );
+
+		$safety_count = 0;
+		while ( 500 === $response['response']['code'] && 5 > $safety_count ) {
+			error_log( 'Link to job failed( ' . $safety_count . '): ' . serialize( $response ) );
+			$response = wp_remote_get( $url, array( 'body' => wp_json_encode( $body ), 'method' => 'PUT' ) );
+			$safety_count ++;
+		}
 
 		if ( 200 === $response['response']['code'] ) {
 			return json_decode( $response['body'] );
