@@ -291,7 +291,7 @@ class Shortcodes {
 				$jobs->the_post();
 				$id = get_the_ID();
 				$output .= sprintf( '<li id="job-%s">', $id );
-				do_action( 'bullhorn_shortcode_top_job', $id );
+				$output = apply_filters( 'bullhorn_shortcode_top_job', $output, $id );
 				foreach ( $possible_fields as $possible_field ) {
 					switch ( $possible_field ) {
 
@@ -331,7 +331,7 @@ class Shortcodes {
 						break;
 					}
 				}
-				do_action( 'bullhorn_shortcode_bottom_job', $id );
+				$output  = apply_filters( 'bullhorn_shortcode_bottom_job', $output, $id );
 				$output .= '</li>';
 			}
 			$output .= '</ul>';
