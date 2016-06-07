@@ -86,7 +86,7 @@ class Bullhorn_Connection {
 		}
 
 		$existing = self::get_existing();
-		// emove job on in current job list
+		// move job on in current job list
 		self::remove_old( $jobs );
 
 		if ( count( $jobs ) ) {
@@ -114,26 +114,36 @@ class Bullhorn_Connection {
 	 * @return boolean
 	 */
 	protected static function login() {
-		if ( false === self::refresh_token() ) {
-			return false;
-		};
+		$cache_id = 'bullhorn_token';
+		$cache_token = wp_cache_get( $cache_id );
+		if ( false === $cache_token ) {
+			if ( false === self::refresh_token() ) {
+				return false;
+			};
 
-		$url = add_query_arg(
-			array(
-				'version'      => '*',
-				'access_token' => self::$api_access['access_token'],
-			), 'https://rest.bullhornstaffing.com/rest-services/login'
-		);
+			$url = add_query_arg(
+				array(
+					'version'      => '*',
+					'access_token' => self::$api_access['access_token'],
+					'ttl'          => 20,
+				), 'https://rest.bullhornstaffing.com/rest-services/login'
+			);
 
-		$response = self::request( $url );
-		$body     = json_decode( $response['body'] );
+			$response = self::request( $url );
+			$body     = json_decode( $response['body'] );
 
-		if ( isset( $body->BhRestToken ) ) {
-			self::$session = $body->BhRestToken;
-			self::$url     = $body->restUrl;
-
-			return true;
+			if ( isset( $body->BhRestToken ) ) {
+				self::$session = $body->BhRestToken;
+				self::$url     = $body->restUrl;
+				wp_cache_add( $cache_id, $body ,  MINUTE_IN_SECONDS * 8 );
+				return true;
+			}
+		} else {
+			$cache_token   = json_decode( $cache_token );
+			self::$session = $cache_token->BhRestToken;
+			self::$url     = $cache_token->restUrl;
 		}
+
 		// TODO: make to user freindly
 		if ( isset( $body->errorMessage ) ) {
 			throw new Exception( $body->errorMessage );
