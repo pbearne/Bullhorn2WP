@@ -293,6 +293,10 @@ class Shortcodes {
 				$output .= sprintf( '<li id="job-%s">', $id );
 				$output = apply_filters( 'bullhorn_shortcode_top_job', $output, $id );
 				foreach ( $possible_fields as $possible_field ) {
+					if ( ! in_array( $possible_field, $meta_to_show, true ) ) {
+
+						continue;
+					}
 					switch ( $possible_field ) {
 
 						case 'title':
@@ -311,7 +315,7 @@ class Shortcodes {
 								$output .= sprintf( '<div class="%s %s">%s</div>', $possible_field, $show_content , wp_kses_post( get_the_content() ) );
 							} elseif ( is_numeric( $show_content ) || 'true' === $show_content ) {
 								if ( is_numeric( $show_content ) ) {
-									self::$show_content_count = $show_content;
+									self::$show_content_count = absint( $show_content );
 									add_filter( 'excerpt_length', function( $length ) {
 										return self::$show_content_count; }
 									, 999 );
