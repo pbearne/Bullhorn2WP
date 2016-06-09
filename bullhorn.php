@@ -46,7 +46,7 @@ class Bullhorn_Connection {
 	 *
 	 * @return \Bullhorn_Connection
 	 */
-	public function __construct() {
+	public function __construct () {
 		self::$settings   = get_option( 'bullhorn_settings' );
 		self::$api_access = get_option( 'bullhorn_api_access' );
 	}
@@ -58,7 +58,7 @@ class Bullhorn_Connection {
 	 * @throws Exception
 	 * @return boolean
 	 */
-	public static function sync( $throw = true ) {
+	public static function sync ( $throw = true ) {
 		// Refresh the token if necessary before doing anything
 		if ( false === self::refresh_token() ) {
 			return false;
@@ -77,10 +77,23 @@ class Bullhorn_Connection {
 
 		$response = self::get_categories_from_bullhorn();
 		if ( is_wp_error( $response ) ) {
-			return $response->get_error_message();
+			error_log( 'get categories failed: ' . serialize( $response->get_error_message() ) );
 		}
 
-		$jobs     = self::get_jobs_from_bullhorn();
+		if ( apply_filters( 'bullhorn_sync_skills', false ) ) {
+			$response = self::get_skills_from_bullhorn();
+			if ( is_wp_error( $response ) ) {
+				error_log( 'get skills failed: ' . serialize( $response->get_error_message() ) );
+			}
+		}
+		if ( apply_filters( 'bullhorn_sync_specialties', false ) ) {
+			$response = self::get_specialties_from_bullhorn();
+			if ( is_wp_error( $response ) ) {
+				error_log( 'get skills failed: ' . serialize( $response->get_error_message() ) );
+			}
+		}
+
+		$jobs = self::get_jobs_from_bullhorn();
 		if ( is_wp_error( $jobs ) ) {
 			return $jobs;
 		}
@@ -92,7 +105,7 @@ class Bullhorn_Connection {
 		if ( count( $jobs ) ) {
 			foreach ( $jobs as $job ) {
 				if ( 'Archive' !== $job->status ) {
-					if ( isset( $existing[ $job->id ] )  ) {
+					if ( isset( $existing[ $job->id ] ) ) {
 						self::sync_job( $job, $existing[ $job->id ] );
 					} else {
 						self::sync_job( $job );
@@ -113,8 +126,8 @@ class Bullhorn_Connection {
 	 * @throws Exception
 	 * @return boolean
 	 */
-	protected static function login() {
-		$cache_id = 'bullhorn_token';
+	protected static function login () {
+		$cache_id    = 'bullhorn_token';
 		$cache_token = wp_cache_get( $cache_id );
 		if ( false === $cache_token ) {
 			if ( false === self::refresh_token() ) {
@@ -135,7 +148,8 @@ class Bullhorn_Connection {
 			if ( isset( $body->BhRestToken ) ) {
 				self::$session = $body->BhRestToken;
 				self::$url     = $body->restUrl;
-				wp_cache_add( $cache_id, $body ,  MINUTE_IN_SECONDS * 8 );
+				wp_cache_add( $cache_id, $body, MINUTE_IN_SECONDS * 8 );
+
 				return true;
 			}
 		} else {
@@ -159,7 +173,7 @@ class Bullhorn_Connection {
 	 *
 	 * @return boolean
 	 */
-	protected static function refresh_token( $force = false ) {
+	protected static function refresh_token ( $force = false ) {
 		// TODO: stop re-calling every time
 		//      $eight_mins_ago = strtotime( '8 minutes ago' );
 		//      if ( false === $force && $eight_mins_ago <= self::api_access['last_refreshed'] ) {
@@ -208,9 +222,9 @@ class Bullhorn_Connection {
 	/**
 	 * This retreives all available categories from Bullhorn.
 	 *
-	 * @return array
+	 * @return error|bool
 	 */
-	private static function get_categories_from_bullhorn() {
+	private static function get_categories_from_bullhorn () {
 		//TODO: cache this
 		$url    = self::$url . 'options/Category';
 		$params = array(
@@ -221,20 +235,76 @@ class Bullhorn_Connection {
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
-		$body     = json_decode( $response['body'] );
+		$body = json_decode( $response['body'] );
 		if ( isset( $body->data ) ) {
 			foreach ( $body->data as $category ) {
 				wp_insert_term( $category->label, 'bullhorn_category' );
 			}
 		}
 
-		return array();
+		return true;
 	}
 
-	public static function no_token_admin_notice() {
-		$class   = 'error';
-		$message = 'Error in saving';
-		echo "<div class=\"$class\"> <p>$message</p></div>";
+	/**
+	 * This retreives all available Skills from Bullhorn.
+	 *
+	 * @return error|bool
+	 */
+	private static function get_skills_from_bullhorn () {
+
+		$url = self::$url . 'query/Skill';
+		$url = add_query_arg( $params = array(
+			'BhRestToken' => self::$session,
+			'where'       => 'enabled=true',
+			'fields'      => '*',
+		), $url );
+
+		$response = self::request( $url, false );
+		if ( is_wp_error( $response ) ) {
+
+			return $response;
+		}
+		$body = json_decode( $response['body'] );
+		if ( isset( $body->data ) ) {
+			foreach ( $body->data as $category ) {
+				wp_insert_term( $category->label, 'bullhorn_skills' );
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * This retreives all available specialties from Bullhorn.
+	 *
+	 * @return error|bool
+	 */
+	private static function get_specialties_from_bullhorn () {
+		$url = self::$url . 'query/Specialties';
+		$url = add_query_arg( $params = array(
+			'BhRestToken' => self::$session,
+			'where'       => 'enabled=true',
+			'fields'      => '*',
+		), $url );
+
+		$response = self::request( $url, false );
+		if ( is_wp_error( $response ) ) {
+
+			return $response;
+		}
+		$body = json_decode( $response['body'] );
+		if ( isset( $body->data ) ) {
+			foreach ( $body->data as $category ) {
+				wp_insert_term( $category->label, 'bullhorn_specialties' );
+			}
+		}
+
+		return true;
+	}
+
+
+	public static function no_token_admin_notice () {
+		printf( '<div class="error"> <p>%s</p></div>', esc_html__( 'Error in saving', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
 	}
 
 	/**
@@ -242,7 +312,7 @@ class Bullhorn_Connection {
 	 *
 	 * @return string
 	 */
-	private static function get_description_field() {
+	private static function get_description_field () {
 		if ( isset( self::$settings['description_field'] ) ) {
 			$description = self::$settings['description_field'];
 		} else {
@@ -257,7 +327,7 @@ class Bullhorn_Connection {
 	 *
 	 * @return array
 	 */
-	private static function get_jobs_from_bullhorn() {
+	private static function get_jobs_from_bullhorn () {
 		// Use the specified description field if set, otherwise the default
 		$description = self::get_description_field();
 
@@ -295,7 +365,7 @@ class Bullhorn_Connection {
 
 			$response = self::request( $url . '?' . http_build_query( $params ), false );
 
-			$body     = json_decode( $response['body'] );
+			$body = json_decode( $response['body'] );
 
 			if ( isset( $body->data ) ) {
 				$start += $page;
@@ -325,7 +395,7 @@ class Bullhorn_Connection {
 	 * @return bool
 	 * @throws Exception
 	 */
-	private static function sync_job( $job, $id = null ) {
+	private static function sync_job ( $job, $id = null ) {
 		global $post;
 		$description = self::get_description_field();
 
@@ -399,7 +469,7 @@ class Bullhorn_Connection {
 		return true;
 	}
 
-	private static function create_json_ld( $job, $categories ) {
+	private static function create_json_ld ( $job, $categories ) {
 		$description = self::get_description_field();
 		$address     = (array) $job->address;
 
@@ -466,7 +536,7 @@ class Bullhorn_Connection {
 	 * @internal param $date
 	 *
 	 */
-	private static function format_date_to_8601( $microtime ) {
+	private static function format_date_to_8601 ( $microtime ) {
 		$microtime = $microtime / 1000;
 		// make sure the have a .00 in the date format
 		if ( ! strpos( $microtime, '.' ) ) {
@@ -478,7 +548,7 @@ class Bullhorn_Connection {
 		return $utc->format( 'c' );
 	}
 
-	private static function get_country_name( $country_id ) {
+	private static function get_country_name ( $country_id ) {
 
 		$country_list_id = 'bullhorn_country_list';
 
@@ -526,7 +596,7 @@ class Bullhorn_Connection {
 	 *
 	 * @return boolean
 	 */
-	private static function remove_old( $jobs ) {
+	private static function remove_old ( $jobs ) {
 		$ids = array();
 		foreach ( $jobs as $job ) {
 			if ( 'Archive' !== $job->status ) {
@@ -570,7 +640,7 @@ class Bullhorn_Connection {
 	 *
 	 * @return array
 	 */
-	private static function get_existing() {
+	private static function get_existing () {
 		global $wpdb;
 		//TODO: change this the WP_QUERY meta select
 		$posts = $wpdb->get_results( "SELECT $wpdb->posts.id, $wpdb->postmeta.meta_value FROM $wpdb->postmeta JOIN $wpdb->posts ON $wpdb->posts.id = $wpdb->postmeta.post_id WHERE meta_key = 'bullhorn_job_id'", ARRAY_A );
@@ -591,7 +661,7 @@ class Bullhorn_Connection {
 	 * @return array
 	 * @throws Exception
 	 */
-	public static function request( $url, $throw = true ) {
+	public static function request ( $url, $throw = true ) {
 		$response = wp_remote_get( $url, array( 'timeout' => 180 ) );
 		if ( is_wp_error( $response ) ) {
 			if ( $throw ) {
