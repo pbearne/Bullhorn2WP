@@ -55,10 +55,19 @@ function ah_send_me_form() {
 	// Who are we going to send this form too
 	$send_to = 'retuer@jobsite.com';
 
+	$folder_path = WP_CONTENT_DIR . '/uploads/cv/';
 	$attachments = array();
 	$tmp_nae = $_FILES['resume']['tmp_name'];
-	$new_name = WP_CONTENT_DIR . '/uploads/cv/' . $_FILES['resume']['name'];
+	$new_name = $folder_path . $_FILES['resume']['name'];
 
+	$count = 0;
+	while ( file_exists( $new_name ) ) {
+		$new_name = $folder_path . $count . '-' . $_FILES['resume']['name'];
+		$count ++;
+	}
+	if ( ! file_exists( $folder_path ) ) {
+		mkdir( $folder_path, 0777, true );
+	}
 	move_uploaded_file( $tmp_nae, $new_name );
 
 	if ( file_exists( $new_name ) ) {
@@ -82,3 +91,22 @@ function ah_parse_resume_failed_text( $text ) {
 }
 
 add_filter( 'parse_resume_failed_text', 'ah_parse_resume_failed_text' );
+
+
+
+function bullhorn_shortcode_bottom_job( $output, $id ) {
+	$output .= '<div id="linky">';
+	$output .= '<a href="' . get_permalink( $id ) . '">' . 'Read more >>' . '</a>';
+	$output .= '</div>';
+
+	return $output;
+}
+
+add_filter( 'bullhorn_shortcode_bottom_job', 'bullhorn_shortcode_bottom_job', 10, 2 );
+
+function bullhorn_shortcode_base_salary_meta_value( $meta_value ) {
+
+	return 'Payrate: $'. $meta_value;
+}
+
+add_filter( 'bullhorn-shortcode-baseSalary-meta-value', 'bullhorn_shortcode_base_salary_meta_value' );

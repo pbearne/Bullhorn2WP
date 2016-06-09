@@ -77,22 +77,22 @@ class Shortcodes {
 			printf( '<div class="bh-message"><strong>%s</strong></div>', esc_html( apply_filters( 'bh-message', wp_unslash( $_GET['bh-message'] ) ) ) );
 		}
 		?>
-		<form id="bullhorn-resume" action="/api/bullhorn/resume" enctype="multipart/form-data" method="post">
+		<form id="bullhorn-resume" action="<?php echo esc_url( site_url( '/api/bullhorn/resume' ) ); ?>" enctype="multipart/form-data" method="post">
 
 			<?php
 			do_action( 'wp_bullhorn_render_cv_form_top', $element_to_show, $settings );
 
 			if ( false !== array_search( 'name' , $element_to_show )  ) { ?>
-			<label for="name"><?php _e( 'Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?> <span class="gfield_required"> *</span></label>
-			<input id="name" name="name" type="text"/>
+				<label for="name"><?php _e( 'Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?> <span class="gfield_required"> *</span></label>
+				<input id="name" name="name" type="text"/>
 			<?php }?>
 			<?php if ( false !== array_search( 'email' , $element_to_show )  ) { ?>
-			<label for="email"><?php _e( 'Email', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?><span class="gfield_required"> *</span></label>
-			<input id="email" name="email" type="text"/>
+				<label for="email"><?php _e( 'Email', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?><span class="gfield_required"> *</span></label>
+				<input id="email" name="email" type="text"/>
 			<?php }?>
 			<?php if ( false !== array_search( 'phone' , $element_to_show )  ) { ?>
-			<label for="phone"><?php _e( 'Phone', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>
-			<input id="phone" name="phone" type="text"/>
+				<label for="phone"><?php _e( 'Phone', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>
+				<input id="phone" name="phone" type="text"/>
 				<label for="message"><?php _e( '<br/>Message<br/>', 'bh-staffing-job-listing-and-cv-upload-for-wp' )?></label>
 				<textarea name="message" cols="40" rows="10" id="message"></textarea>
 			<?php }?>
@@ -118,7 +118,7 @@ class Shortcodes {
 			<span class="<?php echo apply_filters( 'wp_bullhorn_render_cv_form_file_input_styles', 'file-to-upload-wrap' ); ?>">
 				<input id="fileToUpload" name="resume" type="file" accept=".pdf,.docx,.doc,.text,.rft,.html"/>
 			</span>
-				<br/><br/>
+			<br/><br/>
 			<?php
 			if ( isset( $_GET['position'] ) ) {
 				printf( '<input id="position" name="position" type="hidden" value="%s" />',	esc_attr( $_GET['position'] ) );
@@ -204,10 +204,10 @@ class Shortcodes {
 			'show_date' => false,
 			'state'     => null,
 			'type'      => null,
-			'title'     => true,
+			'title'     => null,
 			'columns'   => 1,
-			'show_content' => false, // full, 10 (words), true ( extract )
-			'meta_to_show' => '', // 'bullhorn_job_id','bullhorn_job_address','bullhorn_json_ld','employmentType','baseSalary','city','state','Country','zip',
+			'show_content' => 'extract', // full, 10 (words), extract, null
+			'meta_to_show' => 'title, content', // 'bullhorn_job_id','bullhorn_job_address','bullhorn_json_ld','employmentType','baseSalary','city','state','Country','zip',
 		), $atts );
 
 		$output = null;
@@ -216,10 +216,11 @@ class Shortcodes {
 		$show_date = (bool) $atts['show_date'];
 		$state     = esc_attr( $atts['state'] );
 		$type      = esc_attr( $atts['type'] );
-		$title     = (bool) esc_attr( $atts['title'] );
+		$title     = esc_attr( $atts['title'] );
 		$columns   = absint( $atts['columns'] );
 		$show_content = esc_attr( $atts['show_content'] );
-		$meta_to_show = explode( ',', esc_attr( $atts['meta_to_show'] ) );
+		$meta_to_show = array_map( 'trim', explode( ',', esc_attr( $atts['meta_to_show'] ) ) );
+
 
 		// Only allow up to two columns for now
 		if ( $columns > 4 or $columns < 1 ) {
@@ -270,9 +271,9 @@ class Shortcodes {
 		$possible_fields = apply_filters( 'bullhorn_shortcode_possiable_fields_and_order', array(
 			'bullhorn_job_id',
 			'title',
+			'content',
 			'type',
 			'show_date',
-			'show_content',
 			'bullhorn_job_address',
 			'bullhorn_json_ld',
 			'employmentType',
@@ -292,33 +293,34 @@ class Shortcodes {
 				$id = get_the_ID();
 				$output .= sprintf( '<li id="job-%s">', $id );
 				$output = apply_filters( 'bullhorn_shortcode_top_job', $output, $id );
+
+
 				foreach ( $possible_fields as $possible_field ) {
+
+
 					if ( ! in_array( $possible_field, $meta_to_show, true ) ) {
 
 						continue;
 					}
+
 					switch ( $possible_field ) {
-
 						case 'title':
+							$output .= sprintf( '<a href="%s">%s</a>', esc_url_raw( get_permalink() ), esc_html( get_the_title() ) );
 
-							if ( $title ) {
-								$output .= sprintf( '<a href="%s">%s</a>', esc_url_raw( get_permalink() ), esc_html( get_the_title() ) );
-							}
 							if ( $show_date ) {
 								$output .= sprintf( '<span class="date"> posted on %s</span>', esc_html( get_the_date( 'F jS, Y' ) ) );
 							}
 
 							break;
-						case 'show_content':
-
+						case 'content':
 							if ( 'full' === $show_content ) {
 								$output .= sprintf( '<div class="%s %s">%s</div>', $possible_field, $show_content , wp_kses_post( get_the_content() ) );
-							} elseif ( is_numeric( $show_content ) || 'true' === $show_content ) {
+							} elseif ( is_numeric( $show_content ) || 'extract' === $show_content ) {
 								if ( is_numeric( $show_content ) ) {
 									self::$show_content_count = absint( $show_content );
 									add_filter( 'excerpt_length', function( $length ) {
 										return self::$show_content_count; }
-									, 999 );
+										, 999 );
 								}
 								$output .= sprintf( '<div class="%s %s">%s</div>', $possible_field, $show_content , wp_kses_post( get_the_excerpt() ) );
 							}
@@ -332,7 +334,7 @@ class Shortcodes {
 									$output .= sprintf( '<div class="%s">%s</div>', esc_attr( $possible_field ), esc_html( $meta_value ) );
 								}
 							}
-						break;
+							break;
 					}
 				}
 				$output  = apply_filters( 'bullhorn_shortcode_bottom_job', $output, $id );
