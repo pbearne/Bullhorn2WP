@@ -98,32 +98,46 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 					// Create candidate
 					$candidate = self::createCandidate( $resume );
 
-					// Attach education to candidate
-					self::attachEducation( $resume, $candidate );
+					if ( false === $candidate || ! isset( $candidate->changedEntityId ) ) {
+						error_log( 'Candidate ID not set: ' . serialize( $candidate ) );
 
-					// Attach work history to candidate
-					self::attachWorkHistory( $resume, $candidate );
-					//var_dump($resume->candidateWorkHistory);
+						$settings = (array) get_option( 'bullhorn_settings' );
+						$permalink = add_query_arg( array(
+							'bh_applied' => false,
+						), get_permalink( $settings['thanks_page'] ) );
 
-					// Attach work history to candidate
-					self::attachSkills( $resume, $candidate );
+						header( "location: $permalink" );
+						exit;
+					} else {
+						// Attach education to candidate
+						self::attachEducation( $resume, $candidate );
 
-					// link to job
-					self::link_candidate_to_job( $candidate );
+						// Attach work history to candidate
+						self::attachWorkHistory( $resume, $candidate );
+						//var_dump($resume->candidateWorkHistory);
 
-					// Attach resume file to candidate
-					error_log( 'wp_upload_file_request: ' . self::wp_upload_file_request( $candidate ) );
+						// Attach work history to candidate
+						self::attachSkills( $resume, $candidate );
 
-					do_action( 'wp-bullhorn-cv-upload-complete', $candidate, $resume );
+						// link to job
+						self::link_candidate_to_job( $candidate );
 
-					// Redirect
-					$settings = (array) get_option( 'bullhorn_settings' );
-					$permalink = add_query_arg( array(
-						'bh_applied' => true,
-					), get_permalink( $settings['thanks_page'] ) );
+						// Attach resume file to candidate
+						error_log( 'wp_upload_file_request: ' . self::wp_upload_file_request( $candidate ) );
 
-					header( "location: $permalink" );
-					exit;
+						do_action( 'wp-bullhorn-cv-upload-complete', $candidate, $resume );
+
+						// Redirect
+						$settings = (array) get_option( 'bullhorn_settings' );
+						$permalink = add_query_arg( array(
+							'bh_applied' => true,
+						), get_permalink( $settings['thanks_page'] ) );
+
+						header( "location: $permalink" );
+						exit;
+					}
+
+
 
 					break;
 				default:
@@ -427,6 +441,13 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		);
 
 		$response = wp_remote_get( $url, array( 'body' => json_encode( $resume->candidate ), 'method' => 'PUT' ) );
+
+		$safety_count = 0;
+		while ( 500 === $response['response']['code'] && 5 > $safety_count ) {
+			error_log( 'Create Canditate failed( ' . $safety_count . '): ' . serialize( $response ) );
+			$response = wp_remote_get( $url, array('body' => json_encode( $resume->candidate ), 'method' => 'PUT' ) );
+			$safety_count ++;
+		}
 
 		if ( ! is_wp_error( $response ) && 200 === $response['response']['code'] ) {
 
