@@ -137,69 +137,23 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		}
 	}
 
-	public static function add_bullhorn_candidate( $profile_data, $file_data ) {
-
-		$local_file = $file_data['resume']['tmp_name'];
-		// Get Resume
-		$resume = self::parseResume( $local_file );
-
-		if ( false === $resume ) {
-			return false;
-		}
-
-		// Create candidate
-		$candidate = self::createCandidate( $resume, $profile_data );
-
-		// Attach education to candidate
-		self::attachEducation( $resume, $candidate );
-
-		// Attach work history to candidate
-		self::attachWorkHistory( $resume, $candidate );
-		//var_dump($resume->candidateWorkHistory);
-
-		// Attach work history to candidate
-		self::attachSkills( $resume, $candidate );
-
-		// Attach resume file to candidate
-		$file_name = $file_data['resume']['name'];
-		error_log( 'wp_upload_file_request: ' . self::wp_upload_file_request( $candidate, $local_file, $file_name ) );
-
-		do_action( 'add_bullhorn_candidate_complete', $candidate, $resume, $profile_data, $file_data );
-		return true;
-	}
-
-	public static function update_bullhorn_candidate ( $profile_data, $file_data ) {
-
-
-		
-		do_action( 'update_bullhorn_candidate_complete', $candidate, $resume, $profile_data, $file_data );
-		return true;
-	}
-
 	/**
 	 * Takes the posted 'resume' file and returns a parsed version from bullhorn
 	 *
 	 * @return mixed
 	 */
-	public static function parseResume( $local_file = null ) {
-
-		if ( null === $local_file ) {
-			// check to make sure file was posted
-			if ( ! isset( $_FILES['resume'] ) ) {
-				self::throwJsonError( 500, 'No "resume" file found.' );
-			}
-			list( $ext, $format ) = self::get_filetype();
-
-			// API authentication
-			self::apiAuth();
-
-			// http://gerhardpotgieter.com/2014/07/30/uploading-files-with-wp_remote_post-or-wp_remote_request/
-			$local_file = $_FILES['resume']['tmp_name'];
+	public static function parseResume() {
+		// check to make sure file was posted
+		if ( ! isset( $_FILES['resume'] ) ) {
+			self::throwJsonError( 500, 'No "resume" file found.' );
 		}
+		list( $ext, $format ) = self::get_filetype();
 
-		if ( ! file_exists( $local_file ) ) {
-			return false;
-		}
+		// API authentication
+		self::apiAuth();
+
+		// http://gerhardpotgieter.com/2014/07/30/uploading-files-with-wp_remote_post-or-wp_remote_request/
+		$local_file = $_FILES['resume']['tmp_name'];
 		// wp_remote_request way
 
 		//https://github.com/jeckman/wpgplus/blob/master/gplus.php#L554
@@ -349,7 +303,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 *
 	 * @return mixed
 	 */
-	public static function createCandidate( $resume, $profile_data = array() ) {
+	public static function createCandidate( $resume ) {
 
 		if ( ! isset( $resume->candidate ) ) {
 			return false;
@@ -360,59 +314,40 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			$resume->candidate->address->countryID = 1;
 		}
 
-		if ( isset( $profile_data['email'] ) ) {
-			$cv_email = $resume->candidate->email;
-
-			$resume->candidate->email = esc_attr( $profile_data['email'] );
-			$resume->candidate->email2 = esc_attr( $cv_email );
-		} elseif ( isset( $_POST['email'] ) ) {
-			$cv_email = $resume->candidate->email;
+		if ( isset( $_POST['email'] ) ) {
+			if ( isset( $resume->candidate->email ) ) {
+				$resume->candidate->email2 = $resume->candidate->email;
+			}
 
 			$resume->candidate->email = esc_attr( $_POST['email'] );
-			$resume->candidate->email2 = esc_attr( $cv_email );
 		}
 
-		if ( isset( $profile_data['phone'] ) ) {
-			$cv_email = $resume->candidate->email;
-
-			$resume->candidate->phone = esc_attr( $profile_data['phone'] );
-			$resume->candidate->phone2 = esc_attr( $cv_email );
-		} elseif ( isset( $_POST['phone'] ) ) {
-			$cv_phone = $resume->candidate->phone;
+		if ( isset( $_POST['phone'] ) ) {
+			if ( isset( $resume->candidate->phone ) ) {
+				$resume->candidate->phone2 = $resume->candidate->phone;
+			}
 
 			$resume->candidate->phone = esc_attr( $_POST['phone'] );
-			$resume->candidate->phone2 = esc_attr( $cv_phone );
 		}
-		if ( isset( $profile_data['name'] ) ) {
 
-			$resume->candidate->name = esc_attr( $profile_data['name'] );
-		} elseif ( isset( $_POST['name'] ) ) {
+		if ( isset( $_POST['name'] ) ) {
 
 			$resume->candidate->name = esc_attr( $_POST['name'] );
 		}
 
-		$address_fields = array( 'address1', 'address2', 'city', 'state', 'zip' );
-		if ( isset( $profile_data['address'] ) ) {
-			$cv_address = $resume->candidate->address;
+		if ( isset( $_POST['address1'] ) ) {
+			if ( isset( $resume->candidate->address ) ) {
 
+				$resume->candidate->secondaryAddress = $resume->candidate->address;;
+			}
+			$address_fields = array( 'address1', 'address2', 'city', 'state', 'zip' );
 			$address_data = array();
 
 			foreach ( $address_fields as $key ) {
-				$address_data[ $key ] = ( isset( $profile_data[$key] ) ) ? $profile_data[ $key ] : '';
+				$address_data[ $key ] = ( isset( $_POST[ $key ] ) ) ? $_POST[ $key ] : '';
 			}
+
 			$resume->candidate->address = $address_data;
-			$resume->candidate->secondaryAddress = $cv_address;
-		} elseif ( isset( $_POST['address1'] ) ) {
-			$cv_address = $resume->candidate->address;
-
-			$address_data = array();
-
-			foreach ( $address_fields as $key ) {
-				$address_data[$key] = ( isset( $_POST[ $key ] ) ) ? $_POST[ $key ] : '';
-			}
-			$resume->candidate->address = $address_data;
-			$resume->candidate->secondaryAddress = $cv_address;
-
 		}
 
 		$resume->candidate->source = 'New Website';
@@ -606,19 +541,13 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	/**
 	 * @param $candidate
 	 *
-	 * @param null $local_file
-	 * @param null $file_name
 	 * @return array|bool|mixed|object
 	 */
-	public static function wp_upload_file_request( $candidate, $local_file = null, $file_name = null ) {
+	public static function wp_upload_file_request( $candidate ) {
 
 		list( $ext, $format ) = self::get_filetype();
 
-		$local_file = ( null === $local_file ) ? $_FILES['resume']['tmp_name'] : $local_file;
-		$file_name = ( null === $file_name ) ? $_FILES['resume']['name'] : $file_name;
-		$file_title = ( isset( $candidate->firstName ) ) ? $candidate->firstName . ' ' : '';
-		$file_title .= ( isset( $candidate->lastName ) ) ? $candidate->lastName : '';
-		$file_title = ( ! empty( $file_title ) ) ? ' for ' . $file_title : $file_title;
+		$local_file = $_FILES['resume']['tmp_name'];
 		// wp_remote_request way
 
 		//https://github.com/jeckman/wpgplus/blob/master/gplus.php#L554
@@ -626,7 +555,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$payload = '';
 		$payload .= '--' . $boundary;
 		$payload .= "\r\n";
-		$payload .= 'Content-Disposition: form-data; name="Resume' . $file_title . '"; filename="' . esc_url_raw( $file_name ) . '"' . "\r\n";
+		$payload .= 'Content-Disposition: form-data; name="photo_upload_file_name"; filename="' . $_FILES['resume']['name'] . '"' . "\r\n";
 		$payload .= 'Content-Type: ' . $format . '\r\n'; // If you	know the mime-type
 		$payload .= 'Content-Transfer-Encoding: binary' . "\r\n";
 		$payload .= "\r\n";
@@ -649,7 +578,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 				'BhRestToken' => self::$session,
 				'externalID' => 'Portfolio',
 				'fileType' => 'SAMPLE',
-			), self::$url . '/file/Candidate/' . esc_url_raw( $candidate->changedEntityId ) . '/raw'
+			), self::$url . '/file/Candidate/' . $candidate->changedEntityId . '/raw'
 		);
 		$response = wp_remote_request( $url, $args );
 
@@ -775,20 +704,38 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		}
 		$jobOrder = absint( $_POST['position'] );
 
+
+//		$url = add_query_arg(
+//			array(
+//				'BhRestToken' => self::$session,
+//			), self::$url . 'entity/Tearsheet' . absint( $jobOrder ) . '/candidates/' .  absint( $candidate->changedEntityId )
+//		);
+//
+//		$response = wp_remote_get( $url, array( 'method' => 'PUT' ) );
+
+
 		$url = add_query_arg(
 			array(
 				'BhRestToken' => self::$session,
 			), self::$url . 'entity/JobSubmission'
 		);
 
+
 		$body = array(
 			'candidate' => array( 'id' => absint( $candidate->changedEntityId ) ),
 			'jobOrder' => array( 'id' => absint( $jobOrder ) ),
-			'status' => 'New Lead',
+			'status' => 'Submitted', // 'New Lead',
 			'dateWebResponse' => self::microtime_float(), //date( 'u', $date ),// time(),
 		);
 
 		$response = wp_remote_get( $url, array( 'body' => json_encode( $body ), 'method' => 'PUT' ) );
+
+		$safety_count = 0;
+		while ( 500 === $response['response']['code'] && 5 > $safety_count ) {
+			error_log( 'Link to job failed (' . $safety_count . '): ' . serialize( $response ) );
+			$response = wp_remote_get( $url, array( 'body' => wp_json_encode( $body ), 'method' => 'PUT' ) );
+			$safety_count ++;
+		}
 
 		if ( 200 === $response['response']['code'] ) {
 			return json_decode( $response['body'] );
