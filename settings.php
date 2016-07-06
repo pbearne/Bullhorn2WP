@@ -334,7 +334,7 @@ class Bullhorn_Settings {
 		);
 
 		foreach ( $sorts as $value => $name ) {
-			printf( '<label for="%1$s">%2$s&nbsp;<input name="bullhorn_settings[is_public]" id="%1$s" value="%1$s" type="radio" %3$s>&nbsp;</label>',
+			printf( '<label for="%1$s">%2$s&nbsp;<input name="bullhorn_settings[mark_submitted]" id="%1$s" value="%1$s" type="radio" %3$s>&nbsp;</label>',
 				esc_attr( $value ),
 				esc_attr( $name ),
 				checked( $mark_submitted, $value, false )

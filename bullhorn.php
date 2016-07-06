@@ -77,25 +77,37 @@ class Bullhorn_Connection {
 
 		$response = self::get_categories_from_bullhorn();
 		if ( is_wp_error( $response ) ) {
-			error_log( 'get categories failed: ' . serialize( $response->get_error_message() ) );
+			if ( $throw ) {
+				error_log( 'Get categories failed: ' . serialize( $response->get_error_message() ) );
+			} else {
+				return __( 'Get categories failed: ' . serialize( $response->get_error_message() ) );
+			}
 		}
 
 		if ( apply_filters( 'bullhorn_sync_skills', false ) ) {
 			$response = self::get_skills_from_bullhorn();
 			if ( is_wp_error( $response ) ) {
-				error_log( 'get skills failed: ' . serialize( $response->get_error_message() ) );
+				if ( $throw ) {
+					error_log( 'Get skills failed: ' . serialize( $response->get_error_message() ) );
+				} else {
+					return __( 'Get skills failed:  ' . serialize( $response->get_error_message() ) );
+				}
 			}
 		}
 		if ( apply_filters( 'bullhorn_sync_specialties', false ) ) {
 			$response = self::get_specialties_from_bullhorn();
 			if ( is_wp_error( $response ) ) {
-				error_log( 'get skills failed: ' . serialize( $response->get_error_message() ) );
+				if ( $throw ) {
+					error_log( 'Get skills failed: ' . serialize( $response->get_error_message() ) );
+				} else {
+					return __( 'Get categories failed: ' . serialize( $response->get_error_message() ) );
+				}
 			}
 		}
 
 		$jobs = self::get_jobs_from_bullhorn();
 		if ( is_wp_error( $jobs ) ) {
-			return $jobs;
+			return __( 'Get Jobs failed: ' . serialize( $jobs ) );
 		}
 
 		$existing = self::get_existing();
@@ -128,7 +140,7 @@ class Bullhorn_Connection {
 	 */
 	protected static function login () {
 		$cache_id    = 'bullhorn_token';
-		$cache_token = wp_cache_get( $cache_id );
+		$cache_token = false; //wp_cache_get( $cache_id );
 		if ( false === $cache_token ) {
 			if ( false === self::refresh_token() ) {
 				return false;
@@ -160,6 +172,10 @@ class Bullhorn_Connection {
 
 		// TODO: make to user freindly
 		if ( isset( $body->errorMessage ) ) {
+			$admin_email = get_option( 'admin_email' );
+			error_log( 'Login failed. With the message:' . $body->errorMessage );
+			$headers = 'From: Bullhorn Plugin <' . $admin_email . '>';
+			wp_mail( $admin_email, 'Login failed please reconnect ', 'With the message: ' . $body->errorMessage, $headers );
 			throw new Exception( $body->errorMessage );
 		}
 
@@ -364,6 +380,10 @@ class Bullhorn_Connection {
 			}
 
 			$response = self::request( $url . '?' . http_build_query( $params ), false );
+
+			if ( is_wp_error( $response ) ) {
+				return $response;
+			}
 
 			$body = json_decode( $response['body'] );
 
