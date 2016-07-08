@@ -283,7 +283,7 @@ class Bullhorn_Connection {
 		$body = json_decode( $response['body'] );
 		if ( isset( $body->data ) ) {
 			foreach ( $body->data as $category ) {
-				wp_insert_term( $category->label, 'bullhorn_skills' );
+				wp_insert_term( $category->name, 'bullhorn_skills' );
 			}
 		}
 
@@ -469,10 +469,19 @@ class Bullhorn_Connection {
 			update_post_meta( $id, $key, $val );
 		}
 
-		update_post_meta( $id, 'city', $create_json_ld['jobLocation']['address']['addressLocality'] );
-		update_post_meta( $id, 'state', $create_json_ld['jobLocation']['address']['addressRegion'] );
-		update_post_meta( $id, 'Country', $create_json_ld['jobLocation']['address']['addressCountry'] );
-		update_post_meta( $id, 'zip', $create_json_ld['jobLocation']['address']['postalCode'] );
+		if ( isset( $create_json_ld['jobLocation']['address']['addressLocality'] ) ) {
+			update_post_meta( $id, 'city', $create_json_ld['jobLocation']['address']['addressLocality'] );
+		}
+		if ( isset( $create_json_ld['jobLocation']['address']['addressRegion'] ) ) {
+			update_post_meta( $id, 'state', $create_json_ld['jobLocation']['address']['addressRegion'] );
+		}
+		if ( isset( $create_json_ld['jobLocation']['address']['addressCountry'] ) ) {
+			update_post_meta( $id, 'Country', $create_json_ld['jobLocation']['address']['addressCountry'] );
+		}
+		if ( isset( $create_json_ld['jobLocation']['address']['postalCode'] ) ) {
+			update_post_meta( $id, 'zip', $create_json_ld['jobLocation']['address']['postalCode'] );
+		}
+
 
 		$custom_fields = array(
 			'bullhorn_job_id'      => $job->id,

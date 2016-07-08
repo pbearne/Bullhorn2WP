@@ -62,7 +62,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 						! isset( $_POST['bullhorn_cv_form'] )
 						|| ! wp_verify_nonce( $_POST['bullhorn_cv_form'], 'bullhorn_cv_form' )
 					) {
-						print __( 'Sorry, your nonce did not verify.', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
+						esc_attr_e( 'Sorry, your nonce did not verify.', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
 						die();
 
 					}
@@ -109,32 +109,32 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 						header( "location: $permalink" );
 						exit;
 					} else {
-					// Attach education to candidate
-					self::attachEducation( $resume, $candidate );
+						// Attach education to candidate
+						self::attachEducation( $resume, $candidate );
 
-					// Attach work history to candidate
-					self::attachWorkHistory( $resume, $candidate );
-					//var_dump($resume->candidateWorkHistory);
+						// Attach work history to candidate
+						self::attachWorkHistory( $resume, $candidate );
+						//var_dump($resume->candidateWorkHistory);
 
-					// Attach work history to candidate
-					self::attachSkills( $resume, $candidate );
+						// Attach work history to candidate
+						self::attachSkills( $resume, $candidate );
 
-					// link to job
-					self::link_candidate_to_job( $candidate );
+						// link to job
+						self::link_candidate_to_job( $candidate );
 
-					// Attach resume file to candidate
-					error_log( 'wp_upload_file_request: ' . self::wp_upload_file_request( $candidate ) );
+						// Attach resume file to candidate
+						error_log( 'wp_upload_file_request: ' . self::wp_upload_file_request( $candidate ) );
 
-					do_action( 'wp-bullhorn-cv-upload-complete', $candidate, $resume );
+						do_action( 'wp-bullhorn-cv-upload-complete', $candidate, $resume );
 
-					// Redirect
-					$settings = (array) get_option( 'bullhorn_settings' );
-					$permalink = add_query_arg( array(
-						'bh_applied' => true,
-					), get_permalink( $settings['thanks_page'] ) );
+						// Redirect
+						$settings = (array) get_option( 'bullhorn_settings' );
+						$permalink = add_query_arg( array(
+							'bh_applied' => true,
+						), get_permalink( $settings['thanks_page'] ) );
 
-					header( "location: $permalink" );
-					exit;
+						header( "location: $permalink" );
+						exit;
 					}
 
 
@@ -414,7 +414,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			$address_data = array();
 
 			foreach ( $address_fields as $key ) {
-				$address_data[ $key ] = ( isset( $profile_data[$key] ) ) ? $profile_data[ $key ] : '';
+				$address_data[ $key ] = ( isset( $profile_data[ $key ] ) ) ? $profile_data[ $key ] : '';
 			}
 			$resume->candidate->address = $address_data;
 			$resume->candidate->secondaryAddress = $cv_address;

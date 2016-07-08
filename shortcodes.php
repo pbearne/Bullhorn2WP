@@ -77,7 +77,62 @@ class Shortcodes {
 			printf( '<div class="bh-message"><strong>%s</strong></div>', esc_html( apply_filters( 'bh-message', wp_unslash( $_GET['bh-message'] ) ) ) );
 		}
 		?>
-		<form id="bullhorn-resume" action="<?php echo esc_url( site_url( '/api/bullhorn/resume' ) ); ?>" enctype="multipart/form-data" method="post">
+		<style type="text/css">'
+		<?php
+		ob_start();
+		?>
+			#bullhorn-resume{
+				position: relative;
+			}
+			#bullhorn_upload_overlay{
+				display: none;
+				width: 104%;
+				height: 104%;
+				background: whitesmoke;
+				position: absolute;
+				top: -2%;
+				left: -2%;
+				opacity: .6;
+				filter: alpha(opacity=70);
+				border-radius: 8px;
+				-moz-border-radius: 8px;
+				-webkit-border-radius: 8px;
+				border: 0 solid #800000;
+			}
+			#bullhorn_upload_overlay div{
+				margin-top: 40%;
+				text-align: center;
+				border: 1px solid;
+				border-radius: 8px;
+				-moz-border-radius: 8px;
+				-webkit-border-radius: 8px;
+				margin-left: 2%;
+				margin-right: 2%;
+				padding: 40px;
+				background: #fff;
+				opacity: 1;
+				filter: alpha(opacity=100);
+			}
+
+			#bullhorn_upload_overlay .spinner{
+				background: url(<?php echo esc_js( admin_url( 'images/spinner.gif' ) ); ?> ) no-repeat;
+				-webkit-background-size: 20px 20px;
+				background-size: 20px 20px;
+				display: inline-block;
+				vertical-align: middle;
+				opacity: .7;
+				filter: alpha(opacity=70);
+				width: 20px;
+				height: 20px;
+				margin: -4px 6px 0;
+			}
+
+
+			<?php
+			echo esc_js( apply_filters( 'wp_bullhorn_form_css', ob_get_contents() ) );
+			?>
+		</style>
+		<form id="bullhorn-resume" action="<?php echo esc_url( site_url( '/api/bullhorn/resume' ) ); ?>" enctype="multipart/form-data" method="post" style="position: relative">
 
 			<?php
 			do_action( 'wp_bullhorn_render_cv_form_top', $element_to_show, $settings );
@@ -114,7 +169,7 @@ class Shortcodes {
 			?>
 
 
-			<label for="fileToUpload"><?php esc_html__( 'Your Resume', 'bh-staffing-job-listing-and-cv-upload-for-wp' ); ?><span class="gfield_required"> *</span></label>
+			<label for="fileToUpload"><?php esc_html_e( 'Your Resume', 'bh-staffing-job-listing-and-cv-upload-for-wp' ); ?><span class="gfield_required"> *</span></label>
 			<span class="<?php echo apply_filters( 'wp_bullhorn_render_cv_form_file_input_styles', 'file-to-upload-wrap' ); ?>">
 				<input id="fileToUpload" name="resume" type="file" accept=".pdf,.docx,.doc,.text,.rft,.html"/>
 			</span>
@@ -131,8 +186,14 @@ class Shortcodes {
 			?>
 			<input name="submit" type="submit" value="Upload Resume"/>
 			<?php do_action( 'wp_bullhorn_render_cv_form_close', $element_to_show, $settings ); ?>
-		</form>
-		<script type="application/javascript">
+			<div id="bullhorn_upload_overlay">
+				<div>
+					<span class="spinner"></span>
+					<?php esc_html_e( apply_filters( 'wp_bullhorn_form_submited_message', 'We are uploading your application it will take a a while to read your CV' ) ); ?>
+				</div>
+			</div>
+
+		</form>	<script type="application/javascript">
 
 			jQuery(document).ready( function () {
 				var error_color = '#FFDFE0';
@@ -168,6 +229,9 @@ class Shortcodes {
 					}
 
 					//	e.preventDefault();
+					if( true === $no_error ) {
+						jQuery( '#bullhorn_upload_overlay' ).show();
+					}
 					return $no_error;
 				});
 
