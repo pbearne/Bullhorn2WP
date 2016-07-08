@@ -129,7 +129,9 @@ class Shortcodes {
 
 
 			<?php
-			echo esc_js( apply_filters( 'wp_bullhorn_form_css', ob_get_contents() ) );
+				$css = ob_get_contents();
+				ob_clean();
+				echo wp_kses_post( apply_filters( 'wp_bullhorn_form_css', $css ) );
 			?>
 		</style>
 		<form id="bullhorn-resume" action="<?php echo esc_url( site_url( '/api/bullhorn/resume' ) ); ?>" enctype="multipart/form-data" method="post" style="position: relative">
@@ -187,10 +189,18 @@ class Shortcodes {
 			<input name="submit" type="submit" value="Upload Resume"/>
 			<?php do_action( 'wp_bullhorn_render_cv_form_close', $element_to_show, $settings ); ?>
 			<div id="bullhorn_upload_overlay">
+				<?php
+				ob_start();
+				?>
 				<div>
 					<span class="spinner"></span>
 					<?php esc_html_e( apply_filters( 'wp_bullhorn_form_submited_message', 'We are uploading your application it will take a a while to read your CV' ) ); ?>
 				</div>
+				<?php
+				$html = ob_get_contents();
+				ob_clean();
+				echo wp_kses_post( apply_filters( 'wp_bullhorn_form_overlay_contents', $html ) );
+				?>
 			</div>
 
 		</form>	<script type="application/javascript">
