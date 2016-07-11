@@ -352,10 +352,6 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 * @return void
 	 */
 	private static function apiAuth () {
-		// Refresh the token if necessary before doing anything
-		if ( false === self::refresh_token() ) {
-			return false;
-		};
 
 		// login to bullhorn api
 		$logged_in = self::login();

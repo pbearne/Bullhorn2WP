@@ -59,10 +59,6 @@ class Bullhorn_Connection {
 	 * @return boolean
 	 */
 	public static function sync ( $throw = true ) {
-		// Refresh the token if necessary before doing anything
-		if ( false === self::refresh_token() ) {
-			return false;
-		};
 
 		$logged_in = self::login();
 		if ( ! $logged_in ) {
@@ -191,10 +187,11 @@ class Bullhorn_Connection {
 	 */
 	protected static function refresh_token ( $force = false ) {
 		// TODO: stop re-calling every time
-		//      $eight_mins_ago = strtotime( '8 minutes ago' );
-		//      if ( false === $force && $eight_mins_ago <= self::api_access['last_refreshed'] ) {
-		//         return true;
-		//      }
+        $eight_mins_ago = strtotime( '8 minutes ago' );
+        if ( false === $force && $eight_mins_ago <= self::$api_access['last_refreshed'] ) {
+
+            return true;
+        }
 		// TODO: return false if client not set and add handlers for the call
 		if (
 			null === self::$api_access['refresh_token'] ||
@@ -218,6 +215,7 @@ class Bullhorn_Connection {
 		$response = wp_remote_post( $url );
 
 		if ( ! is_array( $response ) ) {
+
 			return false;
 		}
 		$body = json_decode( $response['body'], true );
@@ -229,6 +227,7 @@ class Bullhorn_Connection {
 
 			return true;
 		} elseif ( isset( $body['error_description'] ) ) {
+
 			wp_die( $body['error_description'] );
 		}
 
