@@ -138,7 +138,7 @@ class Bullhorn_Connection {
 	 * @throws Exception
 	 * @return boolean
 	 */
-	protected static function login () {
+	protected static function login() {
 		$cache_id    = 'bullhorn_token';
 		$cache_token = false; //wp_cache_get( $cache_id );
 		if ( false === $cache_token ) {
@@ -382,6 +382,7 @@ class Bullhorn_Connection {
 			$response = self::request( $url . '?' . http_build_query( $params ), false );
 
 			if ( is_wp_error( $response ) ) {
+
 				return $response;
 			}
 
@@ -424,7 +425,7 @@ class Bullhorn_Connection {
 			'post_content' => $job->{$description},
 			'post_type'    => 'bullhornjoblisting',
 			'post_status'  => 'publish',
-			'post_date'    => date( 'Y-m-d H:i:s', $job->dateAdded / 1000 ),
+			'post_date'    => date( 'Y-m-d 00:00:01', $job->dateAdded / 1000 ),
 		);
 
 		if ( null !== $id ) {
