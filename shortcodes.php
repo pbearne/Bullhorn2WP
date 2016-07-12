@@ -78,9 +78,9 @@ class Shortcodes {
 		}
 		?>
 		<style type="text/css">'
-		<?php
-		ob_start();
-		?>
+			<?php
+			ob_start();
+			?>
 			#bullhorn-resume{
 				position: relative;
 			}
@@ -130,7 +130,7 @@ class Shortcodes {
 
 			<?php
 				$css = ob_get_contents();
-				ob_clean();
+				ob_end_clean();
 				echo wp_kses_post( apply_filters( 'wp_bullhorn_form_css', $css ) );
 			?>
 		</style>
@@ -198,7 +198,7 @@ class Shortcodes {
 				</div>
 				<?php
 				$html = ob_get_contents();
-				ob_clean();
+				ob_end_clean();
 				echo wp_kses_post( apply_filters( 'wp_bullhorn_form_overlay_contents', $html ) );
 				?>
 			</div>
@@ -206,9 +206,9 @@ class Shortcodes {
 		</form>	<script type="application/javascript">
 
 			jQuery(document).ready( function () {
-				var error_color = '#FFDFE0';
-				var defaut_file_color = jQuery('#fileToUpload').css('background-color'); //'#fff';
-				var defaut_color = jQuery('#email').css('background-color'); //'#d0eafa';
+				error_color = '#FFDFE0';
+				defaut_file_color = jQuery('#fileToUpload').css('background-color'); //'#fff';
+				defaut_color = jQuery('#email').css('background-color'); //'#d0eafa';
 				jQuery('#bullhorn-resume').on('submit', function () {
 
 
