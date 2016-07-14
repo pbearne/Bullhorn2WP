@@ -188,7 +188,7 @@ class Bullhorn_Connection {
 	protected static function refresh_token ( $force = false ) {
 		// TODO: stop re-calling every time
         $eight_mins_ago = strtotime( '8 minutes ago' );
-        if ( false === $force && $eight_mins_ago <= self::$api_access['last_refreshed'] ) {
+        if ( false !== $force && $eight_mins_ago <= self::$api_access['last_refreshed'] ) {
 
             return true;
         }
