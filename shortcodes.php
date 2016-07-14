@@ -88,10 +88,18 @@ class Shortcodes {
 				display: none;
 				width: 104%;
 				height: 104%;
-				background: whitesmoke;
 				position: absolute;
 				top: -2%;
 				left: -2%;
+
+			}
+
+			#bullhorn_upload_overlay .bullhorn_upload_overlay_background{
+				width: 100%;
+				height: 100%;
+				top: 0;
+				left: 0;
+				background: whitesmoke;
 				opacity: .6;
 				filter: alpha(opacity=70);
 				border-radius: 8px;
@@ -99,8 +107,9 @@ class Shortcodes {
 				-webkit-border-radius: 8px;
 				border: 0 solid #800000;
 			}
-			#bullhorn_upload_overlay div{
-				margin-top: 40%;
+
+			#bullhorn_upload_overlay div.bullhorn_upload_overlay_message{
+				margin-top: -30%;
 				text-align: center;
 				border: 1px solid;
 				border-radius: 8px;
@@ -189,12 +198,13 @@ class Shortcodes {
 			<input name="submit" type="submit" value="Upload Resume"/>
 			<?php do_action( 'wp_bullhorn_render_cv_form_close', $element_to_show, $settings ); ?>
 			<div id="bullhorn_upload_overlay">
+				<div class="bullhorn_upload_overlay_background"></div>
 				<?php
 				ob_start();
 				?>
-				<div>
+				<div class="bullhorn_upload_overlay_message">
 					<span class="spinner"></span>
-					<?php esc_html_e( apply_filters( 'wp_bullhorn_form_submited_message', 'We are uploading your application it will take a a while to read your CV' ) ); ?>
+					<?php esc_html_e( apply_filters( 'wp_bullhorn_form_submitted_message', 'We are uploading your application, it may it take few monuments to read your resume. Please wait!' ) ); ?>
 				</div>
 				<?php
 				$html = ob_get_contents();
