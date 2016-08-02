@@ -106,6 +106,10 @@ class Bullhorn_Settings {
 			);
 
 			$response = wp_remote_post( $url );
+			if( is_wp_error( $response ) ) {
+				
+				wp_die( __( 'Callback to Bullhorn API failed. Please retry.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
+			}
 			$body     = json_decode( $response['body'], true );
 
 			if ( isset( $body['error_description'] ) ) {
@@ -128,6 +132,7 @@ class Bullhorn_Settings {
 	 */
 	public static function api_settings() {
 		if ( ! isset( $_GET['code'] ) ) {
+
 			return;
 		}
 
