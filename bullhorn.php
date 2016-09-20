@@ -80,16 +80,6 @@ class Bullhorn_Connection {
 			}
 		}
 
-		if ( apply_filters( 'bullhorn_sync_skills', false ) ) {
-			$response = self::get_skills_from_bullhorn();
-			if ( is_wp_error( $response ) ) {
-				if ( $throw ) {
-					error_log( 'Get skills failed: ' . serialize( $response->get_error_message() ) );
-				} else {
-					return __( 'Get skills failed:  ' . serialize( $response->get_error_message() ) );
-				}
-			}
-		}
 		if ( apply_filters( 'bullhorn_sync_specialties', false ) ) {
 			$response = self::get_specialties_from_bullhorn();
 			if ( is_wp_error( $response ) ) {
@@ -282,7 +272,7 @@ class Bullhorn_Connection {
 	 *
 	 * @return error|bool
 	 */
-	private static function get_skills_from_bullhorn () {
+	private static function get_skills_from_bullhorn() {
 
 		$url = self::$url . 'query/Skill';
 		$url = add_query_arg( $params = array(
