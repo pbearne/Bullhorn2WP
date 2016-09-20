@@ -59,8 +59,8 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			switch ( $wp->query_vars['endpoint'] ) {
 				case 'resume':
 
-					$thanks_page_url = esc_url( $_POST['_wp_http_referer'] );
-					
+					$thanks_page_url = esc_url( ( isset( $_POST['_wp_http_referer'] ) ) ? $_POST['_wp_http_referer'] : '' );
+
 					$settings = (array) get_option( 'bullhorn_settings' );
 					if ( 0 < $settings['thanks_page'] ) {
 						$thanks_page_url = get_permalink( $settings['thanks_page'] );
@@ -391,10 +391,10 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		}
 
 		if ( isset( $profile_data['phone'] ) ) {
-			$cv_email = $resume->candidate->email;
+			$cv_phone = $resume->candidate->phone;
 
 			$resume->candidate->phone  = esc_attr( $profile_data['phone'] );
-			$resume->candidate->phone2 = esc_attr( $cv_email );
+			$resume->candidate->phone2 = esc_attr( $cv_phone );
 		} elseif ( isset( $_POST['phone'] ) ) {
 			$cv_phone = $resume->candidate->phone;
 
