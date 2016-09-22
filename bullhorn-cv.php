@@ -451,8 +451,70 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		} elseif ( isset( $_POST['phone'] ) ) {
 			$cv_phone = $resume->candidate->phone;
 
-		return false;
+			$resume->candidate->phone  = esc_attr( $_POST['phone'] );
+			$resume->candidate->phone2 = esc_attr( $cv_phone );
 		}
+
+		if ( isset( $profile_data['name'] ) ) {
+
+			$resume->candidate->name = esc_attr( $profile_data['name'] );
+		} elseif ( isset( $_POST['name'] ) ) {
+
+			$resume->candidate->name = esc_attr( $_POST['name'] );
+		}
+
+		$address_fields = array( 'address1', 'address2', 'city', 'state', 'zip' );
+		if ( isset( $profile_data['address'] ) ) {
+			$cv_address = $resume->candidate->address;
+
+			$address_data = array();
+
+			foreach ( $address_fields as $key ) {
+				$address_data[ $key ] = ( isset( $profile_data[ $key ] ) ) ? $profile_data[ $key ] : '';
+			}
+			$resume->candidate->address          = $address_data;
+			$resume->candidate->secondaryAddress = $cv_address;
+		} elseif ( isset( $_POST['address1'] ) ) {
+			$cv_address = $resume->candidate->address;
+
+			$address_data = array();
+
+			foreach ( $address_fields as $key ) {
+				$address_data[ $key ] = ( isset( $_POST[ $key ] ) ) ? $_POST[ $key ] : '';
+			}
+
+			$resume->candidate->address          = $address_data;
+			$resume->candidate->secondaryAddress = $cv_address;
+
+		}
+
+		$resume->candidate->source = 'New Website';
+
+		// API authentication
+		self::apiAuth();
+
+		$url = add_query_arg(
+			array(
+				'BhRestToken' => self::$session,
+			), self::$url . 'entity/Candidate'
+		);
+
+		$response = wp_remote_get( $url, array( 'body' => json_encode( $resume->candidate ), 'method' => 'PUT' ) );
+
+		$safety_count = 0;
+		while ( 500 === $response['response']['code'] && 5 > $safety_count ) {
+			error_log( 'Create Canditate failed( ' . $safety_count . '): ' . serialize( $response ) );
+			$response = wp_remote_get( $url, array( 'body' => json_encode( $resume->candidate ), 'method' => 'PUT' ) );
+			$safety_count ++;
+		}
+
+		if ( ! is_wp_error( $response ) && 200 === $response['response']['code'] ) {
+
+			return json_decode( $response['body'] );
+		}
+
+		return false;
+	}
 
 	/**
 	 * Create a candidate int he system
