@@ -126,7 +126,7 @@ class Bullhorn_Connection {
 	 */
 	protected static function login() {
 		$cache_id    = 'bullhorn_token';
-		$cache_token = false; //wp_cache_get( $cache_id );
+		$cache_token = wp_cache_get( $cache_id );
 		if ( false === $cache_token ) {
 			if ( false === self::refresh_token() ) {
 				return false;
@@ -182,6 +182,13 @@ class Bullhorn_Connection {
 
             return true;
         }
+        // ok lets not do this if we have already done it in the last 20 sec
+        if ( false !== get_transient( 'get_bullhorn_token' ) ){
+
+	        return true;
+        }
+		set_transient( 'get_bullhorn_token', self::$api_access['last_refreshed'], 20 );
+
 		// TODO: return false if client not set and add handlers for the call
 		if (
 			null === self::$api_access['refresh_token'] ||
