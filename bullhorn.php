@@ -129,6 +129,7 @@ class Bullhorn_Connection {
 		$cache_token = wp_cache_get( $cache_id );
 		if ( false === $cache_token ) {
 			if ( false === self::refresh_token() ) {
+
 				return false;
 			};
 
@@ -142,27 +143,34 @@ class Bullhorn_Connection {
 
 			$response = self::request( $url );
 			$body     = json_decode( $response['body'] );
+			// TODO: make to user freindly
+			if ( isset( $body->errorMessage ) ) {
+				$admin_email = get_option( 'admin_email' );
+				error_log( 'Login failed. With the message:' . $body->errorMessage );
+				$headers = 'From: Bullhorn Plugin <' . $admin_email . '>';
+				wp_mail( $admin_email, 'Login failed please reconnect ', 'With the message: ' . $body->errorMessage, $headers );
+				throw new Exception( $body->errorMessage );
+
+				return false;
+			}
 
 			if ( isset( $body->BhRestToken ) ) {
 				self::$session = $body->BhRestToken;
 				self::$url     = $body->restUrl;
-				wp_cache_add( $cache_id, $body, MINUTE_IN_SECONDS * 8 );
+				wp_cache_add( $cache_id, $body, 'bullhorn', MINUTE_IN_SECONDS * 8 );
+				//	error_log( 'bullhorn_token from call ' . serialize($body) );
 
 				return true;
 			}
 		} else {
+			if( ! is_object( $cache_token) ) {
 			$cache_token   = json_decode( $cache_token );
+			}
+
 			self::$session = $cache_token->BhRestToken;
 			self::$url     = $cache_token->restUrl;
-		}
 
-		// TODO: make to user freindly
-		if ( isset( $body->errorMessage ) ) {
-			$admin_email = get_option( 'admin_email' );
-			error_log( 'Login failed. With the message:' . $body->errorMessage );
-			$headers = 'From: Bullhorn Plugin <' . $admin_email . '>';
-			wp_mail( $admin_email, 'Login failed please reconnect ', 'With the message: ' . $body->errorMessage, $headers );
-			throw new Exception( $body->errorMessage );
+			return true;
 		}
 
 		return false;
@@ -176,12 +184,14 @@ class Bullhorn_Connection {
 	 * @return boolean
 	 */
 	protected static function refresh_token ( $force = false ) {
+		//	error_log( 'refresh token start' );
 		// TODO: stop re-calling every time
         $eight_mins_ago = strtotime( '8 minutes ago' );
         if ( false !== $force && $eight_mins_ago <= self::$api_access['last_refreshed'] ) {
-
-            return true;
-        }
+			error_log( 'refresh token last refreshed'  . self::$api_access['last_refreshed'] );
+			return true;
+		}
+		
         // ok lets not do this if we have already done it in the last 20 sec
         if ( false !== get_transient( 'get_bullhorn_token' ) ){
 
@@ -221,7 +231,7 @@ class Bullhorn_Connection {
 			$body['last_refreshed'] = time();
 			update_option( 'bullhorn_api_access', $body );
 			self::$api_access = $body;
-
+			//		error_log( 'refresh token finish' );
 			return true;
 		} elseif ( isset( $body['error_description'] ) ) {
 
@@ -230,7 +240,6 @@ class Bullhorn_Connection {
 
 		return false;
 	}
-
 	/**
 	 * This retreives all available categories from Bullhorn.
 	 *
