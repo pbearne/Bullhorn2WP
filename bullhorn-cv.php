@@ -44,7 +44,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 *
 	 * @return void
 	 */
-	public static function add_endpoint () {
+	public static function add_endpoint() {
 		add_rewrite_rule( '^api/bullhorn/([^/]+)/?', 'index.php?__api=1&endpoint=$matches[1]', 'top' );
 	}
 
@@ -53,7 +53,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 *
 	 * @return void
 	 */
-	public static function sniff_requests () {
+	public static function sniff_requests() {
 		global $wp;
 		if ( isset( $wp->query_vars['__api'] ) && isset( $wp->query_vars['endpoint'] ) ) {
 			switch ( $wp->query_vars['endpoint'] ) {
@@ -84,8 +84,8 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 							'bh_applied' => false,
 						), $thanks_page_url );
 
-						header( "location: $permalink" );
-						exit;
+						wp_safe_redirect( $permalink );
+						die();
 					}
 
 					if ( is_array( $resume ) ) {
@@ -153,18 +153,28 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		}
 	}
 
+	/**
+	 *
+	 *
+	 * @static
+	 *
+	 * @param $profile_data
+	 * @param $file_data
+	 *
+	 * @return bool
+	 */
 	public static function add_bullhorn_candidate ( $profile_data, $file_data ) {
 
 		// Get Resume
 		if ( is_array( $file_data ) ) {
 			$resume = self::parseResume( $file_data );
 
-		if ( false === $resume ) {
+			if ( false === $resume ) {
 
-			return false;
-		}
+				return false;
+			}
 		} else {
-			// create data oject to create Candidate
+			// create data object to create Candidate
 
 			$resume                     = new stdClass();
 			$resume->candidate          = new stdClass();
@@ -230,6 +240,8 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 	/**
 	 * Takes the posted 'resume' file and returns a parsed version from bullhorn
+	 *
+	 * @param null $local_files
 	 *
 	 * @return mixed
 	 */
