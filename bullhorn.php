@@ -126,8 +126,7 @@ class Bullhorn_Connection {
 	 */
 	protected static function login() {
 		$cache_id    = 'bullhorn_token';
-		$cache_token = wp_cache_get( $cache_id, 'bullhorn' );
-		//	error_log( 'bullhorn_token from cache' . serialize($cache_token) );
+		$cache_token = wp_cache_get( $cache_id );
 		if ( false === $cache_token ) {
 			if ( false === self::refresh_token() ) {
 
@@ -165,7 +164,7 @@ class Bullhorn_Connection {
 			}
 		} else {
 			if( ! is_object( $cache_token) ) {
-				$cache_token   = json_decode( $cache_token );
+			$cache_token   = json_decode( $cache_token );
 			}
 
 			self::$session = $cache_token->BhRestToken;
@@ -187,17 +186,17 @@ class Bullhorn_Connection {
 	protected static function refresh_token ( $force = false ) {
 		//	error_log( 'refresh token start' );
 		// TODO: stop re-calling every time
-		$eight_mins_ago = strtotime( '8 minutes ago' );
-		if ( false !== $force && $eight_mins_ago <= self::$api_access['last_refreshed'] ) {
+        $eight_mins_ago = strtotime( '8 minutes ago' );
+        if ( false !== $force && $eight_mins_ago <= self::$api_access['last_refreshed'] ) {
 			error_log( 'refresh token last refreshed'  . self::$api_access['last_refreshed'] );
 			return true;
 		}
+		
+        // ok lets not do this if we have already done it in the last 20 sec
+        if ( false !== get_transient( 'get_bullhorn_token' ) ){
 
-		// ok lets not do this if we have already done it in the last 20 sec
-		if ( false !== get_transient( 'get_bullhorn_token' ) ){
-			//		error_log( 'bullhorn token transient set action' );
-			return true;
-		}
+	        return true;
+        }
 		set_transient( 'get_bullhorn_token', self::$api_access['last_refreshed'], 20 );
 
 		// TODO: return false if client not set and add handlers for the call
