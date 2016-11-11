@@ -17,6 +17,8 @@ class Bullhorn_Custom_Post_Type {
 
 		add_filter( 'comments_open', array( __CLASS__, 'comments_open' ), 10, 2 );
 
+		add_action( 'init' , array( __CLASS__, 'sniff_post' ) );
+
 		add_filter( 'manage_bullhornapplication_posts_columns', array( __CLASS__, 'set_custom_edit_columns' ) );
 		add_action( 'manage_bullhornapplication_posts_custom_column', array( __CLASS__, 'custom_column' ), 10, 2 );
 	}
@@ -151,6 +153,12 @@ class Bullhorn_Custom_Post_Type {
 		return true;
 	}
 
+	public static function sniff_post(){
+		if( isset( $_REQUEST['sync'] ) && isset( $_REQUEST['post_type'] ) && 'bullhornapplication' === $_REQUEST['post_type'] ){
+			bullhorn_application_sync( absint( $_REQUEST['sync'] ) );
+		}
+	}
+
 
 	public static function set_custom_edit_columns( $columns ) {
 
@@ -166,6 +174,12 @@ class Bullhorn_Custom_Post_Type {
 					echo __( 'Synced', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
 				} else {
 					echo __( 'Not synced', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
+					printf( ' - <a href="%s">%s</a>',
+						add_query_arg( array(
+							'sync' => $post_id,
+						), admin_url( 'edit.php?post_type=bullhornapplication' ) ),
+						__( 'Try Now', 'bh-staffing-job-listing-and-cv-upload-for-wp' )
+					);
 				}
 				break;
 		}

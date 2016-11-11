@@ -127,8 +127,9 @@ class Bullhorn_Connection {
 	 */
 	protected static function login() {
 		$cache_id    = 'bullhorn_token';
-		$cache_token = wp_cache_get( $cache_id );
+		$cache_token = get_transient( $cache_id );
 		if ( false === $cache_token ) {
+
 			if ( false === self::refresh_token() ) {
 
 				return false;
@@ -144,13 +145,14 @@ class Bullhorn_Connection {
 
 			$response = self::request( $url );
 			$body     = json_decode( $response['body'] );
+
 			// TODO: make to user freindly
 			if ( isset( $body->errorMessage ) ) {
 				$admin_email = get_option( 'admin_email' );
 				error_log( 'Login failed. With the message:' . $body->errorMessage );
 				$headers = 'From: Bullhorn Plugin <' . $admin_email . '>';
 				wp_mail( $admin_email, 'Login failed please reconnect ', 'With the message: ' . $body->errorMessage, $headers );
-				throw new Exception( $body->errorMessage );
+//				throw new Exception( $body->errorMessage );
 
 				return false;
 			}
@@ -158,14 +160,13 @@ class Bullhorn_Connection {
 			if ( isset( $body->BhRestToken ) ) {
 				self::$session = $body->BhRestToken;
 				self::$url     = $body->restUrl;
-				wp_cache_add( $cache_id, $body, 'bullhorn', MINUTE_IN_SECONDS * 8 );
-				//	error_log( 'bullhorn_token from call ' . serialize($body) );
+				set_transient( $cache_id, $body, MINUTE_IN_SECONDS * 8 );
 
 				return true;
 			}
 		} else {
 			if( ! is_object( $cache_token) ) {
-			$cache_token   = json_decode( $cache_token );
+				$cache_token   = json_decode( $cache_token );
 			}
 
 			self::$session = $cache_token->BhRestToken;
