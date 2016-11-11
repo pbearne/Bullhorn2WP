@@ -115,7 +115,8 @@ register_activation_hook( __FILE__, 'bullhorn_activation_hook' );
  * flush rewrtie on deactivation
  */
 function bullhorn_deactivation_hook() {
-	wp_clear_scheduled_hook( 'bullhorn_hourly_event' );
+	wp_clear_scheduled_hook( 'bullhorn_event' );
+	wp_clear_scheduled_hook( 'bullhorn_appication_sync' );
 	flush_rewrite_rules();
 }
 

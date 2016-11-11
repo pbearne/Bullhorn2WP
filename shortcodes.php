@@ -65,10 +65,22 @@ class Shortcodes {
 		$settings = (array) get_option( 'bullhorn_settings' );
 
 		if ( isset( $settings['form_page'] ) && 0 < $settings['form_page'] && get_the_ID() !== $settings['form_page'] ) {
-			return sprintf( '<a href="%s" class="bullhorn-apply-here-link">%s</a>', esc_url( get_permalink( $settings['form_page'] ) ), __( 'Apply Here.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
+
+			return sprintf( '<a href="%s" class="bullhorn-apply-here-link">%s</a>',
+				esc_url(
+					add_query_arg(
+						array(
+						'position' => get_post_meta( get_the_ID(), 'bullhorn_job_id', true ),
+						'post' => get_the_ID(),
+						),
+						get_permalink( $settings['form_page'] )
+					)
+				),
+				__( 'Apply Here.' , 'bh-staffing-job-listing-and-cv-upload-for-wp' )
+			);
 		}
 
-		if ( null === $element_to_show ){
+		if ( null === $element_to_show ) {
 			$element_to_show = apply_filters( 'wp_bullhorn_render_cv_to_show', array( 'name', 'email', 'phone' ), $settings );
 		}
 
@@ -191,6 +203,9 @@ class Shortcodes {
 			} elseif ( 'bullhornjoblisting' === get_post_type() ) {
 				printf( '<input id="position" name="position" type="hidden" value="%s" />',	esc_attr( get_post_meta( get_the_ID(), 'bullhorn_job_id', true ) ) );
 			}
+			printf( '<input id="post" name="post" type="hidden" value="%s" />',
+				esc_attr( ( isset( $_GET['post'] ) ) ? isset( $_GET['post'] ) : get_the_ID() )
+			);
 
 			wp_nonce_field( 'bullhorn_cv_form', 'bullhorn_cv_form' );
 			do_action( 'wp_bullhorn_render_cv_form_bottom', $element_to_show, $settings );

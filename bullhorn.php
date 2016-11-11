@@ -46,7 +46,7 @@ class Bullhorn_Connection {
 	 *
 	 * @return \Bullhorn_Connection
 	 */
-	public function __construct () {
+	public function __construct() {
 		self::$settings   = get_option( 'bullhorn_settings' );
 		self::$api_access = get_option( 'bullhorn_api_access' );
 	}
@@ -55,10 +55,11 @@ class Bullhorn_Connection {
 	 * This should be the only method that is called externally, as it handles
 	 * all processing of jobs from Bullhorn into WordPress.
 	 *
+	 * @param $throw bool
 	 * @throws Exception
 	 * @return boolean
 	 */
-	public static function sync ( $throw = true ) {
+	public static function sync( $throw = true ) {
 
 		$logged_in = self::login();
 		if ( ! $logged_in ) {
@@ -191,7 +192,7 @@ class Bullhorn_Connection {
 			error_log( 'refresh token last refreshed'  . self::$api_access['last_refreshed'] );
 			return true;
 		}
-		
+
         // ok lets not do this if we have already done it in the last 20 sec
         if ( false !== get_transient( 'get_bullhorn_token' ) ){
 

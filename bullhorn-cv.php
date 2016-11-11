@@ -59,13 +59,6 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			switch ( $wp->query_vars['endpoint'] ) {
 				case 'resume':
 
-					$thanks_page_url = esc_url( ( isset( $_POST['_wp_http_referer'] ) ) ? $_POST['_wp_http_referer'] : '' );
-
-					$settings = (array) get_option( 'bullhorn_settings' );
-					if ( 0 < $settings['thanks_page'] ) {
-						$thanks_page_url = get_permalink( $settings['thanks_page'] );
-					}
-
 					if (
 						! isset( $_POST['bullhorn_cv_form'] )
 						|| ! wp_verify_nonce( $_POST['bullhorn_cv_form'], 'bullhorn_cv_form' )
@@ -74,6 +67,35 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 						die();
 
 					}
+					$thanks_page_url = esc_url( ( isset( $_POST['_wp_http_referer'] ) ) ? $_POST['_wp_http_referer'] : '' );
+
+					$settings = (array) get_option( 'bullhorn_settings' );
+					if ( 0 < $settings['thanks_page'] ) {
+						$thanks_page_url = get_permalink( $settings['thanks_page'] );
+					}
+
+
+					$local_post_id = self::save_application();
+
+					if ( ! isset( self::$api_access['refresh_token'] ) ) {
+						$permalink = add_query_arg( array(
+							'bh_applied' => true,
+						), $thanks_page_url );
+						wp_safe_redirect( $permalink );
+						die();
+					}
+					if ( apply_filters( 'bullhorn_upload_via_cron', false ) ) {
+
+						wp_schedule_single_event( time(), 'bullhorn_application_sync', $local_post_id );
+
+						$permalink = add_query_arg( array(
+							'bh_applied' => true,
+						), $thanks_page_url );
+						wp_safe_redirect( $permalink );
+						die();
+					}
+
+
 
 					// Get Resume
 					$resume = self::parseResume();
@@ -111,8 +133,8 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 							'bh_applied' => false,
 						), $thanks_page_url );
 
-						header( "location: $permalink" );
-						exit;
+						wp_safe_redirect( $permalink );
+						die();
 					} else {
 						// Attach education to candidate
 						self::attachEducation( $resume, $candidate );
@@ -130,14 +152,23 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 						// Attach resume file to candidate
 						error_log( 'wp_upload_file_request: ' . self::wp_upload_file_request( $candidate ) );
 
-						do_action( 'wp-bullhorn-cv-upload-complete', $candidate, $resume );
+						if ( apply_filters( 'bullhorn_delete_local_copy', false ) ) {
+
+							wp_delete_post( $local_post_id );
+						} else {
+
+							add_post_meta( $local_post_id, 'bh_candidate_data', $candidate, true );
+							add_post_meta( $local_post_id, 'bullhorn_synced', true, true );
+						}
+
+						do_action( 'wp-bullhorn-cv-upload-complete', $candidate, $resume, $local_post_id );
 
 						// Redirect
 						$permalink = add_query_arg( array(
 							'bh_applied' => true,
 						), $thanks_page_url );
-						header( "location: $permalink" );
-						exit;
+						wp_safe_redirect( $permalink );
+						die();
 					}
 
 
@@ -153,6 +184,103 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		}
 	}
 
+
+	/**
+	 *
+	 *
+	 * @static
+	 * @return int|WP_Error
+	 */
+	public static function save_application() {
+
+		$ext = $format = '';
+		// get cv file
+		if ( ! isset( $_FILES['resume'] ) ) {
+
+			self::throwJsonError( 500, 'No resume file found.' );
+		}
+		list( $ext, $format ) = self::get_filetype();
+
+		// http://gerhardpotgieter.com/2014/07/30/uploading-files-with-wp_remote_post-or-wp_remote_request/
+		$local_file = $_FILES['resume']['tmp_name'];
+
+		$name = '--';
+		if ( isset( $_REQUEST['name'] ) && ! empty( $_REQUEST['name'] ) ) {
+			$name = sanitize_text_field( $_REQUEST['name'] );
+		}
+
+		$job_title = '--';
+		if ( isset( $_REQUEST['post'] ) && ! empty( $_REQUEST['post'] ) ) {
+			$job_title = get_the_title( absint( $_REQUEST['post'] ) );
+		} elseif ( isset( $_REQUEST['position'] ) && ! empty( $_REQUEST['position'] ) ) {
+			$args = array(
+				'meta_key'   => 'bullhorn_job_id',
+				'meta_value' => absint( $_REQUEST['position'] ),
+				'post_type'  => 'bullhornjoblisting',
+				'number'     => 1,
+			);
+			$job_post = get_pages( $args );
+			$job_title = $job_post->post_title . ' (' . absint( $_REQUEST['position'] ) . ')';
+		}
+
+
+		$uploads = wp_upload_dir();
+			$cv_folder = trailingslashit( trailingslashit( $uploads['basedir'] ) . 'cv' );
+		if ( ! file_exists( $cv_folder ) ) {
+			mkdir( $cv_folder );
+		}
+
+		$new_filename = $_FILES['resume']['name'];
+		$posfix = 1;
+		while ( file_exists( $cv_folder . $new_filename ) ) {
+			$new_filename = str_replace( '.', '-' . $posfix . '.', $_FILES['resume']['name'] );
+			++$posfix;
+		}
+
+		move_uploaded_file( $local_file, $cv_folder . $new_filename );
+
+		$cv_url = trailingslashit( $uploads['baseurl'] ) . $new_filename;
+
+
+		$post_title = $name . ' ' . __( 'applied for', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . ' ' . $job_title;
+
+		$posiable_fields = array( 'name', 'email', 'phone', 'message','address1', 'address2', 'city', 'state', 'zip' );
+
+		$data = array();
+		$post_content = '';
+		foreach ( $posiable_fields as $key ) {
+			$data[ $key ] = ( isset( $_REQUEST[ $key ] ) ) ? sanitize_text_field( $_REQUEST[ $key ] ) : '';
+			$post_content .=  $key . ': ' . $data[ $key ] . PHP_EOL;
+		}
+
+		$data['cv_url'] = $cv_url;
+		$data['cv_dir'] = $cv_folder . $new_filename;
+		$data['cv_name'] = $new_filename;
+		$post_content .=  'CV: ' . sprintf( '<a href="%1$s">%1$s</a>', esc_url( $cv_url ) ) . PHP_EOL;
+
+		// Create post object
+		$my_post = array(
+			'post_title'    => $post_title,
+			'post_content'  => $post_content,
+			'post_type'   => 'bullhornapplication',
+			'post_author'   => 1,
+			'post_status' => 'publish',
+		);
+
+
+		// Insert the post into the database
+		;
+		$post_id = wp_insert_post( $my_post );
+
+		add_post_meta( $post_id, 'data', $data, true );
+		add_post_meta( $post_id, 'bullhorn_synced', true, true );
+
+		add_action( 'bullhorn_appication_post_saved', $data, $post_content );
+
+		return $post_id;
+	}
+
+
 	/**
 	 *
 	 *
@@ -163,7 +291,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 *
 	 * @return bool
 	 */
-	public static function add_bullhorn_candidate ( $profile_data, $file_data ) {
+	public static function add_bullhorn_candidate( $profile_data, $file_data ) {
 
 		// Get Resume
 		if ( is_array( $file_data ) ) {
@@ -198,12 +326,25 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		// Attach resume file to candidate
 		if ( is_array( $file_data ) ) {
-		$file_name = $file_data['resume']['name'];
+			$file_name = $file_data['resume']['name'];
 			$local_file = $file_data['resume']['tmp_name'];
-		error_log( 'wp_upload_file_request: ' . self::wp_upload_file_request( $candidate, $local_file, $file_name ) );
+			error_log( 'wp_upload_file_request: ' . self::wp_upload_file_request( $candidate, $local_file, $file_name ) );
 		}
 
 		do_action( 'add_bullhorn_candidate_complete', $candidate, $resume, $profile_data, $file_data );
+
+		if ( isset( $profile_data['application_post_id'] ) ) {
+			if ( apply_filters( 'bullhorn_delete_local_copy', false ) ) {
+
+				wp_delete_post( $profile_data['application_post_id'] );
+				unlink ( $file_data['resume']['tmp_name'] );
+			} else {
+
+				add_post_meta( $profile_data['application_post_id'], 'data', $candidate, true );
+				add_post_meta( $profile_data['application_post_id'], 'bullhorn_synced', true, true );
+			}
+
+		}
 
 		return $candidate->changedEntityId;
 	}
@@ -362,7 +503,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	private static function get_filetype( $local_files = null ) {
 		// Get file extension
 		if ( null === $local_files ) {
-		$file_type = wp_check_filetype_and_ext( $_FILES['resume']['tmp_name'], $_FILES['resume']['name'] );
+			$file_type = wp_check_filetype_and_ext( $_FILES['resume']['tmp_name'], $_FILES['resume']['name'] );
 		} else {
 			$file_type = wp_check_filetype_and_ext( $local_files['resume']['tmp_name'], $local_files['resume']['name'] );
 		}

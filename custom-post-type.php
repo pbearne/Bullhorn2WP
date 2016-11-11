@@ -58,6 +58,39 @@ class Bullhorn_Custom_Post_Type {
 		);
 		register_post_type( 'bullhornjoblisting', $args );
 
+
+		$labels = array(
+			'name'               => _x( 'Applications', 'Taxonomy General Name' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'singular_name'      => _x( 'Application', 'Taxonomy Singular Name' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'add_new'            => __( 'Add New' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'add_new_item'       => __( 'Add New Application' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'edit_item'          => __( 'Edit Application' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'new_item'           => __( 'New Application' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'all_items'          => __( 'All Applications' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'view_item'          => __( 'View Application' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'search_items'       => __( 'Search Applications' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'not_found'          => __( 'No Applications found' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'not_found_in_trash' => __( 'No Applications found in Trash' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'parent_item_colon'  => '',
+			'menu_name'          => __( 'Application' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+		);
+		$args   = array(
+			'labels'             => $labels,
+			'public'             => false,
+			'publicly_queryable' => false,
+			'show_ui'            => true,
+			'show_in_menu'       => 'edit.php?post_type=bullhornjoblisting',
+			'query_var'          => true,
+			'rewrite'            => array( 'slug' => trim( $settings['listings_page'], '/' ) ),
+			'capability_type'    => 'page',
+			'has_archive'        => false,
+			'hierarchical'       => false,
+			'menu_position'      => null,
+			'supports'           => array( 'title', 'editor', 'custom-fields' ),
+		);
+		register_post_type( 'bullhornapplication', $args );
+
+
 		$labels = array(
 			'name'                       => _x( 'Categories', 'Taxonomy General Name' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 			'singular_name'              => _x( 'Category', 'Taxonomy Singular Name' , 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
