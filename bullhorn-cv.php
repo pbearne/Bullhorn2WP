@@ -155,6 +155,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 						if ( apply_filters( 'bullhorn_delete_local_copy', false ) ) {
 
 							wp_delete_post( $local_post_id );
+							//TODO: remove and file saved
 						} else {
 
 							add_post_meta( $local_post_id, 'bh_candidate_data', $candidate, true );
