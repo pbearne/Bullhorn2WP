@@ -16,7 +16,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 *
 	 * @return \Bullhorn_Extended_Connection
 	 */
-	public function __construct () {
+	public function __construct() {
 		// Call parent __construct()
 		parent::__construct();
 
@@ -32,7 +32,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 *
 	 * @return array
 	 */
-	public static function add_query_vars ( $vars ) {
+	public static function add_query_vars( $vars ) {
 		$vars[] = '__api';
 		$vars[] = 'endpoint';
 
@@ -94,7 +94,6 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 						wp_safe_redirect( $permalink );
 						die();
 					}
-
 
 
 					// Get Resume
@@ -211,31 +210,34 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		}
 
 		$job_title = '--';
+		$job_id    = null;
 		if ( isset( $_REQUEST['post'] ) && ! empty( $_REQUEST['post'] ) ) {
 			$job_title = get_the_title( absint( $_REQUEST['post'] ) );
+			$job_id    = get_post_meta( absint( $_REQUEST['post'] ), 'bullhorn_job_id', true );
 		} elseif ( isset( $_REQUEST['position'] ) && ! empty( $_REQUEST['position'] ) ) {
-			$args = array(
+			$args      = array(
 				'meta_key'   => 'bullhorn_job_id',
 				'meta_value' => absint( $_REQUEST['position'] ),
 				'post_type'  => 'bullhornjoblisting',
 				'number'     => 1,
 			);
-			$job_post = get_pages( $args );
+			$job_post  = get_pages( $args );
 			$job_title = $job_post->post_title . ' (' . absint( $_REQUEST['position'] ) . ')';
+			$job_id    = get_post_meta( $job_post->ID, 'bullhorn_job_id', true );
 		}
 
 
-		$uploads = wp_upload_dir();
-			$cv_folder = trailingslashit( trailingslashit( $uploads['basedir'] ) . 'cv' );
+		$uploads   = wp_upload_dir();
+		$cv_folder = trailingslashit( trailingslashit( $uploads['basedir'] ) . 'cv' );
 		if ( ! file_exists( $cv_folder ) ) {
 			mkdir( $cv_folder );
 		}
 
 		$new_filename = $_FILES['resume']['name'];
-		$posfix = 1;
+		$posfix       = 1;
 		while ( file_exists( $cv_folder . $new_filename ) ) {
 			$new_filename = str_replace( '.', '-' . $posfix . '.', $_FILES['resume']['name'] );
-			++$posfix;
+			++ $posfix;
 		}
 
 		move_uploaded_file( $local_file, $cv_folder . $new_filename );
@@ -245,31 +247,30 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		$post_title = $name . ' ' . __( 'applied for', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . ' ' . $job_title;
 
-		$posiable_fields = array( 'name', 'email', 'phone', 'message','address1', 'address2', 'city', 'state', 'zip' );
+		$posiable_fields = array( 'name', 'email', 'phone', 'message', 'address1', 'address2', 'city', 'state', 'zip', 'position', 'post' );
 
-		$data = array();
+		$data         = array();
 		$post_content = '';
 		foreach ( $posiable_fields as $key ) {
 			$data[ $key ] = ( isset( $_REQUEST[ $key ] ) ) ? sanitize_text_field( $_REQUEST[ $key ] ) : '';
-			$post_content .=  $key . ': ' . $data[ $key ] . PHP_EOL;
+			$post_content .= $key . ': ' . $data[ $key ] . PHP_EOL;
 		}
 
-		$data['cv_url'] = $cv_url;
-		$data['cv_dir'] = $cv_folder . $new_filename;
+		$data['cv_url']  = $cv_url;
+		$data['cv_dir']  = $cv_folder . $new_filename;
 		$data['cv_name'] = $new_filename;
-		$post_content .=  'CV: ' . sprintf( '<a href="%1$s">%1$s</a>', esc_url( $cv_url ) ) . PHP_EOL;
+		$data['job_id']  = $job_id;
+
+		$post_content .= 'CV: ' . sprintf( '<a href="%1$s">%1$s</a>', esc_url( $cv_url ) ) . PHP_EOL;
 
 		// Create post object
 		$my_post = array(
-			'post_title'    => $post_title,
-			'post_content'  => $post_content,
-			'post_type'   => 'bullhornapplication',
-			'post_author'   => 1,
-			'post_status' => 'publish',
-		);
-
-
-		// Insert the post into the database
+			'post_title'   => $post_title,
+			'post_content' => $post_content,
+			'post_type'    => 'bullhornapplication',
+			'post_author'  => 1,
+			'post_status'  => 'publish',
+		);// Insert the post into the database
 		;
 		$post_id = wp_insert_post( $my_post );
 
@@ -324,6 +325,11 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		// Attach work history to candidate
 		self::attach_skills( $resume, $candidate );
 
+		$job_id = null;
+
+		// link to job
+		self::link_candidate_to_job( $candidate, $profile_data['job_id'] );
+
 		// Attach resume file to candidate
 		if ( is_array( $file_data ) ) {
 
@@ -348,7 +354,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	}
 
 //TODO: finish
-	public static function update_bullhorn_candidate ( $candidate_id, $profile_data, $file_data ) {
+	public static function update_bullhorn_candidate( $candidate_id, $profile_data, $file_data ) {
 
 		// Get Resume
 		if ( is_array( $file_data ) ) {
@@ -441,7 +447,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		// API authentication
 		self::api_auth();
 
-		$url = add_query_arg(
+		$url          = add_query_arg(
 			array(
 				'BhRestToken'         => self::$session,
 				'format'              => $format,
@@ -490,7 +496,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 * @param $status
 	 * @param $error
 	 */
-	public static function throwJsonError ( $status, $error ) {
+	public static function throwJsonError( $status, $error ) {
 		$response = array( 'status' => $status, 'error' => $error );
 		echo wp_json_encode( $response );
 		exit;
@@ -508,7 +514,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			$file_type = wp_check_filetype_and_ext( $local_files['resume']['tmp_name'], $local_files['resume']['name'] );
 		}
 
-		$ext       = $file_type['type'];
+		$ext = $file_type['type'];
 
 		switch ( strtolower( $ext ) ) {
 			case 'text/plain':
@@ -695,15 +701,15 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			error_log( 'Create Canditate failed( ' . $safety_count . '): ' . serialize( $response ) );
 			$response = wp_remote_get( $url, array( 'body' => wp_json_encode( $candidate ), 'method' => 'PUT' ) );
 			$safety_count ++;
-			}
+		}
 
 		if ( ! is_wp_error( $response ) && 200 === $response['response']['code'] ) {
 
 			return json_decode( $response['body'] );
-			}
+		}
 
 		return false;
-		}
+	}
 
 
 	private static function get_candidate( $candidate_id ) {
@@ -742,7 +748,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 *
 	 * @return mixed
 	 */
-	public static function attachEducation ( $resume, $candidate ) {
+	public static function attachEducation( $resume, $candidate ) {
 
 		if ( empty( $resume->candidateEducation ) ) {
 
@@ -865,7 +871,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	/**
 	 * @return array $skill_list
 	 */
-	public static function get_skill_list () {
+	public static function get_skill_list() {
 		if ( null === self::$session ) {
 			self::login();
 		}
@@ -887,7 +893,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 				return $response;
 			}
 
-			$body     = wp_remote_retrieve_body( $response );
+			$body = wp_remote_retrieve_body( $response );
 			$data = json_decode( $body, true );
 
 			if ( ! isset( $data['data'] ) ) {
@@ -904,6 +910,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		return $skill_list;
 	}
+
 	/**
 	 * @return array $skill_list
 	 */
@@ -917,7 +924,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$user_type_list = false;// get_transient( $user_type_list_id );
 		if ( false === $user_type_list ) {
 			$user_type_list = array();
-			$url        = add_query_arg(
+			$url            = add_query_arg(
 				array(
 					'BhRestToken' => self::$session,
 				), self::$url . 'options/userType'
@@ -946,7 +953,8 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		return $user_type_list;
 	}
-	private static function clean_skill_label ( $label ) {
+
+	private static function clean_skill_label( $label ) {
 		$label = strtolower( trim( $label ) );
 
 		return $label;
@@ -960,7 +968,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 *
 	 * @return array|bool|mixed|object
 	 */
-	public static function wp_upload_file_request ( $candidate, $file_data = null ) {
+	public static function wp_upload_file_request( $candidate, $file_data = null ) {
 
 		list( $ext, $format ) = self::get_filetype( $file_data );
 
@@ -1020,7 +1028,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 *
 	 * @return array|bool|mixed|object
 	 */
-	public static function wp_upload_html_request ( $candidate ) {
+	public static function wp_upload_html_request( $candidate ) {
 
 		list( $ext, $format ) = self::get_filetype();
 
@@ -1116,14 +1124,16 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 *
 	 * @return mixed
 	 */
-	public static function link_candidate_to_job ( $candidate ) {
+	public static function link_candidate_to_job( $candidate, $job_id = null ) {
 		// API authentication
 		self::api_auth();
 
-		if ( ! isset( $_POST['position'] ) ) {
+		if ( ! isset( $_POST['position'] ) && null !== $job_id ) {
+
 			return false;
 		}
-		$jobOrder = absint( $_POST['position'] );
+
+		$job_order = ( null !== $job_id ) ? $job_id : absint( $_POST['position'] );
 
 		$url = add_query_arg(
 			array(
@@ -1139,7 +1149,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		$body = array(
 			'candidate'       => array( 'id' => absint( $candidate->changedEntityId ) ),
-			'jobOrder'        => array( 'id' => absint( $jobOrder ) ),
+			'jobOrder'        => array( 'id' => absint( $job_order ) ),
 			'status'          => ( $mark_submitted ) ? 'Submitted' : 'New Lead',
 			'dateWebResponse' => self::microtime_float(), //date( 'u', $date ),// time(),
 		);
@@ -1164,7 +1174,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 * get time in microseconds
 	 * @return float
 	 */
-	private static function microtime_float () {
+	private static function microtime_float() {
 		list( $usec, $sec ) = explode( ' ', microtime() );
 
 		return ( (float) $usec + (float) $sec ) * 100;
@@ -1182,7 +1192,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 // Make sure country ID is correct
 		if ( isset( $resume->candidate->address->countryID ) && is_null( $resume->candidate->address->countryID ) ) {
 			$resume->candidate->address->countryID = 1;
-}
+		}
 
 		if ( isset( $profile_data['email'] ) && ! empty( $profile_data['email'] ) ) {
 			if ( isset( $resume->candidate->email ) ) {

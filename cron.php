@@ -17,7 +17,7 @@ function bullhorn_sync() {
 			if ( true !== $sync ) {
 				$admin_email = get_bloginfo( 'admin_email' );
 				if ( $admin_email ) {
-					$subject = __( 'Bullhorn cron synic failed with this error', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
+					$subject = __( 'Bullhorn cron sync failed with this error', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
 					wp_mail( $admin_email, $subject, serialize( $sync ) );
 				}
 			}
@@ -28,6 +28,7 @@ function bullhorn_sync() {
 
 function bullhorn_sync_now() {
 	$bullhorn_connection = new Bullhorn_Connection;
+
 	return $bullhorn_connection->sync();
 }
 
@@ -40,10 +41,11 @@ function bullhorn_event_activation() {
 		wp_schedule_event( time(), 'hourly', 'bullhorn_event' );
 	}
 
-	if ( ! wp_next_scheduled( 'bullhorn_appication_sync' ) ) {
+	if ( ! wp_next_scheduled( 'bullhorn_application_sync' ) ) {
 		wp_schedule_event( time(), 'hourly', 'bullhorn_application_sync' );
 	}
 }
+
 add_action( 'wp', 'bullhorn_event_activation' );
 
 /**
@@ -60,16 +62,17 @@ add_action( 'bullhorn_event', 'bullhorn_event_routine' );
  */
 function bullhorn_application_sync( $local_post_id = null ) {
 
-	if( null === $local_post_id ){
-		$args = array(
+	if ( null === $local_post_id ) {
+		$args             = array(
 			'post_type'  => 'bullhornapplication',
 			'number'     => 1,
 			'meta_query' => array(
 				array(
-					'key' => 'bh_candidate_data',
-					'compare' => 'NOT EXISTS'
+					'key'     => 'bullhorn_synced',
+					'compare' => '!=',
+					'value'   => 'true',
 				),
-			)
+			),
 		);
 		$application_post = get_pages( $args );
 
@@ -78,15 +81,15 @@ function bullhorn_application_sync( $local_post_id = null ) {
 
 			return;
 		}
-		$local_post_id = $application_post->ID;
+		$local_post_id = $application_post[0]->ID;
 	}
 
 
-	$application_post_data = get_post_meta( $local_post_id, 'data', true );
+	$application_post_data = get_post_meta( $local_post_id, 'bh_candidate_data', true );
 
 
-	$file_data['resume']['name'] = $application_post_data['cv_name'];
-	$file_data['resume']['tmp_name'] = $application_post_data['cv_dir'];
+	$file_data['resume']['name']                  = $application_post_data['cv_name'];
+	$file_data['resume']['tmp_name']              = $application_post_data['cv_dir'];
 	$application_post_data['application_post_id'] = $local_post_id;
 
 	Bullhorn_Extended_Connection::add_bullhorn_candidate( $application_post_data, $file_data );
