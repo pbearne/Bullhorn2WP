@@ -502,7 +502,7 @@ class Shortcodes {
 				$selected = 'selected="selected"';
 			}
 
-			$output .= '<option value="?' . http_build_query( $params ) . '" ' . $selected . '>' . esc_html( $category->name ) . '</option>';
+			$output .= '<option value="' . get_post_type_archive_link( 'bullhornjoblisting' ) . '?' . http_build_query( $params ) . '" ' . $selected . '>' . esc_html( $category->name ) . '</option>';
 		}
 
 		$output .= '</select>';
@@ -540,7 +540,7 @@ class Shortcodes {
 				$selected = 'selected="selected"';
 			}
 
-			$output .= '<option value="?' . http_build_query( $params ) . '" ' . $selected . '>' . esc_html( $state->name ) . '</option>';
+			$output .= '<option value="' . get_post_type_archive_link( 'bullhornjoblisting' ) . '?' . http_build_query( $params ) . '" ' . $selected . '>' . esc_html( $state->name ) . '</option>';
 		}
 
 		$output .= '</select>';
