@@ -107,7 +107,7 @@ class Bullhorn_Settings {
 
 			$response = wp_remote_post( $url );
 			if( is_wp_error( $response ) ) {
-				
+
 				wp_die( __( 'Callback to Bullhorn API failed. Please retry.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
 			}
 			$body     = json_decode( $response['body'], true );
@@ -189,11 +189,11 @@ class Bullhorn_Settings {
 		} else {
 			printf( ' <strong> %s</strong>', __( 'Enter Your Client Id and Secret', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
 		}
-		echo '<br><span class="description">' .
+		printf( '<br><span class="description">' .
 		     __(
-			     'Note: You will have to ask Bullhorn support to add your domain/s to the API white list for this to work. (see the plugin install notes for more info)',
+			     'Note: You will have to ask Bullhorn support to add this URL "%s" to your API white list for this to work. (see the plugin install notes for more info)',
 			     'bh-staffing-job-listing-and-cv-upload-for-wp'
-		     ) . '</span>';
+		     ) . '</span>', admin_url( 'options-general.php?page=bullhorn' ) );
 	}
 
 	/**
