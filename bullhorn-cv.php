@@ -242,7 +242,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		move_uploaded_file( $local_file, $cv_folder . $new_filename );
 
-		$cv_url = trailingslashit( $uploads['baseurl'] ) . $new_filename;
+		$cv_url = trailingslashit( $uploads['baseurl'] ) . 'cv/' . $new_filename;
 
 
 		$post_title = $name . ' ' . __( 'applied for', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . ' ' . $job_title;

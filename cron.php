@@ -87,12 +87,14 @@ function bullhorn_application_sync( $local_post_id = null ) {
 
 	$application_post_data = get_post_meta( $local_post_id, 'bh_candidate_data', true );
 
+	if( isset( $application_post_data['cv_name'] ) && isset( $application_post_data['cv_dir'] ) ) {
+		$file_data['resume']['name']                  = $application_post_data['cv_name'];
+		$file_data['resume']['tmp_name']              = $application_post_data['cv_dir'];
+		$application_post_data['application_post_id'] = $local_post_id;
 
-	$file_data['resume']['name']                  = $application_post_data['cv_name'];
-	$file_data['resume']['tmp_name']              = $application_post_data['cv_dir'];
-	$application_post_data['application_post_id'] = $local_post_id;
+		Bullhorn_Extended_Connection::add_bullhorn_candidate( $application_post_data, $file_data );
+	}
 
-	Bullhorn_Extended_Connection::add_bullhorn_candidate( $application_post_data, $file_data );
 
 }
 
