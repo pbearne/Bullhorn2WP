@@ -86,7 +86,6 @@ class Bullhorn_Custom_Post_Type {
 			'show_ui'            => true,
 			'show_in_menu'       => 'edit.php?post_type=bullhornjoblisting',
 			'query_var'          => true,
-			'rewrite'            => array( 'slug' => trim( $settings['listings_page'], '/' ) ),
 			'capability_type'    => 'page',
 			'has_archive'        => false,
 			'hierarchical'       => false,
