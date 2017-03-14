@@ -80,17 +80,21 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 					if ( ! isset( self::$api_access['refresh_token'] ) ) {
 						$permalink = add_query_arg( array(
 							'bh_applied' => true,
+							'refresh_token' => true,
 						), $thanks_page_url );
+
 						wp_safe_redirect( $permalink );
 						die();
 					}
-					if ( apply_filters( 'bullhorn_upload_via_cron', false ) ) {
+					if ( apply_filters( 'bullhorn_upload_via_cron', true ) ) {
 
-						wp_schedule_single_event( time(), 'bullhorn_application_sync', $local_post_id );
+						wp_schedule_single_event( time(), 'bullhorn_application_sync_now', $local_post_id );
 
 						$permalink = add_query_arg( array(
 							'bh_applied' => true,
+							'cron_used' => true,
 						), $thanks_page_url );
+
 						wp_safe_redirect( $permalink );
 						die();
 					}
@@ -199,7 +203,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			self::throwJsonError( 500, 'No resume file found.' );
 		}
 
-		list( $ext, $format ) = self::get_filetype();
+//		list( $ext, $format ) = self::get_filetype();
 
 		// http://gerhardpotgieter.com/2014/07/30/uploading-files-with-wp_remote_post-or-wp_remote_request/
 		$local_file = $_FILES['resume']['tmp_name'];
@@ -294,7 +298,6 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 * @return bool
 	 */
 	public static function add_bullhorn_candidate( $profile_data, $file_data ) {
-
 		// Get Resume
 		if ( is_array( $file_data ) ) {
 			$resume = self::parseResume( $file_data );
@@ -311,7 +314,6 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			$resume->candidate->address = array();
 			$resume->skillList          = array();
 		}
-
 
 		// Create candidate
 		$candidate = self::create_candidate( $resume, $profile_data );
@@ -330,13 +332,16 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		// link to job
 		self::link_candidate_to_job( $candidate, $profile_data['job_id'] );
 
-		// Attach resume file to candidate
+
+				// Attach resume file to candidate
 		if ( is_array( $file_data ) ) {
 
 			error_log( 'wp_upload_file_request: ' . self::wp_upload_file_request( $candidate, $file_data ) );
 		}
 
+
 		do_action( 'add_bullhorn_candidate_complete', $candidate, $resume, $profile_data, $file_data );
+
 
 		if ( isset( $profile_data['application_post_id'] ) ) {
 			if ( apply_filters( 'bullhorn_delete_local_copy', false ) ) {
@@ -399,8 +404,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 				self::throwJsonError( 500, 'No resume file found.' );
 			}
-
-			list( $ext, $format ) = self::get_filetype();
+			$file_name = $_FILES['resume']['name'];
 
 			// http://gerhardpotgieter.com/2014/07/30/uploading-files-with-wp_remote_post-or-wp_remote_request/
 			$local_file = $_FILES['resume']['tmp_name'];
@@ -410,6 +414,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 				self::throwJsonError( 500, 'No resume file found.' );
 			}
 
+			$file_name = $local_files['resume']['name'];
 			list( $ext, $format ) = self::get_filetype( $local_files );
 
 			// http://gerhardpotgieter.com/2014/07/30/uploading-files-with-wp_remote_post-or-wp_remote_request/
@@ -426,8 +431,8 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$payload  = '';
 		$payload .= '--' . $boundary;
 		$payload .= "\r\n";
-		$payload .= 'Content-Disposition: form-data; name="photo_upload_file_name"; filename="' . $_FILES['resume']['name'] . '"' . "\r\n";
-		$payload .= 'Content-Type: ' . $ext . '\r\n'; // If you	know the mime-type
+		$payload .= 'Content-Disposition: form-data; name="photo_upload_file_name"; filename="' . $file_name . '"' . "\r\n";
+		$payload .= 'Content-Type: ' . $ext . "\r\n"; // If you	know the mime-type
 		$payload .= 'Content-Transfer-Encoding: binary' . "\r\n";
 		$payload .= "\r\n";
 		$payload .= file_get_contents( $local_file );
@@ -437,7 +442,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		$args = array(
 			'method'  => 'POST',
-			'timeout' => 120, // default is 45 set to 2 minets for this one call
+			'timeout' => 120, // default is 45 set to 2 minuets for this one call
 			'headers' => array(
 				'accept'       => 'application/json', // The API returns JSON
 				'content-type' => 'multipart/form-data;boundary=' . $boundary, // Set content type to multipart/form-data
@@ -508,12 +513,13 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	private static function get_filetype( $local_files = null ) {
 
 		// Get file extension
+		$mine_types = wp_get_mime_types();
+		unset( $mine_types['swf'], $mine_types['exe'], $mine_types['htm|html'] );
 		if ( null === $local_files ) {
-			$file_type = wp_check_filetype_and_ext( $_FILES['resume']['tmp_name'], $_FILES['resume']['name'] );
+			$file_type = wp_check_filetype_and_ext( $_FILES['resume']['tmp_name'], $_FILES['resume']['name'], $mine_types );
 		} else {
-			$file_type = wp_check_filetype_and_ext( $local_files['resume']['tmp_name'], $local_files['resume']['name'] );
+			$file_type = wp_check_filetype_and_ext( $local_files['resume']['tmp_name'], $local_files['resume']['name'], $mine_types );
 		}
-
 		$ext = $file_type['type'];
 
 		switch ( strtolower( $ext ) ) {
@@ -973,19 +979,25 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		list( $ext, $format ) = self::get_filetype( $file_data );
 
 		$local_file = ( null === $file_data ) ? $_FILES['resume']['tmp_name'] : $file_data['resume']['tmp_name'];
-		$file_name  = ( null === $file_data ) ? $_FILES['resume']['name'] : $file_data['resume']['tmp_name'];
-		$file_title = ( isset( $candidate->firstName ) ) ? $candidate->firstName . ' ' : '';
-		$file_title .= ( isset( $candidate->lastName ) ) ? $candidate->lastName : '';
-		$file_title = ( ! empty( $file_title ) ) ? ' for ' . $file_title : $file_title;
+		$file_name  = ( null === $file_data ) ? $_FILES['resume']['name'] : $file_data['resume']['name'];
+
 		// wp_remote_request way
 
+		$url      = add_query_arg(
+			array(
+				'BhRestToken' => self::$session,
+				'externalID'  => 'portfolio', //'Portfolio',
+				'fileType'    => 'SAMPLE',
+			), self::$url . 'file/Candidate/' . $candidate->changedEntityId . '/raw'
+		);
+
 		//https://github.com/jeckman/wpgplus/blob/master/gplus.php#L554
-		$boundary = md5( time() . $ext );
+		$boundary = md5( time() );
 		$payload  = '';
 		$payload .= '--' . $boundary;
 		$payload .= "\r\n";
-		$payload .= 'Content-Disposition: form-data; name="Resume' . $file_title . '"; filename="' . esc_url_raw( $file_name ) . '"' . "\r\n";
-		$payload .= 'Content-Type: ' . $format . '\r\n'; // If you	know the mime-type
+		$payload .= 'Content-Disposition: form-data; name="portfolio"; filename="' . $file_name . '"' . "\r\n";
+		$payload .= 'Content-Type: ' . $ext . "\r\n"; // If you	know the mime-type
 		$payload .= 'Content-Transfer-Encoding: binary' . "\r\n";
 		$payload .= "\r\n";
 		$payload .= file_get_contents( $local_file );
@@ -995,20 +1007,14 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		$args = array(
 			'method'  => 'PUT',
+			'timeout' => 120, // default is 45 set to 2 minuets for this one call
 			'headers' => array(
 				'accept'       => 'application/json', // The API returns JSON
-				'content-type' => 'multipart/form-data;boundary=' . $boundary, // Set content type to multipart/form-data
+				'content-type' => 'multipart/mixed;boundary=' . $boundary, // Set content type to multipart/form-data
 			),
 			'body'    => $payload,
 		);
 
-		$url      = add_query_arg(
-			array(
-				'BhRestToken' => self::$session,
-				'externalID'  => 'Portfolio',
-				'fileType'    => 'SAMPLE',
-			), self::$url . '/file/Candidate/' . esc_url_raw( $candidate->changedEntityId ) . '/raw'
-		);
 		$response = wp_remote_request( $url, $args );
 
 		// try once more if we get an error
@@ -1017,6 +1023,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		}
 
 		if ( 200 === $response['response']['code'] ) {
+
 			return json_decode( $response );
 		}
 
@@ -1266,7 +1273,15 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			$resume->candidate->lastName = sanitize_text_field( $_POST['lastName'] );
 		}
 
-		$address_fields = array( 'address1', 'address2', 'city', 'state', 'zip', 'countryName' );
+		$address_fields = array( 'address1' => 40, 'address2' => 40, 'city' => 40, 'state' => 30, 'zip' => 15, 'countryName' => 99 );
+
+		foreach ( $address_fields as $key => $length ) {
+			if ( isset( $resume->candidate->address->$key ) ) {
+
+				$resume->candidate->address->$key = substr( $resume->candidate->address->$key, 0, $length );
+			}
+		}
+
 		if ( isset( $profile_data['address'] ) && ! empty( $profile_data['address'] ) ) {
 			if ( isset( $resume->candidate->address ) ) {
 				$cv_address = $resume->candidate->address;
@@ -1278,8 +1293,8 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 			$address_data = array();
 
-			foreach ( $address_fields as $key ) {
-				$address_data[ $key ] = ( isset( $profile_data[ $key ] ) ) ? $profile_data[ $key ] : '';
+			foreach ( $address_fields as $key => $length ) {
+				$address_data[ $key ] = ( isset( $profile_data[ $key ] ) ) ? substr( $profile_data[ $key ], 0, $length ) : '';
 			}
 
 			$resume->candidate->address = $address_data;
@@ -1295,8 +1310,8 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 			$address_data = array();
 
-			foreach ( $address_fields as $key ) {
-				$address_data[ $key ] = ( isset( $_POST[ $key ] ) ) ? sanitize_text_field( $_POST[ $key ] ) : '';
+			foreach ( $address_fields as $key => $length ) {
+				$address_data[ $key ] = ( isset( $_POST[ $key ] ) ) ? substr( sanitize_text_field( $_POST[ $key ] ), 0, $length ) : '';
 			}
 
 			$resume->candidate->address = $address_data;
@@ -1309,6 +1324,10 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 				$resume->skillList = array_merge( $resume->skillList, $profile_data['skillList'] );
 			}
 		}
+
+		// remove bad fields
+		unset( $resume->candidate->editHistoryValue );
+
 
 		return apply_filters( 'bullhorn_add_data_to_canditate_data', $resume, $profile_data );
 	}

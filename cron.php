@@ -1,5 +1,13 @@
 <?php
 
+$path = plugin_dir_path( __FILE__ );
+require_once $path . 'bullhorn-2-wp.php';
+require_once $path . 'bullhorn.php';
+require_once $path . 'settings.php';
+require_once $path . 'custom-post-type.php';
+require_once $path . 'shortcodes.php';
+require_once $path . 'bullhorn-cv.php';
+
 /**
  * @throws Exception
  */
@@ -46,7 +54,7 @@ function bullhorn_event_activation() {
 	}
 }
 
-add_action( 'wp', 'bullhorn_event_activation' );
+add_action( 'init', 'bullhorn_event_activation' );
 
 /**
  *
@@ -57,6 +65,7 @@ function bullhorn_event_routine() {
 
 add_action( 'bullhorn_event', 'bullhorn_event_routine' );
 
+//bullhorn_application_sync();
 /**
  *
  */
@@ -74,7 +83,8 @@ function bullhorn_application_sync( $local_post_id = null ) {
 				),
 			),
 		);
-		$application_post = get_pages( $args );
+
+		$application_post = get_posts( $args );
 
 		// return if none found
 		if ( false === $application_post ) {
@@ -85,7 +95,7 @@ function bullhorn_application_sync( $local_post_id = null ) {
 	}
 
 
-	$application_post_data = get_post_meta( $local_post_id, 'bh_candidate_data', true );
+	$application_post_data = (array) get_post_meta( $local_post_id, 'bh_candidate_data', true );
 
 	if( isset( $application_post_data['cv_name'] ) && isset( $application_post_data['cv_dir'] ) ) {
 		$file_data['resume']['name']                  = $application_post_data['cv_name'];
@@ -93,9 +103,10 @@ function bullhorn_application_sync( $local_post_id = null ) {
 		$application_post_data['application_post_id'] = $local_post_id;
 
 		Bullhorn_Extended_Connection::add_bullhorn_candidate( $application_post_data, $file_data );
+
 	}
-
-
 }
 
 add_action( 'bullhorn_application_sync', 'bullhorn_application_sync' );
+
+add_action( 'bullhorn_application_sync_now', 'bullhorn_application_sync' );
