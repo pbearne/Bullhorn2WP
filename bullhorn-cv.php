@@ -86,7 +86,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 						wp_safe_redirect( $permalink );
 						die();
 					}
-					if ( apply_filters( 'bullhorn_upload_via_cron', true ) ) {
+					if ( apply_filters( 'bullhorn_upload_via_cron', false ) ) {
 
 						wp_schedule_single_event( time(), 'bullhorn_application_sync_now', $local_post_id );
 
@@ -99,9 +99,8 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 						die();
 					}
 
-
 					// Get Resume
-					$resume = self::parseResume();
+					$resume = self::parseResume( $local_post_id );
 
 					if ( false === $resume ) {
 						// Redirect
@@ -391,7 +390,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	/**
 	 * Takes the posted 'resume' file and returns a parsed version from bullhorn
 	 *
-	 * @param null $local_files
+	 * @param null|array|int $local_files
 	 *
 	 * @return mixed
 	 */
@@ -409,17 +408,30 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			// http://gerhardpotgieter.com/2014/07/30/uploading-files-with-wp_remote_post-or-wp_remote_request/
 			$local_file = $_FILES['resume']['tmp_name'];
 		} else {
-			if ( ! isset( $local_files['resume'] ) ) {
+			if ( ! is_array( $local_files ) ) {
+				$application_post_data = (array) get_post_meta( absint( $local_files ), 'bh_candidate_data', true );
+
+				if( isset( $application_post_data['cv_name'] ) && isset( $application_post_data['cv_dir'] ) ) {
+					$files['resume']['name']     = $application_post_data['cv_name'];
+					$files['resume']['tmp_name'] = $application_post_data['cv_dir'];
+
+				}
+			} else {
+				$files = $local_files;
+			}
+
+			if ( ! isset( $files['resume'] ) ) {
 
 				self::throwJsonError( 500, 'No resume file found.' );
 			}
 
-			$file_name = $local_files['resume']['name'];
-			list( $ext, $format ) = self::get_filetype( $local_files );
+			$file_name = $files['resume']['name'];
+			list( $ext, $format ) = self::get_filetype( $files );
 
 			// http://gerhardpotgieter.com/2014/07/30/uploading-files-with-wp_remote_post-or-wp_remote_request/
-			$local_file = $local_files['resume']['tmp_name'];
+			$local_file = $files['resume']['tmp_name'];
 		}
+
 
 		if ( ! file_exists( $local_file ) ) {
 
@@ -1157,7 +1169,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$body = array(
 			'candidate'       => array( 'id' => absint( $candidate->changedEntityId ) ),
 			'jobOrder'        => array( 'id' => absint( $job_order ) ),
-			'status'          => ( $mark_submitted ) ? 'Submitted' : 'New Lead',
+			'status'          => 'New Lead',
 			'dateWebResponse' => self::microtime_float(), //date( 'u', $date ),// time(),
 		);
 
@@ -1165,14 +1177,51 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		$safety_count = 0;
 		while ( 500 === $response['response']['code'] && 5 > $safety_count ) {
-			error_log( 'Link to job failed( ' . $safety_count . '): ' . serialize( $response ) );
+			error_log( 'Add to job failed( ' . $safety_count . '): ' . serialize( $response ) );
 			$response = wp_remote_get( $url, array( 'body' => wp_json_encode( $body ), 'method' => 'PUT' ) );
 			$safety_count ++;
 		}
 
 		if ( 200 === $response['response']['code'] ) {
+			print_r($mark_submitted);
+
+			echo '----------------' .PHP_EOL ;
+			if( $mark_submitted ) {
+				$body = json_decode( $response['body'] );
+				print_r($body);
+
+				echo '----------------' .PHP_EOL ;
+				$changed_entity_id = $body->changedEntityId;
+
+
+				$url = add_query_arg(
+					array(
+						'BhRestToken' => self::$session,
+					), self::$url . 'entity/JobSubmission/' . $changed_entity_id
+				);
+
+				$body = array(
+					'status'          => 'Submitted',
+					'dateWebResponse' => self::microtime_float(), //date( 'u', $date ),// time(),
+				);
+
+				$response = wp_remote_post( $url, array( 'body' => wp_json_encode( $body ) ) );
+				while ( 500 === $response['response']['code'] && 5 > $safety_count ) {
+					error_log( 'Link to job failed( ' . $safety_count . '): ' . serialize( $response ) );
+					$response = wp_remote_get( $url, array( 'body' => wp_json_encode( $body ), 'method' => 'PUT' ) );
+					$safety_count ++;
+				}
+
+
+			}
+
+			print_r($response);
+			die();
+
 			return json_decode( $response['body'] );
 		}
+
+
 
 		return false;
 	}
