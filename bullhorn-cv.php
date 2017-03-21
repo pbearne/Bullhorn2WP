@@ -857,10 +857,15 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		}
 		// API authentication
 		self::api_auth();
-
-		$skillList = self::get_skill_list();
-
 		$skill_ids = array();
+		$skillList = self::get_skill_list();
+		if( is_array( $skillList ) ) {
+			foreach( $skillList as $key => $skill ){
+
+				$skill_ids[] = $key;
+			}
+		}
+
 		if ( ! empty( $skill_ids ) ) {
 			foreach ( $resume->skillList as $skill ) {
 				if ( false !== $key = array_search( strtolower( $skill ), $skillList ) ) {
