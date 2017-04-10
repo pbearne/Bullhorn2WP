@@ -219,7 +219,7 @@ class Shortcodes {
 				?>
 				<div class="bullhorn_upload_overlay_message">
 					<span class="spinner"></span>
-					<?php esc_html_e( apply_filters( 'wp_bullhorn_form_submitted_message', 'We are uploading your application, it may it take few monuments to read your resume. Please wait!' ) ); ?>
+					<?php esc_html_e( apply_filters( 'wp_bullhorn_form_submitted_message', 'We are uploading your application, it may it take few moments to read your resume. Please wait!' ) ); ?>
 				</div>
 				<?php
 				$html = ob_get_contents();
