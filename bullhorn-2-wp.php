@@ -3,7 +3,7 @@
 Plugin Name: Bullhorn Staffing and Recruitment Job Listing and CV/Resume uploader.
 Plugin URI: https://github.com/pbearne/Bullhorn2WP
 Description: This plugin adds Bullhorn jobs to a custom post (Job Listings) for front-end display. New and deleted jobs are synchronized every hour with Bullhorn. This is a 'pull' process only - any job created locally is not pushed to Bullhorn! Any theme developed on top of this plugin should have archive-job-listing.php and single-job-listing.php template files if a special layout is needed. Pull requests are accepted at https://github.com/pbearne/Bullhorn2WP
-Version: 2.4.0
+Version: 2.5.0
 Author: Paul Bearne
 Author URI: https://github.com/pbearne/
 License: GPL2
