@@ -277,7 +277,7 @@ class Bullhorn_Custom_Post_Type {
 			}
 		}
 		if ( isset( $_GET['bh_applied'] ) ) {
-			$content = sprintf( ' <h3 style="text-align: center">%s</h3>', __( 'Thank you for uploading you resume.' ) ) . $content;
+			$content = sprintf( ' <h3 style="text-align: center">%s</h3>', __( 'Thank you for uploading your resume.' ) ) . $content;
 		}
 
 		return apply_filters( 'wp_bullhorn_the_content_filter', $content );
