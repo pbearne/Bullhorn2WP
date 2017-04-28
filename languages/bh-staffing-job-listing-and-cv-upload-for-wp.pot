@@ -308,7 +308,7 @@ msgid "Apply Now"
 msgstr ""
 
 #: custom-post-type.php:209
-msgid "Thank you for uploading you resume."
+msgid "Thank you for uploading your resume."
 msgstr ""
 
 #: settings.php:51
