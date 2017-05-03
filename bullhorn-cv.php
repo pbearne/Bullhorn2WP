@@ -1188,14 +1188,10 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		}
 
 		if ( 200 === $response['response']['code'] ) {
-			print_r($mark_submitted);
 
-			echo '----------------' .PHP_EOL ;
 			if( $mark_submitted ) {
 				$body = json_decode( $response['body'] );
-				print_r($body);
 
-				echo '----------------' .PHP_EOL ;
 				$changed_entity_id = $body->changedEntityId;
 
 
@@ -1219,9 +1215,6 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 
 			}
-
-			print_r($response);
-			die();
 
 			return json_decode( $response['body'] );
 		}
