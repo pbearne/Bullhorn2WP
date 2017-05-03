@@ -161,7 +161,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 						self::link_candidate_to_job( $candidate );
 
 						// Attach resume file to candidate
-						error_log( 'wp_upload_file_request: ' . self::wp_upload_file_request( $candidate ) );
+						error_log( 'wp_upload_file_request: ' . self::wp_upload_file_request( $candidate, $file_data ) );
 
 						if ( apply_filters( 'bullhorn_delete_local_copy', false ) ) {
 
@@ -996,10 +996,12 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	/**
 	 * @param $candidate
 	 *
-	 * @param null $local_file
-	 * @param null $file_name
+	 * @param null $file_data
 	 *
 	 * @return array|bool|mixed|object
+	 * @internal param null $local_file
+	 * @internal param null $file_name
+	 *
 	 */
 	public static function wp_upload_file_request( $candidate, $file_data = null ) {
 
