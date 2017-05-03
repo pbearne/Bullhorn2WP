@@ -75,7 +75,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 					}
 
 
-					$local_post_id = self::save_application();
+					list( $local_post_id, $local_post_data ) = self::save_application();
 
 					if ( ! isset( self::$api_access['refresh_token'] ) ) {
 						$permalink = add_query_arg( array(
@@ -99,8 +99,18 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 						die();
 					}
 
-					// Get Resume
-					$resume = self::parseResume( $local_post_id );
+					if ( isset( $local_post_data['cv_name'] ) && isset( $local_post_data['cv_dir'] ) ) {
+						$file_data['resume']['name']                  = $local_post_data['cv_name'];
+						$file_data['resume']['tmp_name']              = $local_post_data['cv_dir'];
+
+						$resume = self::parseResume( $file_data );
+
+					} else {
+						// Get Resume
+						$resume = self::parseResume();
+					}
+
+
 
 					if ( false === $resume ) {
 						// Redirect
@@ -163,7 +173,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 							update_post_meta( $local_post_id, 'bullhorn_synced', 'true' );
 						}
 
-						do_action( 'wp-bullhorn-cv-upload-complete', $candidate, $resume, $local_post_id );
+						do_action( 'wp-bullhorn-cv-upload-complete', $candidate, $resume, $local_post_id, $local_post_data );
 
 						// Redirect
 						$permalink = add_query_arg( array(
@@ -282,7 +292,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		add_action( 'bullhorn_appication_post_saved', $data, $post_content );
 
-		return $post_id;
+		return array( $post_id, $data );
 	}
 
 

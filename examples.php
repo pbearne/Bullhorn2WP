@@ -7,17 +7,19 @@
  */
 
 
-add_action( 'wp-bullhorn-cv-upload-complete', 'ah_send_me_form' );
+add_action( 'wp-bullhorn-cv-upload-complete', 'ah_send_me_form', 10, 3 );
 
-function ah_send_me_form() {
+function ah_send_me_form( $candidate, $resume, $local_post_id ) {
 
 	// get the info from the form
 	$fullname = ( isset( $_POST['name'] ) ) ? trim( sanitize_text_field( wp_unslash( $_POST['name'] ) ) ) : 'n/a';
-	$email = ( isset( $_POST['name'] ) ) ? trim( sanitize_email( wp_unslash( $_POST['email'] ) ) ) : 'n/a';
-	$phone = ( isset( $_POST['name'] ) ) ? trim( sanitize_text_field( wp_unslash( $_POST['phone'] ) ) ) : 'n/a';
-	$position_id = ( isset( $_POST['name'] ) ) ? absint( wp_unslash( $_POST['position'] ) ) : - 1;
-	$message1 = ( isset( $_POST['name'] ) ) ? trim( sanitize_text_field( wp_unslash( $_POST['message'] ) ) ) : 'n/a';
+	$email = ( isset( $_POST['email'] ) ) ? trim( sanitize_email( wp_unslash( $_POST['email'] ) ) ) : 'n/a';
+	$phone = ( isset( $_POST['phone'] ) ) ? trim( sanitize_text_field( wp_unslash( $_POST['phone'] ) ) ) : 'n/a';
+	$position_id = ( isset( $_POST['position'] ) ) ? absint( wp_unslash( $_POST['position'] ) ) : - 1;
+	$user_message = ( isset( $_POST['message'] ) ) ? trim( sanitize_text_field( wp_unslash( $_POST['message'] ) ) ) : 'n/a';
 	$title = '';
+	$attachments = array();
+
 	if ( 0 < $position_id ) {
 		$args = array(
 			'meta_query' => array(
@@ -46,7 +48,7 @@ function ah_send_me_form() {
 	$message .= 'Name :' . $fullname . '\n';
 	$message .= 'Email :' . $email . '\n';
 	$message .= 'Phone :' . $phone . '\n';
-	$message .= 'Message: ' . $message1 . '\n';
+	$message .= 'Message: ' . $user_message . '\n';
 
 	//set the form headers
 	$headers = 'From: New Submission on NYCM Search Website <wordpress@newyorkcm.com>';
@@ -54,24 +56,11 @@ function ah_send_me_form() {
 
 	// Who are we going to send this form too
 	$send_to = 'retuer@jobsite.com';
+	$file_data = (array) get_post_meta( absint( $local_post_id ), 'bh_candidate_data', true );
+	$file_name = $file_data['resume']['name'];
 
-	$folder_path = WP_CONTENT_DIR . '/uploads/cv/';
-	$attachments = array();
-	$tmp_nae = $_FILES['resume']['tmp_name'];
-	$new_name = $folder_path . $_FILES['resume']['name'];
-
-	$count = 0;
-	while ( file_exists( $new_name ) ) {
-		$new_name = $folder_path . $count . '-' . $_FILES['resume']['name'];
-		$count ++;
-	}
-	if ( ! file_exists( $folder_path ) ) {
-		mkdir( $folder_path, 0777, true );
-	}
-	move_uploaded_file( $tmp_nae, $new_name );
-
-	if ( file_exists( $new_name ) ) {
-		$attachments = array( $new_name );
+	if ( file_exists( $file_name ) ) {
+		$attachments = array( $file_name );
 	}
 
 	wp_mail( $send_to, $subject, $message, $headers, $attachments );
