@@ -7,19 +7,15 @@
  */
 
 
-add_action( 'wp-bullhorn-cv-upload-complete', 'ah_send_me_form', 10, 3 );
-
-function ah_send_me_form( $candidate, $resume, $local_post_id ) {
+function send_me_form( $candidate, $resume, $local_post_id, $local_post_data ) {
 
 	// get the info from the form
 	$fullname = ( isset( $_POST['name'] ) ) ? trim( sanitize_text_field( wp_unslash( $_POST['name'] ) ) ) : 'n/a';
-	$email = ( isset( $_POST['email'] ) ) ? trim( sanitize_email( wp_unslash( $_POST['email'] ) ) ) : 'n/a';
-	$phone = ( isset( $_POST['phone'] ) ) ? trim( sanitize_text_field( wp_unslash( $_POST['phone'] ) ) ) : 'n/a';
-	$position_id = ( isset( $_POST['position'] ) ) ? absint( wp_unslash( $_POST['position'] ) ) : - 1;
-	$user_message = ( isset( $_POST['message'] ) ) ? trim( sanitize_text_field( wp_unslash( $_POST['message'] ) ) ) : 'n/a';
+	$email = ( isset( $_POST['name'] ) ) ? trim( sanitize_email( wp_unslash( $_POST['email'] ) ) ) : 'n/a';
+	$phone = ( isset( $_POST['name'] ) ) ? trim( sanitize_text_field( wp_unslash( $_POST['phone'] ) ) ) : 'n/a';
+	$position_id = ( isset( $_POST['name'] ) ) ? absint( wp_unslash( $_POST['position'] ) ) : - 1;
+	$message1 = ( isset( $_POST['name'] ) ) ? trim( sanitize_text_field( wp_unslash( $_POST['message'] ) ) ) : 'n/a';
 	$title = '';
-	$attachments = array();
-
 	if ( 0 < $position_id ) {
 		$args = array(
 			'meta_query' => array(
@@ -45,26 +41,28 @@ function ah_send_me_form( $candidate, $resume, $local_post_id ) {
 		$subject = 'CV Uploaded by';
 		$message = '<p>A CV Uploaded by:</p>' . PHP_EOL;
 	}
-	$message .= 'Name :' . $fullname . '\n';
-	$message .= 'Email :' . $email . '\n';
-	$message .= 'Phone :' . $phone . '\n';
-	$message .= 'Message: ' . $user_message . '\n';
+
+	$message .= '<p>Name :' . $fullname . '</p>' . PHP_EOL;
+	$message .= '<p>Email :' . $email . '</p>' . PHP_EOL;
+	$message .= '<p>Phone :' . $phone . '</p>' . PHP_EOL;
+	$message .= '<p>Message: ' . $message1 . '</p>' . PHP_EOL;
 
 	//set the form headers
-	$headers = 'From: New Submission on NYCM Search Website <wordpress@newyorkcm.com>';
-
+	$headers = 'From: New Submission on NYCM Search Website <resume@sitename.com>';
 
 	// Who are we going to send this form too
-	$send_to = 'retuer@jobsite.com';
-	$file_data = (array) get_post_meta( absint( $local_post_id ), 'bh_candidate_data', true );
-	$file_name = $file_data['resume']['name'];
+	$send_to = 'resume@sitename.com';
 
-	if ( file_exists( $file_name ) ) {
-		$attachments = array( $file_name );
+	if ( file_exists( $local_post_data['cv_dir'] ) ) {
+		$attachments = array( $local_post_data['cv_dir'] );
 	}
 
+	add_filter( 'wp_mail_content_type', 'ah_set_content_type', 22 );
 	wp_mail( $send_to, $subject, $message, $headers, $attachments );
+	remove_filter( 'wp_mail_content_type', 'ah_set_content_type' );
 }
+
+add_action( 'wp-bullhorn-cv-upload-complete', 'send_me_form', 10, 4 );
 
 
 /**
