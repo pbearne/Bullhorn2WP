@@ -110,8 +110,6 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 						$resume = self::parseResume();
 					}
 
-
-
 					if ( false === $resume ) {
 						// Redirect
 						$permalink = add_query_arg( array(
@@ -996,12 +994,10 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	/**
 	 * @param $candidate
 	 *
-	 * @param null $file_data
+	 * @param null $local_file
+	 * @param null $file_name
 	 *
 	 * @return array|bool|mixed|object
-	 * @internal param null $local_file
-	 * @internal param null $file_name
-	 *
 	 */
 	public static function wp_upload_file_request( $candidate, $file_data = null ) {
 
@@ -1243,7 +1239,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	private static function microtime_float() {
 		list( $usec, $sec ) = explode( ' ', microtime() );
 
-		return ( (float) $usec + (float) $sec ) * 100;
+		return absint( ( (float) $usec + (float) $sec ) * 100 );
 	}
 
 	/**

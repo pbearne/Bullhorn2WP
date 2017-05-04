@@ -11,11 +11,13 @@ function send_me_form( $candidate, $resume, $local_post_id, $local_post_data ) {
 
 	// get the info from the form
 	$fullname = ( isset( $_POST['name'] ) ) ? trim( sanitize_text_field( wp_unslash( $_POST['name'] ) ) ) : 'n/a';
-	$email = ( isset( $_POST['name'] ) ) ? trim( sanitize_email( wp_unslash( $_POST['email'] ) ) ) : 'n/a';
-	$phone = ( isset( $_POST['name'] ) ) ? trim( sanitize_text_field( wp_unslash( $_POST['phone'] ) ) ) : 'n/a';
-	$position_id = ( isset( $_POST['name'] ) ) ? absint( wp_unslash( $_POST['position'] ) ) : - 1;
-	$message1 = ( isset( $_POST['name'] ) ) ? trim( sanitize_text_field( wp_unslash( $_POST['message'] ) ) ) : 'n/a';
+	$email = ( isset( $_POST['email'] ) ) ? trim( sanitize_email( wp_unslash( $_POST['email'] ) ) ) : 'n/a';
+	$phone = ( isset( $_POST['phone'] ) ) ? trim( sanitize_text_field( wp_unslash( $_POST['phone'] ) ) ) : 'n/a';
+	$position_id = ( isset( $_POST['position'] ) ) ? absint( wp_unslash( $_POST['position'] ) ) : - 1;
+	$user_message = ( isset( $_POST['message'] ) ) ? trim( sanitize_text_field( wp_unslash( $_POST['message'] ) ) ) : 'n/a';
 	$title = '';
+	$attachments = array();
+
 	if ( 0 < $position_id ) {
 		$args = array(
 			'meta_query' => array(
