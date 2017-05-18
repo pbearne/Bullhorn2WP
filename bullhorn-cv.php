@@ -110,6 +110,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 						$resume = self::parseResume();
 					}
 
+
 					if ( false === $resume ) {
 						// Redirect
 						$permalink = add_query_arg( array(
@@ -132,6 +133,25 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 						wp_safe_redirect( $url );
 						die();
 					}
+
+					if ( 10 > $resume->confidenceScore ) {
+						$orig_url = $_POST['_wp_http_referer'];
+						$url      = add_query_arg(
+							array(
+								'bh-message' => rawurlencode(
+									apply_filters( 'parse_resume_low_score_text',
+										sprintf( __('We go a low Confidence Score ( %s ) when we paused your CV was it empty?', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), $resume->confidenceScore )
+									)
+								),
+
+							), $orig_url
+						);
+						update_post_meta( $local_post_id, 'bullhorn_synced', 'bad_resume' );
+
+						wp_safe_redirect( $url );
+						die();
+					}
+
 
 					// Create candidate
 					$candidate = self::create_candidate( $resume );

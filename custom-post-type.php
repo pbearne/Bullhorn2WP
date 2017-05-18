@@ -169,8 +169,12 @@ class Bullhorn_Custom_Post_Type {
 	public static function custom_column( $column, $post_id ) {
 		switch ( $column ) {
 			case 'sync' :
-				if ( 'true' === get_post_meta( $post_id, 'bullhorn_synced', true ) ) {
+				$bullhorn_synced = get_post_meta( $post_id, 'bullhorn_synced', true );
+				if ( 'true' ===  $bullhorn_synced ) {
 					echo __( 'Synced', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
+
+				} elseif ( 'bad_resume' ===  $bullhorn_synced ) {
+					echo __( 'bad resume not synced', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
 				} else {
 					echo __( 'Not synced', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
 					printf( ' - <a href="%s">%s</a>',
