@@ -21,6 +21,8 @@ class Bullhorn_Custom_Post_Type {
 
 		add_filter( 'manage_bullhornapplication_posts_columns', array( __CLASS__, 'set_custom_edit_columns' ) );
 		add_action( 'manage_bullhornapplication_posts_custom_column', array( __CLASS__, 'custom_column' ), 10, 2 );
+		add_filter( 'manage_edit-bullhornapplication_sortable_columns', array( __CLASS__, 'sortable_column' ) );
+		add_action( 'pre_get_posts',  array( __CLASS__, 'orderby' ) );
 	}
 
 	/**
@@ -86,7 +88,7 @@ class Bullhorn_Custom_Post_Type {
 			'show_ui'            => true,
 			'show_in_menu'       => 'edit.php?post_type=bullhornjoblisting',
 			'query_var'          => true,
-			'capability_type'    => 'page',
+			'capability_type'    => 'post',
 			'has_archive'        => false,
 			'hierarchical'       => false,
 			'menu_position'      => null,
@@ -170,11 +172,13 @@ class Bullhorn_Custom_Post_Type {
 		switch ( $column ) {
 			case 'sync' :
 				$bullhorn_synced = get_post_meta( $post_id, 'bullhorn_synced', true );
-				if ( 'true' ===  $bullhorn_synced ) {
+				if ( 'true' === $bullhorn_synced ) {
 					echo __( 'Synced', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
 
-				} elseif ( 'bad_resume' ===  $bullhorn_synced ) {
-					echo __( 'bad resume not synced', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
+				} elseif ( 'bad_resume' === $bullhorn_synced ) {
+					echo __( 'Bad resume: Not synced', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
+				} elseif ( 'bad_file' === $bullhorn_synced ) {
+					echo __( 'Bad file type: Not synced', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
 				} else {
 					echo __( 'Not synced', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
 					printf( ' - <a href="%s">%s</a>',
@@ -185,6 +189,28 @@ class Bullhorn_Custom_Post_Type {
 					);
 				}
 				break;
+
+		}
+	}
+
+	function sortable_column( $columns ) {
+		$columns['sync'] = 'sync';
+
+		return $columns;
+	}
+
+
+	function orderby( $query ) {
+		if ( ! is_admin() ) {
+			return;
+		}
+
+
+		$orderby = $query->get( 'orderby' );
+
+		if ( 'sync' == $orderby ) {
+			$query->set( 'meta_key', 'bullhorn_synced' );
+			$query->set( 'orderby', 'meta_value' );
 		}
 	}
 

@@ -78,14 +78,13 @@ function bullhorn_application_sync( $local_post_id = null ) {
 			'meta_query' => array(
 				array(
 					'key'     => 'bullhorn_synced',
-					'compare' => '!=',
-					'value'   => 'true',
+					'compare' => '=',
+					'value'   => 'false',
 				),
 			),
 		);
 
 		$application_post = get_posts( $args );
-
 		// return if none found
 		if ( false === $application_post ) {
 

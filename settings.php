@@ -64,6 +64,9 @@ class Bullhorn_Settings {
 		add_settings_field( 'listings_sort', __( 'Listings Sort', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'listings_sort' ), 'bullhornwp', 'bullhorn_api' );
 		add_settings_field( 'description_field', __( 'Description Field', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'description_field' ), 'bullhornwp', 'bullhorn_api' );
 
+
+		add_settings_field( 'send_email', __( 'Email address for applications', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'send_email' ), 'bullhornwp', 'bullhorn_api' );
+
 		add_settings_field( 'run_cron', __( 'Auto-sync', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'run_cron' ), 'bullhornwp', 'bullhorn_api' );
 		add_settings_field( 'cron_error_email', __( 'Auto-sync Error Email', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), array( __CLASS__, 'cron_error_email' ), 'bullhornwp', 'bullhorn_api' );
 
@@ -211,6 +214,16 @@ class Bullhorn_Settings {
 														Client Corporation. This must be the ID of the corporation. Leave blank to sync all job listings.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</span>';
 	}
 
+	public static function send_email() {
+		$settings = (array) get_option( 'bullhorn_settings' );
+		if ( isset( $settings['send_email'] ) ) {
+			$client_corporation = $settings['send_email'];
+		} else {
+			$client_corporation = null;
+		}
+		echo '<input type="text" size="40" name="bullhorn_settings[send_email]" value="' . esc_attr( $client_corporation ) . '" />';
+		echo '<br><span class="description">' . __( 'This field is optional, but if set, you will get a copy of the application sent to the email provided.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</span>';
+	}
 	/**
 	 * Displays the job listings page settings field.
 	 */
@@ -469,6 +482,7 @@ class Bullhorn_Settings {
 		$input['run_cron']          = esc_attr( $input['run_cron'] );
 		$input['cron_error_email']  = esc_attr( $input['cron_error_email'] );
 		$input['is_public']         = esc_attr( $input['is_public'] );
+		$input['send_email']        = sanitize_email( $input['send_email'] );
 
 		// Since the listings page has probably been updated, we need to flush
 		// the rewrite rules for the site.

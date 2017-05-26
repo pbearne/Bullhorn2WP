@@ -47,7 +47,7 @@ function send_me_form( $candidate, $resume, $local_post_id, $local_post_data ) {
 	$message .= '<p>Name :' . $fullname . '</p>' . PHP_EOL;
 	$message .= '<p>Email :' . $email . '</p>' . PHP_EOL;
 	$message .= '<p>Phone :' . $phone . '</p>' . PHP_EOL;
-	$message .= '<p>Message: ' . $message1 . '</p>' . PHP_EOL;
+	$message .= '<p>Message: ' . $user_message . '</p>' . PHP_EOL;
 
 	//set the form headers
 	$headers = 'From: New Submission on NYCM Search Website <resume@sitename.com>';

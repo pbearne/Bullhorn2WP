@@ -134,23 +134,23 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 						die();
 					}
 
-					if ( 10 > $resume->confidenceScore ) {
-						$orig_url = $_POST['_wp_http_referer'];
-						$url      = add_query_arg(
-							array(
-								'bh-message' => rawurlencode(
-									apply_filters( 'parse_resume_low_score_text',
-										sprintf( __('We go a low Confidence Score ( %s ) when we paused your CV was it empty?', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), $resume->confidenceScore )
-									)
-								),
-
-							), $orig_url
-						);
-						update_post_meta( $local_post_id, 'bullhorn_synced', 'bad_resume' );
-
-						wp_safe_redirect( $url );
-						die();
-					}
+//					if ( 10 > $resume->confidenceScore ) {
+//						$orig_url = $_POST['_wp_http_referer'];
+//						$url      = add_query_arg(
+//							array(
+//								'bh-message' => rawurlencode(
+//									apply_filters( 'parse_resume_low_score_text',
+//										sprintf( __('Submission failed - We go a low Confidence Score ( %s ) when we paused your CV was it empty?', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), $resume->confidenceScore )
+//									)
+//								),
+//
+//							), $orig_url
+//						);
+//						update_post_meta( $local_post_id, 'bullhorn_synced', 'bad_resume' );
+//
+//						wp_safe_redirect( $url );
+//						die();
+//					}
 
 
 					// Create candidate
@@ -174,6 +174,10 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 						// Attach work history to candidate
 						self::attach_skills( $resume, $candidate );
+
+						// Attach note to candidate
+						self::attach_note( $candidate, $local_post_data );
+//						die();
 
 						// link to job
 						self::link_candidate_to_job( $candidate );
@@ -327,7 +331,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	public static function add_bullhorn_candidate( $profile_data, $file_data ) {
 		// Get Resume
 		if ( is_array( $file_data ) ) {
-			$resume = self::parseResume( $file_data );
+			$resume = self::parseResume( $file_data, $profile_data['application_post_id'] );
 
 			if ( false === $resume ) {
 
@@ -422,7 +426,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	 *
 	 * @return mixed
 	 */
-	public static function parseResume( $local_files = null ) {
+	public static function parseResume( $local_files = null, $local_id = null ) {
 
 		$ext = $format = '';
 		if ( null === $local_files ) {
@@ -454,7 +458,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			}
 
 			$file_name = $files['resume']['name'];
-			list( $ext, $format ) = self::get_filetype( $files );
+			list( $ext, $format ) = self::get_filetype( $files, $local_id );
 
 			// http://gerhardpotgieter.com/2014/07/30/uploading-files-with-wp_remote_post-or-wp_remote_request/
 			$local_file = $files['resume']['tmp_name'];
@@ -550,7 +554,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	/**
 	 * @return array
 	 */
-	private static function get_filetype( $local_files = null ) {
+	private static function get_filetype( $local_files = null, $local_post_id = null ) {
 
 		// Get file extension
 		$mine_types = wp_get_mime_types();
@@ -583,12 +587,17 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 				break;
 			default:
 				$format   = '';
+				if ( null !== $local_post_id ) {
+
+					update_post_meta( $local_post_id, 'bullhorn_synced', 'bad_file' );
+				}
 				$orig_url = $_POST['_wp_http_referer'];
+				unset( $_GET['sync'] );
 				$url      = add_query_arg(
-					array(
+					array_merge( array(
 						'bh-message' => rawurlencode( apply_filters( 'file_type_failed_text', __( "Oops. This document isn't the correct format. Please upload it as one of the following formats: .txt, .html, .pdf, .doc, .docx, .rft.", 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ) ),
 
-					), $orig_url
+					), $_GET ), $orig_url
 				);
 
 				wp_safe_redirect( $url );
@@ -918,6 +927,59 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		return false;
 	}
+
+	/**
+	 * Attach Work History to a candidate
+	 *
+	 * @param $resume
+	 * @param $candidate
+	 *
+	 * @return mixed
+	 */
+	public static function attach_note( $candidate, $local_post_data ) {
+
+		if ( ! isset( $local_post_data['message'] ) ) {
+			return false;
+		}
+		// API authentication
+		self::api_auth();
+
+		$data['comments'] = $local_post_data['message'];
+		$data['commentingPerson'] =array( 'id' => $candidate->changedEntityId );
+		$data['candidates'] = array(
+			array( 'id' => $candidate->changedEntityId )
+		);
+		$data['personReference'] =array( 'id' => $candidate->changedEntityId );
+
+//		var_dump(wp_json_encode( $data ));
+//		{
+//			"commentingPerson": { "id" : "2"},
+//"candidates" : [
+//            { "id" : "4"}
+//            ],
+//"comments":"This is note",
+//"personReference": { "id" : "2"}
+//}
+		//https://rest9.bullhornstaffing.com/rest-services/13n5s0/entity/Note?BhRestToken=96dc2cad-8bbd-4826-80d5-f958a56fdad3
+
+		// Create the url && variables array
+		$url      = add_query_arg(
+			array(
+				'BhRestToken' => self::$session,
+			), self::$url . 'entity/Note/'
+		);
+//		var_dump($url);
+		$response = wp_remote_get( $url, array( 'body' => wp_json_encode( $data ), 'method' => 'PUT' ) );
+//		var_dump($response);
+
+		if ( 200 === $response['response']['code'] ) {
+
+			return wp_remote_retrieve_body( $response );
+		}
+
+		return false;
+	}
+
 
 	/**
 	 * @return array $skill_list
