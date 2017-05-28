@@ -14,7 +14,12 @@ class Bullhorn_Settings {
 
 		add_action( 'admin_init', array( __CLASS__, 'init' ) );
 		add_action( 'current_screen', array( __CLASS__, 'tasks' ) );
-		add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
+
+		if ( ! is_plugin_active('job-manager/job-manager.php') ) {
+		    add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
+	    } else {
+			add_action( 'job_manager_settings', array( __CLASS__, 'job_manager_menu' ) );
+        }
 	}
 
 
