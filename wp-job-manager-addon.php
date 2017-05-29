@@ -31,7 +31,7 @@ class Bullhorn_WP_Job_Manager_Addon {
 			'type'      => 'bullhorn_sync',
 		);
 
-		add_action( 'wp_job_manager_admin_field_bullhorn_sync', array( __CLASS__, 'sync_button_handler' ) );
+		add_action( 'wp_job_manager_admin_field_bullhorn_sync', array( __CLASS__, 'form_sync_button_handler' ) );
 
 		$settings[] = array(
 			'name' 		  => 'job_manager_bullhorn_client_corporation',
@@ -103,12 +103,37 @@ class Bullhorn_WP_Job_Manager_Addon {
 			),
 		);
 
+		$settings[] = array(
+			'name' 		  => '',
+			'std' 		  => '',
+			'placeholder' => '',
+			'label' 	  => '',
+			'desc'        => '',
+			'type'      => 'bullhorn_js',
+		);
+		add_action( 'wp_job_manager_admin_field_bullhorn_js', array( __CLASS__, 'form_js_handler' ) );
+
+		$settings[] = array(
+			'name' 		  => '',
+			'std' 		  => '',
+			'placeholder' => '',
+			'label' 	  => '',
+			'desc'        => '',
+			'type'      => 'bullhorn_code_authorization',
+		);
+		add_action( 'wp_job_manager_admin_field_bullhorn_code_authorization', array( __CLASS__, 'form_code_authorization_handler' ) );
+
 		$sections['bullhorn'] = array( __( 'Bullhorn', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), $settings );
 
 		return $sections;
 	}
 
-	public static function sync_button_handler( $option, $attributes, $value, $placeholder ) {
+	public static function form_code_authorization_handler() {
+
+
+	}
+
+	public static function form_sync_button_handler( $option, $attributes, $value, $placeholder ) {
 
 		$settings = (array) get_option( 'bullhorn_settings' );
 
@@ -128,5 +153,25 @@ class Bullhorn_WP_Job_Manager_Addon {
 		);
 
 		printf( '<a class="button" href="https://%s">%s</a>', $url, esc_html( $state_string ) );
+	}
+
+	public static function form_js_handler() {
+	?>
+		<script>
+			jQuery(function(){
+
+              var tabsIds = jQuery('.job-manager-settings-wrap div').toArray().map(function(value) { return '#' + value.id } );
+
+              if((tabsIds.indexOf(window.location.hash) > -1)) {
+
+                jQuery('.nav-tab-wrapper a[href="#settings-job_listings"]').removeClass('nav-tab-active');
+                jQuery('div#settings-job_listings').css('display', 'none');
+
+                jQuery('.nav-tab-wrapper a[href="' + window.location.hash + '"]').addClass('nav-tab-active');
+                jQuery('div' + window.location.hash).css('display', 'block');
+              }
+			});
+		</script>
+	<?php
 	}
 }
