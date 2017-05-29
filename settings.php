@@ -96,20 +96,22 @@ class Bullhorn_Settings {
 			return self::$authorize;
 		}
 
-		$settings = (array) get_option( 'bullhorn_settings' );
+		$settings = apply_filters( 'wp_bullhorn_settings', (array) get_option( 'bullhorn_settings' ) );
 
 		if (
 			isset( $settings['client_id'] ) and ! empty( $settings['client_id'] ) and
 			                                    isset( $settings['client_secret'] ) and ! empty( $settings['client_secret'] ) and
 			                                                                            isset( $_GET['code'] )
 		) {
+			$redirect_uri = admin_url( 'options-general.php?page=bullhorn' );
+			$redirect_uri = apply_filters( 'wp_bullhorn_api_redirect_uri', $redirect_uri );
 			$url = add_query_arg(
 				array(
 					'grant_type'    => 'authorization_code',
 					'code'          => $_GET['code'],
 					'client_id'     => $settings['client_id'],
 					'client_secret' => $settings['client_secret'],
-					'redirect_uri'  => admin_url( 'options-general.php?page=bullhorn' ),
+					'redirect_uri'  => $redirect_uri,
 				), 'https://auth.bullhornstaffing.com/oauth/token'
 			);
 
@@ -184,11 +186,13 @@ class Bullhorn_Settings {
 			} elseif ( self::connected() ) {
 				$state_string = __( 'Connect to Bullhorn', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
 			}
+			$redirect_uri = admin_url( 'options-general.php?page=bullhorn' );
+			$redirect_uri = apply_filters( 'wp_bullhorn_api_redirect_uri', $redirect_uri );
 			$url = add_query_arg(
 				array(
 					'client_id'     => $settings['client_id'],
 					'response_type' => 'code',
-					'redirect_uri'  => admin_url( 'options-general.php?page=bullhorn' ),
+					'redirect_uri'  => $redirect_uri,
 				),
 				'auth.bullhornstaffing.com/oauth/authorize'
 			);

@@ -2,6 +2,14 @@
 
 class Bullhorn_WP_Job_Manager_Addon {
 
+	public function __construct() {
+
+		if ( is_plugin_active( 'wp-job-manager/wp-job-manager.php' ) ) {
+			add_filter( 'wp_bullhorn_api_redirect_uri', array( __CLASS__, 'get_api_redirect_uri' ) );
+			add_filter( 'wp_bullhorn_settings', array( __CLASS__, 'get_settings' ) );
+		}
+	}
+
 	public static function wp_job_manager_menu( $sections ) {
 
 		$settings[] = array(
@@ -129,8 +137,13 @@ class Bullhorn_WP_Job_Manager_Addon {
 	}
 
 	public static function form_code_authorization_handler() {
+		Bullhorn_Settings::authorize();
+	}
 
+	public static function get_api_redirect_uri( $redirect_uri ) {
 
+		$redirect_uri = admin_url( 'edit.php?post_type=job_listing&page=job-manager-settings#settings-bullhorn' );
+		return $redirect_uri;
 	}
 
 	public static function form_sync_button_handler( $option, $attributes, $value, $placeholder ) {
@@ -147,12 +160,20 @@ class Bullhorn_WP_Job_Manager_Addon {
 			array(
 				'client_id'     => $settings['client_id'],
 				'response_type' => 'code',
-				'redirect_uri'  => admin_url( 'options-general.php?page=bullhorn' ),
+				'redirect_uri'  => self::get_api_redirect_uri(),
 			),
 			'auth.bullhornstaffing.com/oauth/authorize'
 		);
 
 		printf( '<a class="button" href="https://%s">%s</a>', $url, esc_html( $state_string ) );
+	}
+
+	public static function get_settings( $settings ) {
+
+		$settings['client_id'] = get_option('job_manager_bullhorn_client_id');
+		$settings['client_secret'] = get_option('job_manager_bullhorn_client_secret');
+
+		return $settings;
 	}
 
 	public static function form_js_handler() {
@@ -165,7 +186,7 @@ class Bullhorn_WP_Job_Manager_Addon {
               if((tabsIds.indexOf(window.location.hash) > -1)) {
 
                 jQuery('.nav-tab-wrapper a[href="#settings-job_listings"]').removeClass('nav-tab-active');
-                jQuery('div#settings-job_listings').css('display', 'none');
+                jQuery('.settings_panel').css('display', 'none');
 
                 jQuery('.nav-tab-wrapper a[href="' + window.location.hash + '"]').addClass('nav-tab-active');
                 jQuery('div' + window.location.hash).css('display', 'block');
@@ -175,3 +196,5 @@ class Bullhorn_WP_Job_Manager_Addon {
 	<?php
 	}
 }
+
+new Bullhorn_WP_Job_Manager_Addon();
