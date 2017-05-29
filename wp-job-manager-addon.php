@@ -26,7 +26,9 @@ class Bullhorn_WP_Job_Manager_Addon {
 			'std' 		  => '',
 			'placeholder' => '',
 			'label' 	  => __( 'Client Secret', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-			'desc'        => __( 'Note: You will have to ask Bullhorn support to add this URL "http://localhost:8080/wp-admin/options-general.php?page=bullhorn" to your API white list for this to work. (see the plugin install notes for more info)', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'desc'        => sprintf( __( 'Note: You will have to ask Bullhorn support to add this URL "%s" to your API white list for this to work. (see the plugin install notes for more info)',
+				                         'bh-staffing-job-listing-and-cv-upload-for-wp'
+			                         ), self::get_api_redirect_uri() ),
 			'type'      => 'input',
 		);
 
