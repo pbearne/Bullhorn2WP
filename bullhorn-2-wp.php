@@ -23,6 +23,7 @@ DISABLING: If you disable this plugin and want to restore the original /open-pos
 
 
 $path = plugin_dir_path( __FILE__ );
+require_once ABSPATH . 'wp-admin/includes/plugin.php';
 require_once $path . 'bullhorn.php';
 require_once $path . 'settings.php';
 require_once $path . 'custom-post-type.php';
@@ -30,6 +31,7 @@ require_once $path . 'cron.php';
 require_once $path . 'shortcodes.php';
 require_once $path . 'bullhorn-cv.php';
 require_once $path . 'appication-email.php';
+require_once $path . 'wp-job-manager-addon.php';
 new Appication_Email();
 
 
