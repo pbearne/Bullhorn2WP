@@ -51,22 +51,29 @@ class Bullhorn_2_WP {
 
 		require_once 'bullhorn-connection.php';
 		require_once 'settings.php';
-		require_once 'custom-post-type.php';
 		require_once 'cron.php';
 		require_once 'shortcodes.php';
 		require_once 'bullhorn-cv.php';
 		require_once 'application-email.php';
 
-		if ( 'wp-job-manager-addon' === self::$mode ) {
+		if ( 'plugin' === self::$mode ) {
+			require_once 'custom-post-type.php';
+		} else if ( 'wp-job-manager-addon' === self::$mode ) {
 			require_once 'wp-job-manager-addon.php';
-			new Bullhorn_WP_Job_Manager_Addon;
+			require_once 'wp-job-manager-custom-post-type.php';
 		}
 
 		new Bullhorn_Settings;
-		new Bullhorn_Custom_Post_Type;
 		new \bullhorn_2_wp\Shortcodes;
 		new Bullhorn_Extended_Connection;
 		new Appication_Email;
+
+		if ( 'plugin' === self::$mode ) {
+			new Bullhorn_Custom_Post_Type;
+		} else if ( 'wp-job-manager-addon' === self::$mode ) {
+			new Bullhorn_WP_Job_Manager_Addon;
+			new Bullhorn_WP_Job_Manager_Custom_Post_Type;
+		}
 	}
 
 	/**

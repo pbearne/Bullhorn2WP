@@ -32,7 +32,7 @@ class Bullhorn_Custom_Post_Type {
 	public static function init() {
 		$settings = (array) get_option( 'bullhorn_settings' );
 		if ( empty( $settings ) or ! isset( $settings['listings_page'] )
-		                                                or 'plugin' !== Bullhorn_2_WP::$mode ) {
+) {
 			return false;
 		}
 
