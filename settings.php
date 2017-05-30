@@ -47,8 +47,13 @@ class Bullhorn_Settings {
 	 */
 	public static function init() {
 
+		$redirect_uri = admin_url( 'options-general.php?page=bullhorn' );
+
+		$redirect_uri = apply_filters( 'wp_bullhorn_api_redirect_uri', $redirect_uri );
+
 		if ( isset( $_GET['sync'] ) && 'bullhorn' === $_GET['sync'] ) {
-			wp_redirect( admin_url( 'options-general.php?page=bullhorn' ) );
+			wp_redirect( $redirect_uri );
+
 		}
 
 		register_setting( 'bullhorn_settings', 'bullhorn_settings', array( __CLASS__, 'validate' ) );

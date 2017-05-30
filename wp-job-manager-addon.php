@@ -131,15 +131,34 @@ class Bullhorn_WP_Job_Manager_Addon {
 			'desc'        => '',
 			'type'      => 'bullhorn_code_authorization',
 		);
-		add_action( 'wp_job_manager_admin_field_bullhorn_code_authorization', array( __CLASS__, 'form_code_authorization_handler' ) );
+		add_action( 'wp_job_manager_admin_field_bullhorn_code_authorization', array( 'Bullhorn_Settings', 'authorize' ) );
+
+
+		if ( Bullhorn_Settings::authorized() ) {
+			$settings[] = array(
+				'name' => '',
+				'std' => '',
+				'placeholder' => '',
+				'label' => __( 'Sync with Bullhorn', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+				'desc' => '',
+				'type' => 'bullhorn_sync_now_button',
+			);
+			add_action( 'wp_job_manager_admin_field_bullhorn_sync_now_button', array(
+				__CLASS__,
+				'sync_now_button_handler'
+			) );
+		}
 
 		$sections['bullhorn'] = array( __( 'Bullhorn', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), $settings );
 
 		return $sections;
 	}
 
-	public static function form_code_authorization_handler() {
-		Bullhorn_Settings::authorize();
+	public static function sync_now_button_handler() {
+		printf( '<a href="%s" class="button">%s</a>',
+			admin_url( 'edit.php?post_type=job_listing&page=job-manager-settings&sync=bullhorn#settings-bullhorn' ),
+			__( 'Sync Now', 'bh-staffing-job-listing-and-cv-upload-for-wp' )
+		);
 	}
 
 	public static function get_api_redirect_uri( $redirect_uri ) {
