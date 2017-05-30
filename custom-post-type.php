@@ -32,7 +32,7 @@ class Bullhorn_Custom_Post_Type {
 	public static function init() {
 		$settings = (array) get_option( 'bullhorn_settings' );
 		if ( empty( $settings ) or ! isset( $settings['listings_page'] )
-		                                                or is_plugin_active( 'wp-job-manager/wp-job-manager.php' ) ) {
+		                                                or 'plugin' !== Bullhorn_2_WP::$mode ) {
 			return false;
 		}
 
@@ -416,5 +416,3 @@ class Bullhorn_Custom_Post_Type {
 	}
 
 }
-
-$bullhorn_custom_post_type = new Bullhorn_Custom_Post_Type;

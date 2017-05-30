@@ -21,21 +21,22 @@ LIMITS: WP Cron sync schedule should not be shortened, elongate as necessary. Ea
 DISABLING: If you disable this plugin and want to restore the original /open-positions page, go to Settings > Permalinks and click Save Changes after disabling (this will refresh the WP Rewrite cache).
 */
 
-
-$path = plugin_dir_path( __FILE__ );
 require_once ABSPATH . 'wp-admin/includes/plugin.php';
-require_once $path . 'bullhorn-connection.php';
-require_once $path . 'settings.php';
-require_once $path . 'custom-post-type.php';
-require_once $path . 'cron.php';
-require_once $path . 'shortcodes.php';
-require_once $path . 'bullhorn-cv.php';
-require_once $path . 'appication-email.php';
-require_once $path . 'wp-job-manager-addon.php';
 
 class Bullhorn_2_WP {
 
+	static $post_type_job_listing = 'bullhornjoblisting';
+	static $post_type_application = 'bullhornapplication';
+	static $listing_category = 'bullhorn_category';
+	static $mode = 'plugin';
+
 	public function __construct() {
+
+		if ( is_plugin_active( 'wp-job-manager/wp-job-manager.php' ) ) {
+			self::$mode = 'wp-job-manager-addon';
+		}
+
+		self::load();
 
 		add_action( 'plugins_loaded', array( __CLASS__, 'bullhorn_load_plugin_textdomain' ) );
 		register_activation_hook( __FILE__, array( __CLASS__, 'bullhorn_activation_hook' ) );
@@ -46,10 +47,32 @@ class Bullhorn_2_WP {
 		load_plugin_textdomain( 'bh-staffing-job-listing-and-cv-upload-for-wp', false, basename( dirname( __FILE__ ) ) . '/languages/' );
 	}
 
+	public static function load() {
+
+		require_once 'bullhorn-connection.php';
+		require_once 'settings.php';
+		require_once 'custom-post-type.php';
+		require_once 'cron.php';
+		require_once 'shortcodes.php';
+		require_once 'bullhorn-cv.php';
+		require_once 'application-email.php';
+
+		if ( 'wp-job-manager-addon' === self::$mode ) {
+			require_once 'wp-job-manager-addon.php';
+			new Bullhorn_WP_Job_Manager_Addon;
+		}
+
+		new Bullhorn_Settings;
+		new Bullhorn_Custom_Post_Type;
+		new \bullhorn_2_wp\Shortcodes;
+		new Bullhorn_Extended_Connection;
+		new Appication_Email;
+	}
+
 	/**
 	 * flush rewrtie on activation
 	 */
-	function bullhorn_activation_hook() {
+	public static function bullhorn_activation_hook() {
 		flush_rewrite_rules();
 	}
 
@@ -57,7 +80,7 @@ class Bullhorn_2_WP {
 	 * remove cron on deactivation
 	 * flush rewrtie on deactivation
 	 */
-	function bullhorn_deactivation_hook() {
+	public static function bullhorn_deactivation_hook() {
 		wp_clear_scheduled_hook( 'bullhorn_event' );
 		wp_clear_scheduled_hook( 'bullhorn_appication_sync' );
 		flush_rewrite_rules();

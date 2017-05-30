@@ -216,5 +216,3 @@ class Bullhorn_WP_Job_Manager_Addon {
 	<?php
 	}
 }
-
-new Bullhorn_WP_Job_Manager_Addon();

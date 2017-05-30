@@ -633,5 +633,3 @@ class Shortcodes {
 		return str_replace( '</form>', $hidden . '</form>', $form );
 	}
 }
-
-new Shortcodes();

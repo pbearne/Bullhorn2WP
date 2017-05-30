@@ -15,9 +15,9 @@ class Bullhorn_Settings {
 		add_action( 'admin_init', array( __CLASS__, 'init' ) );
 		add_action( 'current_screen', array( __CLASS__, 'tasks' ) );
 
-		if ( ! is_plugin_active( 'wp-job-manager/wp-job-manager.php' ) ) {
+		if ( 'plugin' === Bullhorn_2_WP::$mode ) {
 		    add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
-	    } else {
+	    } else if ( 'wp-job-manager-addon' === Bullhorn_2_WP::$mode ) {
 			add_action( 'job_manager_settings', array( 'Bullhorn_WP_Job_Manager_Addon', 'wp_job_manager_menu' ) );
 		}
 	}
@@ -560,5 +560,3 @@ class Bullhorn_Settings {
 		);
 	}
 }
-
-$bullhorn_settings = new Bullhorn_Settings;

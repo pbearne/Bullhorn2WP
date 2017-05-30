@@ -1469,5 +1469,3 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		return apply_filters( 'bullhorn_add_data_to_canditate_data', $resume, $profile_data );
 	}
 }
-
-new Bullhorn_Extended_Connection;

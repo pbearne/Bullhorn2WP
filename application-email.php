@@ -88,5 +88,3 @@ class Appication_Email {
 	}
 
 }
-
-new Appication_Email();
