@@ -4,10 +4,8 @@ class Bullhorn_WP_Job_Manager_Addon {
 
 	public function __construct() {
 
-		if ( is_plugin_active( 'wp-job-manager/wp-job-manager.php' ) ) {
-			add_filter( 'wp_bullhorn_api_redirect_uri', array( __CLASS__, 'get_api_redirect_uri' ) );
-			add_filter( 'wp_bullhorn_settings', array( __CLASS__, 'get_settings' ) );
-		}
+		add_filter( 'wp_bullhorn_api_redirect_uri', array( __CLASS__, 'get_api_redirect_uri' ) );
+		add_filter( 'wp_bullhorn_settings', array( __CLASS__, 'get_settings' ) );
 	}
 
 	public static function wp_job_manager_menu( $sections ) {
@@ -218,4 +216,6 @@ class Bullhorn_WP_Job_Manager_Addon {
 	}
 }
 
-new Bullhorn_WP_Job_Manager_Addon();
+if ( is_plugin_active( 'wp-job-manager/wp-job-manager.php' ) ) {
+	new Bullhorn_WP_Job_Manager_Addon();
+}
