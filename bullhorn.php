@@ -87,7 +87,7 @@ class Bullhorn_Connection {
 				if ( $throw ) {
 					error_log( 'Get skills failed: ' . serialize( $response->get_error_message() ) );
 				} else {
-					return __( 'Get categories failed: ' . serialize( $response->get_error_message() ) );
+					return __( 'Get skills failed: ' . serialize( $response->get_error_message() ) );
 				}
 			}
 		}
