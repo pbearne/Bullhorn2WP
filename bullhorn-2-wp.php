@@ -24,7 +24,7 @@ DISABLING: If you disable this plugin and want to restore the original /open-pos
 
 $path = plugin_dir_path( __FILE__ );
 require_once ABSPATH . 'wp-admin/includes/plugin.php';
-require_once $path . 'bullhorn.php';
+require_once $path . 'bullhorn-connection.php';
 require_once $path . 'settings.php';
 require_once $path . 'custom-post-type.php';
 require_once $path . 'cron.php';
@@ -32,96 +32,37 @@ require_once $path . 'shortcodes.php';
 require_once $path . 'bullhorn-cv.php';
 require_once $path . 'appication-email.php';
 require_once $path . 'wp-job-manager-addon.php';
-new Appication_Email();
 
+class Bullhorn_2_WP {
 
-function bullhorn_load_plugin_textdomain() {
-	load_plugin_textdomain( 'bh-staffing-job-listing-and-cv-upload-for-wp', false, basename( dirname( __FILE__ ) ) . '/languages/' );
-}
-add_action( 'plugins_loaded', 'bullhorn_load_plugin_textdomain' );
+	public function __construct() {
 
-/**
- * Allow job listings to be sorted by a specified setting by the admin.
- *
- * @param $query WP_QUERY
- */
-function bullhorn_sort_results( $query ) {
-	if ( $query->is_post_type_archive( 'bullhornjoblisting' ) ) {
-		$settings = (array) get_option( 'bullhorn_settings' );
-		if ( isset( $settings['listings_sort'] ) and ! empty( $settings['listings_sort'] ) ) {
-			// Use in_array() because this list might grow in the future
-			if ( ! in_array( $settings['listings_sort'], array( 'name', 'date' ) ) ) {
-				$query->set( 'meta_key', $settings['listings_sort'] );
-				$query->set( 'orderby', 'meta_value' );
-			} else {
-				$query->set( 'orderby', $settings['listings_sort'] );
-			}
-
-			// All queries should default ascending except date sorts
-			if ( strstr( $settings['listings_sort'], 'date' ) ) {
-				$query->set( 'order', 'DESC' );
-			} else {
-				$query->set( 'order', 'ASC' );
-			}
-		}
+		add_action( 'plugins_loaded', array( __CLASS__, 'bullhorn_load_plugin_textdomain' ) );
+		register_activation_hook( __FILE__, array( __CLASS__, 'bullhorn_activation_hook' ) );
+		register_deactivation_hook( __FILE__, array( __CLASS__, 'bullhorn_deactivation_hook' ) );
 	}
 
-	$modify_query = false;
-	$tax_queries  = array_filter( (array) $query->get( 'tax_query' ) );
-	if ( count( $tax_queries ) > 0 ) {
-		foreach ( $tax_queries as $tax_query ) {
-			if ( isset( $tax_query['taxonomy'] ) ) {
-				if ( false !== strstr( $tax_query['taxonomy'], 'bullhorn_' ) ) {
-					$modify_query = true;
-				}
-			}
-		}
+	public static function bullhorn_load_plugin_textdomain() {
+		load_plugin_textdomain( 'bh-staffing-job-listing-and-cv-upload-for-wp', false, basename( dirname( __FILE__ ) ) . '/languages/' );
 	}
 
-	if ( in_array( 'bullhornjoblisting', (array) $query->get( 'post_type' ) ) ) {
-		$modify_query = true;
+	/**
+	 * flush rewrtie on activation
+	 */
+	function bullhorn_activation_hook() {
+		flush_rewrite_rules();
 	}
 
-	if ( true === $modify_query ) {
-		if ( isset( $_GET['bullhorn_state'] ) ) {
-			$tax_queries[] = array(
-				'taxonomy' => 'bullhorn_state',
-				'field'    => 'slug',
-				'terms'    => sanitize_key( $_GET['bullhorn_state'] ),
-			);
-		}
-
-		if ( isset( $_GET['bullhorn_category'] ) ) {
-			$tax_queries[] = array(
-				'taxonomy' => 'bullhorn_category',
-				'field'    => 'slug',
-				'terms'    => sanitize_key( $_GET['bullhorn_category'] ),
-			);
-		}
-
-		$query->set( 'tax_query', $tax_queries );
+	/**
+	 * remove cron on deactivation
+	 * flush rewrtie on deactivation
+	 */
+	function bullhorn_deactivation_hook() {
+		wp_clear_scheduled_hook( 'bullhorn_event' );
+		wp_clear_scheduled_hook( 'bullhorn_appication_sync' );
+		flush_rewrite_rules();
 	}
+
 }
 
-add_action( 'pre_get_posts', 'bullhorn_sort_results' );
-
-/**
- * flush rewrtie on activation
- */
-function bullhorn_activation_hook() {
-	flush_rewrite_rules();
-}
-
-register_activation_hook( __FILE__, 'bullhorn_activation_hook' );
-
-/**
- * remove cron on deactivation
- * flush rewrtie on deactivation
- */
-function bullhorn_deactivation_hook() {
-	wp_clear_scheduled_hook( 'bullhorn_event' );
-	wp_clear_scheduled_hook( 'bullhorn_appication_sync' );
-	flush_rewrite_rules();
-}
-
-register_deactivation_hook( __FILE__, 'bullhorn_deactivation_hook' );
+new Bullhorn_2_WP;

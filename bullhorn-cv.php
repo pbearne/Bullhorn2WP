@@ -1470,4 +1470,4 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	}
 }
 
-new Bullhorn_Extended_Connection();
+new Bullhorn_Extended_Connection;

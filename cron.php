@@ -2,7 +2,7 @@
 
 $path = plugin_dir_path( __FILE__ );
 require_once $path . 'bullhorn-2-wp.php';
-require_once $path . 'bullhorn.php';
+require_once $path . 'bullhorn-connection.php';
 require_once $path . 'settings.php';
 require_once $path . 'custom-post-type.php';
 require_once $path . 'shortcodes.php';

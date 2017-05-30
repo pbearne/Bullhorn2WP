@@ -217,6 +217,4 @@ class Bullhorn_WP_Job_Manager_Addon {
 	}
 }
 
-if ( is_plugin_active( 'wp-job-manager/wp-job-manager.php' ) ) {
-	new Bullhorn_WP_Job_Manager_Addon();
-}
+new Bullhorn_WP_Job_Manager_Addon();

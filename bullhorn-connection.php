@@ -235,7 +235,7 @@ class Bullhorn_Connection {
 			self::$api_access = $body;
 			// Sleep for a Quarter Second. Bullhorn's Login servers sometimes sync slower
 			// slower than our script runs. This sleep should minimize login failures.
-			usleep(250000);
+			usleep( 250000 );
 			return true;
 		} elseif ( isset( $body['error_description'] ) ) {
 
