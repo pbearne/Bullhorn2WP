@@ -172,8 +172,8 @@ class Bullhorn_WP_Job_Manager_Addon {
 
 	public static function get_settings( $settings ) {
 
-		$settings['client_id'] = get_option('job_manager_bullhorn_client_id');
-		$settings['client_secret'] = get_option('job_manager_bullhorn_client_secret');
+		$settings['client_id'] = get_option( 'job_manager_bullhorn_client_id' );
+		$settings['client_secret'] = get_option( 'job_manager_bullhorn_client_secret' );
 
 		return $settings;
 	}
