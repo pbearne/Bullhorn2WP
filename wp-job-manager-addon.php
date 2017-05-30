@@ -111,27 +111,6 @@ class Bullhorn_WP_Job_Manager_Addon {
 			),
 		);
 
-		$settings[] = array(
-			'name' 		  => '',
-			'std' 		  => '',
-			'placeholder' => '',
-			'label' 	  => '',
-			'desc'        => '',
-			'type'      => 'bullhorn_js',
-		);
-		add_action( 'wp_job_manager_admin_field_bullhorn_js', array( __CLASS__, 'form_js_handler' ) );
-
-		$settings[] = array(
-			'name' 		  => '',
-			'std' 		  => '',
-			'placeholder' => '',
-			'label' 	  => '',
-			'desc'        => '',
-			'type'      => 'bullhorn_code_authorization',
-		);
-		add_action( 'wp_job_manager_admin_field_bullhorn_code_authorization', array( 'Bullhorn_Settings', 'authorize' ) );
-
-
 		if ( Bullhorn_Settings::authorized() ) {
 			$settings[] = array(
 				'name' => '',
@@ -143,9 +122,31 @@ class Bullhorn_WP_Job_Manager_Addon {
 			);
 			add_action( 'wp_job_manager_admin_field_bullhorn_sync_now_button', array(
 				__CLASS__,
-				'sync_now_button_handler'
+				'sync_now_button_handler',
 			) );
 		}
+
+		//"invisible" field
+		$settings[] = array(
+			'name' 		  => '',
+			'std' 		  => '',
+			'placeholder' => '',
+			'label' 	  => '',
+			'desc'        => '',
+			'type'      => 'bullhorn_js',
+		);
+		add_action( 'wp_job_manager_admin_field_bullhorn_js', array( __CLASS__, 'form_js_handler' ) );
+
+		//"invisible" field
+		$settings[] = array(
+			'name' 		  => '',
+			'std' 		  => '',
+			'placeholder' => '',
+			'label' 	  => '',
+			'desc'        => '',
+			'type'      => 'bullhorn_code_authorization',
+		);
+		add_action( 'wp_job_manager_admin_field_bullhorn_code_authorization', array( 'Bullhorn_Settings', 'authorize' ) );
 
 		$sections['bullhorn'] = array( __( 'Bullhorn', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), $settings );
 
