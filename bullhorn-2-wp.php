@@ -36,6 +36,11 @@ class Bullhorn_2_WP {
 
 		if ( is_plugin_active( 'wp-job-manager/wp-job-manager.php' ) ) {
 			self::$mode = 'wp-job-manager-addon';
+
+			self::$post_type_job_listing = 'job_listing';
+			self::$post_type_application = 'bullhornapplication';
+			self::$taxonomy_listing_category = 'job_listing_category';
+			self::$taxonomy_listing_state = 'bullhorn_state';
 		}
 
 		self::load();
@@ -57,10 +62,9 @@ class Bullhorn_2_WP {
 		require_once 'shortcodes.php';
 		require_once 'bullhorn-cv.php';
 		require_once 'application-email.php';
+		require_once 'custom-post-type.php';
 
-		if ( 'plugin' === self::$mode ) {
-			require_once 'custom-post-type.php';
-		} else if ( 'wp-job-manager-addon' === self::$mode ) {
+		if ( 'wp-job-manager-addon' === self::$mode ) {
 			require_once 'wp-job-manager-addon.php';
 			require_once 'wp-job-manager-custom-post-type.php';
 		}

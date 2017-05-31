@@ -31,8 +31,7 @@ class Bullhorn_Custom_Post_Type {
 	 */
 	public static function init() {
 		$settings = (array) get_option( 'bullhorn_settings' );
-		if ( empty( $settings ) or ! isset( $settings['listings_page'] )
-) {
+		if ( empty( $settings ) or ! isset( $settings['listings_page'] ) ) {
 			return false;
 		}
 
@@ -156,8 +155,10 @@ class Bullhorn_Custom_Post_Type {
 		return true;
 	}
 
-	public static function sniff_post(){
-		if( isset( $_REQUEST['sync'] ) && isset( $_REQUEST['post_type'] ) && Bullhorn_2_WP::$post_type_application === $_REQUEST['post_type'] ){
+	//TODO move this to somewhere else, add admin check
+	public static function sniff_post() {
+
+		if ( isset( $_REQUEST['sync'] ) && isset( $_REQUEST['post_type'] ) && Bullhorn_2_WP::$post_type_application === $_REQUEST['post_type'] ) {
 			bullhorn_application_sync( absint( $_REQUEST['sync'] ) );
 		}
 	}

@@ -8,6 +8,8 @@ class Bullhorn_Settings {
 	 * Bullhorn_Settings constructor.
 	 */
 	public function __construct() {
+
+		//move this if to somewhere else, add admin check
 		if ( isset( $_GET['sync'] ) && 'bullhorn' === $_GET['sync'] ) {
 			add_action( 'admin_init', 'bullhorn_sync_now' );
 		}
