@@ -27,7 +27,9 @@ class Bullhorn_2_WP {
 
 	static $post_type_job_listing = 'bullhornjoblisting';
 	static $post_type_application = 'bullhornapplication';
-	static $listing_category = 'bullhorn_category';
+	static $taxonomy_listing_category = 'bullhorn_category';
+	static $taxonomy_listing_state = 'bullhorn_state';
+
 	static $mode = 'plugin';
 
 	public function __construct() {

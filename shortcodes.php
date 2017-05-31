@@ -215,7 +215,7 @@ class Shortcodes {
 					'posts_per_page' => - 1,
 					'orderby'        => 'title',
 					'order'          => 'DESC',
-					'post_type'      => 'bullhornjoblisting',
+					'post_type'      => Bullhorn_2_WP::$post_type_job_listing,
 					'post_status'    => 'publish',
 				);
 				$jobs = get_posts( $args );
@@ -252,7 +252,7 @@ class Shortcodes {
 			<?php
 			if ( isset( $_GET['position'] ) ) {
 				printf( '<input id="position" name="position" type="hidden" value="%s" />', esc_attr( $_GET['position'] ) );
-			} elseif ( 'bullhornjoblisting' === get_post_type() ) {
+			} elseif ( Bullhorn_2_WP::$post_type_job_listing === get_post_type() ) {
 				printf( '<input id="position" name="position" type="hidden" value="%s" />', esc_attr( get_post_meta( get_the_ID(), 'bullhorn_job_id', true ) ) );
 			}
 			printf( '<input id="post" name="post" type="hidden" value="%s" />',
@@ -393,40 +393,40 @@ class Shortcodes {
 		}
 
 		$args = array(
-			'post_type'      => 'bullhornjoblisting',
+			'post_type'      => Bullhorn_2_WP::$post_type_job_listing,
 			'posts_per_page' => intval( $limit ),
 			'tax_query'      => array(),
 		);
 
 		if ( $state ) {
 			$args['tax_query'][] = array(
-				'taxonomy' => 'bullhorn_state',
+				'taxonomy' => Bullhorn_2_WP::$taxonomy_listing_state,
 				'field'    => 'slug',
 				'terms'    => sanitize_title( $state ),
 			);
 		}
 
-		if ( isset( $_GET['bullhorn_state'] ) ) {
+		if ( isset( $_GET[ Bullhorn_2_WP::$taxonomy_listing_state ] ) ) {
 			$args['tax_query'][] = array(
-				'taxonomy' => 'bullhorn_state',
+				'taxonomy' => Bullhorn_2_WP::$taxonomy_listing_state,
 				'field'    => 'slug',
-				'terms'    => sanitize_key( $_GET['bullhorn_state'] ),
+				'terms'    => sanitize_key( $_GET[ Bullhorn_2_WP::$taxonomy_listing_state ] ),
 			);
 		}
 
 		if ( $type ) {
 			$args['tax_query'][] = array(
-				'taxonomy' => 'bullhorn_category',
+				'taxonomy' => \Bullhorn_2_WP::$taxonomy_listing_category,
 				'field'    => 'slug',
 				'terms'    => sanitize_title( $type ),
 			);
 		}
 
-		if ( isset( $_GET['bullhorn_category'] ) ) {
+		if ( isset( $_GET[Bullhorn_2_WP::$taxonomy_listing_category] ) ) {
 			$args['tax_query'][] = array(
-				'taxonomy' => 'bullhorn_category',
+				'taxonomy' => Bullhorn_2_WP::$taxonomy_listing_category,
 				'field'    => 'slug',
-				'terms'    => sanitize_key( $_GET['bullhorn_category'] ),
+				'terms'    => sanitize_key( $_GET[Bullhorn_2_WP::$taxonomy_listing_category] ),
 			);
 		}
 
@@ -555,21 +555,21 @@ class Shortcodes {
 		$output .= '<option value="">Filter by category...</option>';
 
 		$categories = get_categories( array(
-			'taxonomy'   => 'bullhorn_category',
+			'taxonomy'   => Bullhorn_2_WP::$taxonomy_listing_category,
 			'hide_empty' => 0,
 		) );
 		foreach ( $categories as $category ) {
-			$params = array( 'bullhorn_category' => $category->slug );
-			if ( isset( $_GET['bullhorn_state'] ) ) {
-				$params['bullhorn_state'] = $_GET['bullhorn_state'];
+			$params = array( Bullhorn_2_WP::$taxonomy_listing_category => $category->slug );
+			if ( isset( $_GET[ Bullhorn_2_WP::$taxonomy_listing_state ] ) ) {
+				$params[ Bullhorn_2_WP::$taxonomy_listing_state ] = $_GET[ Bullhorn_2_WP::$taxonomy_listing_state ];
 			}
 
 			$selected = null;
-			if ( isset( $_GET['bullhorn_category'] ) and $_GET['bullhorn_category'] === $category->slug ) {
+			if ( isset( $_GET[ Bullhorn_2_WP::$taxonomy_listing_category ] ) and $_GET[ Bullhorn_2_WP::$taxonomy_listing_category ] === $category->slug ) {
 				$selected = 'selected="selected"';
 			}
 
-			$output .= '<option value="' . get_post_type_archive_link( 'bullhornjoblisting' ) . '?' . http_build_query( $params ) . '" ' . $selected . '>' . esc_html( $category->name ) . '</option>';
+			$output .= '<option value="' . get_post_type_archive_link( Bullhorn_2_WP::$post_type_job_listing ) . '?' . http_build_query( $params ) . '" ' . $selected . '>' . esc_html( $category->name ) . '</option>';
 		}
 
 		$output .= '</select>';
@@ -593,21 +593,21 @@ class Shortcodes {
 		$output .= '<option value="">Filter by state...</option>';
 
 		$states = get_categories( array(
-			'taxonomy'   => 'bullhorn_state',
+			'taxonomy'   => Bullhorn_2_WP::$taxonomy_listing_state,
 			'hide_empty' => 0,
 		) );
 		foreach ( $states as $state ) {
-			$params = array( 'bullhorn_state' => $state->slug );
-			if ( isset( $_GET['bullhorn_category'] ) ) {
-				$params['bullhorn_category'] = $_GET['bullhorn_category'];
+			$params = array( Bullhorn_2_WP::$taxonomy_listing_state => $state->slug );
+			if ( isset( $_GET[ Bullhorn_2_WP::$taxonomy_listing_category ] ) ) {
+				$params[ Bullhorn_2_WP::$taxonomy_listing_category ] = $_GET[ Bullhorn_2_WP::$taxonomy_listing_category ];
 			}
 
 			$selected = null;
-			if ( isset( $_GET['bullhorn_state'] ) and $_GET['bullhorn_state'] === $state->slug ) {
+			if ( isset( $_GET[ Bullhorn_2_WP::$taxonomy_listing_state ] ) and $_GET[ Bullhorn_2_WP::$taxonomy_listing_state ] === $state->slug ) {
 				$selected = 'selected="selected"';
 			}
 
-			$output .= '<option value="' . get_post_type_archive_link( 'bullhornjoblisting' ) . '?' . http_build_query( $params ) . '" ' . $selected . '>' . esc_html( $state->name ) . '</option>';
+			$output .= '<option value="' . get_post_type_archive_link( Bullhorn_2_WP::$post_type_job_listing ) . '?' . http_build_query( $params ) . '" ' . $selected . '>' . esc_html( $state->name ) . '</option>';
 		}
 
 		$output .= '</select>';
@@ -628,7 +628,7 @@ class Shortcodes {
 			_doing_it_wrong( __FUNCTION__, __( 'bullhorn categories Shortcode does not need attributes', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), 2.0 );
 		}
 		$form   = get_search_form( false );
-		$hidden = '<input type="hidden" name="post_type" value="bullhornjoblisting" />';
+		$hidden = '<input type="hidden" name="post_type" value="' . Bullhorn_2_WP::$post_type_job_listing . '" />';
 
 		return str_replace( '</form>', $hidden . '</form>', $form );
 	}

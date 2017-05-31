@@ -1,12 +1,6 @@
 <?php
 
-$path = plugin_dir_path( __FILE__ );
-require_once $path . 'bullhorn-2-wp.php';
-require_once $path . 'bullhorn-connection.php';
-require_once $path . 'settings.php';
-require_once $path . 'custom-post-type.php';
-require_once $path . 'shortcodes.php';
-require_once $path . 'bullhorn-cv.php';
+require_once 'bullhorn-2-wp.php';
 
 /**
  * @throws Exception
@@ -73,7 +67,7 @@ function bullhorn_application_sync( $local_post_id = null ) {
 
 	if ( null === $local_post_id ) {
 		$args             = array(
-			'post_type'  => 'bullhornapplication',
+			'post_type'  => Bullhorn_2_WP::$post_type_application,
 			'number'     => 1,
 			'meta_query' => array(
 				array(

@@ -253,7 +253,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			$args      = array(
 				'meta_key'   => 'bullhorn_job_id',
 				'meta_value' => absint( $_REQUEST['position'] ),
-				'post_type'  => 'bullhornjoblisting',
+				'post_type'  => Bullhorn_2_WP::$post_type_job_listing,
 				'number'     => 1,
 			);
 			$job_post  = get_pages( $args );
@@ -302,7 +302,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$my_post = array(
 			'post_title'   => $post_title,
 			'post_content' => $post_content,
-			'post_type'    => 'bullhornapplication',
+			'post_type'    => Bullhorn_2_WP::$post_type_application,
 			'post_author'  => 1,
 			'post_status'  => 'publish',
 		);// Insert the post into the database

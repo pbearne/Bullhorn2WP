@@ -19,9 +19,9 @@ class Bullhorn_Custom_Post_Type {
 
 		add_action( 'init' , array( __CLASS__, 'sniff_post' ) );
 
-		add_filter( 'manage_bullhornapplication_posts_columns', array( __CLASS__, 'set_custom_edit_columns' ) );
-		add_action( 'manage_bullhornapplication_posts_custom_column', array( __CLASS__, 'custom_column' ), 10, 2 );
-		add_filter( 'manage_edit-bullhornapplication_sortable_columns', array( __CLASS__, 'sortable_column' ) );
+		add_filter( 'manage_' . Bullhorn_2_WP::$post_type_application . '_posts_columns', array( __CLASS__, 'set_custom_edit_columns' ) );
+		add_action( 'manage_' . Bullhorn_2_WP::$post_type_application . '_posts_custom_column', array( __CLASS__, 'custom_column' ), 10, 2 );
+		add_filter( 'manage_edit-' . Bullhorn_2_WP::$post_type_application . '_sortable_columns', array( __CLASS__, 'sortable_column' ) );
 		add_action( 'pre_get_posts',  array( __CLASS__, 'orderby' ) );
 		add_action( 'pre_get_posts',  array( __CLASS__, 'bullhorn_sort_results' ) );
 	}
@@ -65,7 +65,7 @@ class Bullhorn_Custom_Post_Type {
 			'menu_position'      => null,
 			'supports'           => array( 'title', 'editor', 'thumbnail', 'excerpt', 'custom-fields' ),
 		);
-		register_post_type( 'bullhornjoblisting', $args );
+		register_post_type( Bullhorn_2_WP::$post_type_job_listing, $args );
 
 
 		$labels = array(
@@ -88,7 +88,7 @@ class Bullhorn_Custom_Post_Type {
 			'public'             => false,
 			'publicly_queryable' => false,
 			'show_ui'            => true,
-			'show_in_menu'       => 'edit.php?post_type=bullhornjoblisting',
+			'show_in_menu'       => 'edit.php?post_type=' . Bullhorn_2_WP::$post_type_job_listing,
 			'query_var'          => true,
 			'capability_type'    => 'post',
 			'has_archive'        => false,
@@ -96,7 +96,7 @@ class Bullhorn_Custom_Post_Type {
 			'menu_position'      => null,
 			'supports'           => array( 'title', 'editor', 'custom-fields' ),
 		);
-		register_post_type( 'bullhornapplication', $args );
+		register_post_type( Bullhorn_2_WP::$post_type_application, $args );
 
 
 		$labels = array(
@@ -124,7 +124,7 @@ class Bullhorn_Custom_Post_Type {
 			'show_in_nav_menus' => true,
 			'show_tagcloud'     => true,
 		);
-		register_taxonomy( 'bullhorn_category', 'bullhornjoblisting', $args );
+		register_taxonomy( Bullhorn_2_WP::$taxonomy_listing_category, Bullhorn_2_WP::$post_type_job_listing, $args );
 
 		$labels = array(
 			'name'                       => _x( 'States', 'Taxonomy General Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
@@ -151,13 +151,13 @@ class Bullhorn_Custom_Post_Type {
 			'show_in_nav_menus' => true,
 			'show_tagcloud'     => true,
 		);
-		register_taxonomy( 'bullhorn_state', 'bullhornjoblisting', $args );
+		register_taxonomy( Bullhorn_2_WP::$taxonomy_listing_state, Bullhorn_2_WP::$post_type_job_listing, $args );
 
 		return true;
 	}
 
 	public static function sniff_post(){
-		if( isset( $_REQUEST['sync'] ) && isset( $_REQUEST['post_type'] ) && 'bullhornapplication' === $_REQUEST['post_type'] ){
+		if( isset( $_REQUEST['sync'] ) && isset( $_REQUEST['post_type'] ) && Bullhorn_2_WP::$post_type_application === $_REQUEST['post_type'] ){
 			bullhorn_application_sync( absint( $_REQUEST['sync'] ) );
 		}
 	}
@@ -186,7 +186,7 @@ class Bullhorn_Custom_Post_Type {
 					printf( ' - <a href="%s">%s</a>',
 						add_query_arg( array(
 							'sync' => $post_id,
-						), admin_url( 'edit.php?post_type=bullhornapplication' ) ),
+						), admin_url( 'edit.php?post_type=' . Bullhorn_2_WP::$post_type_application ) ),
 						__( 'Try Now', 'bh-staffing-job-listing-and-cv-upload-for-wp' )
 					);
 				}
@@ -227,7 +227,7 @@ class Bullhorn_Custom_Post_Type {
 	public static function post_updated_messages( $messages ) {
 		global $post, $post_ID;
 
-		$messages['bullhornjoblisting'] = array(
+		$messages[Bullhorn_2_WP::$post_type_job_listing] = array(
 			0  => '', // Unused. Messages start at index 1.
 			1  => sprintf( __( 'Job listing updated. <a href="%s">View job listing</a>', 'your_text_domain' ), esc_url( get_permalink( $post_ID ) ) ),
 			2  => __( 'Custom field updated.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
@@ -257,7 +257,7 @@ class Bullhorn_Custom_Post_Type {
 	 * @return string
 	 */
 	public static function contextual_help( $contextual_help, $screen_id ) {
-		if ( 'bullhornjoblisting' === $screen_id ) {
+		if ( Bullhorn_2_WP::$post_type_job_listing === $screen_id ) {
 			$contextual_help =
 				'<p>' . __( 'Things to remember when adding or editing a job listing:', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</p>' .
 				'<ul>' .
@@ -292,7 +292,7 @@ class Bullhorn_Custom_Post_Type {
 	public static function the_content( $content = null ) {
 
 		$settings = (array) get_option( 'bullhorn_settings' );
-		if ( isset( $settings['form_page'] ) and 'bullhornjoblisting' === get_post_type() ) {
+		if ( isset( $settings['form_page'] ) and Bullhorn_2_WP::$post_type_job_listing === get_post_type() ) {
 			$bullhorn_job_id = get_post_meta( get_the_ID(), 'bullhorn_job_id', true );
 			if ( is_single() ) {
 				if ( apply_filters( 'bullhorn_show_form_on_job_page', true ) ) {
@@ -317,7 +317,7 @@ class Bullhorn_Custom_Post_Type {
 
 	public static function add_json_ld_to_content( $content = null ) {
 		$settings = (array) get_option( 'bullhorn_settings' );
-		if ( isset( $settings['form_page'] ) and 'bullhornjoblisting' === get_post_type() ) {
+		if ( isset( $settings['form_page'] ) and Bullhorn_2_WP::$post_type_job_listing === get_post_type() ) {
 			if ( is_single() ) {
 				$bullhorn_json_ld = get_post_meta( get_the_ID(), 'bullhorn_json_ld', true );
 
@@ -345,7 +345,7 @@ class Bullhorn_Custom_Post_Type {
 	public static function comments_open( $open, $post_id ) {
 		$post_type = get_post_type( $post_id );
 
-		if ( 'bullhornjoblisting' === $post_type ) {
+		if ( Bullhorn_2_WP::$post_type_job_listing === $post_type ) {
 			return false;
 		}
 
@@ -358,7 +358,7 @@ class Bullhorn_Custom_Post_Type {
 	 * @param $query WP_QUERY
 	 */
 	function bullhorn_sort_results( $query ) {
-		if ( $query->is_post_type_archive( 'bullhornjoblisting' ) ) {
+		if ( $query->is_post_type_archive( Bullhorn_2_WP::$post_type_job_listing ) ) {
 			$settings = (array) get_option( 'bullhorn_settings' );
 			if ( isset( $settings['listings_sort'] ) and ! empty( $settings['listings_sort'] ) ) {
 				// Use in_array() because this list might grow in the future
@@ -390,24 +390,24 @@ class Bullhorn_Custom_Post_Type {
 			}
 		}
 
-		if ( in_array( 'bullhornjoblisting', (array) $query->get( 'post_type' ) ) ) {
+		if ( in_array( Bullhorn_2_WP::$post_type_job_listing, (array) $query->get( 'post_type' ) ) ) {
 			$modify_query = true;
 		}
 
 		if ( true === $modify_query ) {
-			if ( isset( $_GET['bullhorn_state'] ) ) {
+			if ( isset( $_GET[ Bullhorn_2_WP::$taxonomy_listing_state ] ) ) {
 				$tax_queries[] = array(
-					'taxonomy' => 'bullhorn_state',
+					'taxonomy' => Bullhorn_2_WP::$taxonomy_listing_state,
 					'field'    => 'slug',
-					'terms'    => sanitize_key( $_GET['bullhorn_state'] ),
+					'terms'    => sanitize_key( $_GET[ Bullhorn_2_WP::$taxonomy_listing_state ] ),
 				);
 			}
 
-			if ( isset( $_GET['bullhorn_category'] ) ) {
+			if ( isset( $_GET[ Bullhorn_2_WP::$taxonomy_listing_category ] ) ) {
 				$tax_queries[] = array(
-					'taxonomy' => 'bullhorn_category',
+					'taxonomy' => Bullhorn_2_WP::$taxonomy_listing_category,
 					'field'    => 'slug',
-					'terms'    => sanitize_key( $_GET['bullhorn_category'] ),
+					'terms'    => sanitize_key( $_GET[ Bullhorn_2_WP::$taxonomy_listing_category ] ),
 				);
 			}
 

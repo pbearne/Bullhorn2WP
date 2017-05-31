@@ -249,8 +249,8 @@ class Bullhorn_Settings {
 			$listings_page = null;
 		}
 
-		echo '<input type="text" size="40" name="bullhorn_settings[listings_page]" value="' . esc_attr( $listings_page ) . '" placeholder="bullhornjoblisting" />';
-		echo '<br><span class="description">' . __( 'This field is optional, but changing it will adjust the URL of the job listing pages from "bullhornjoblisting" to the set value.
+		echo '<input type="text" size="40" name="bullhorn_settings[listings_page]" value="' . esc_attr( $listings_page ) . '" placeholder="' . Bullhorn_2_WP::$post_type_job_listing . '" />';
+		echo '<br><span class="description">' . __( 'This field is optional, but changing it will adjust the URL of the job listing pages from "' . Bullhorn_2_WP::$post_type_job_listing . '" to the set value.
 														You must run the sync after changing this as it changes the Custom Post Slug.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</span>';
 	}
 
