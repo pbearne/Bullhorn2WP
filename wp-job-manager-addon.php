@@ -6,9 +6,31 @@ class Bullhorn_WP_Job_Manager_Addon {
 
 		add_filter( 'wp_bullhorn_api_redirect_uri', array( __CLASS__, 'get_api_redirect_uri' ) );
 		add_filter( 'wp_bullhorn_settings', array( __CLASS__, 'get_settings' ) );
+		add_filter( 'job_manager_locate_template', array( __CLASS__, 'job_manager_locate_template' ), 10, 3 );
+		add_filter( 'job_manager_application_details_bullhorn', array( __CLASS__, 'render_application_form' ) );
+	}
+
+	public static function render_application_form() {
+			echo \bullhorn_2_wp\Shortcodes::render_cv_appication_with_jobs();
+	}
+
+	public static function job_manager_locate_template( $template, $template_name, $template_path ) {
+
+		if ( 'job-application.php' === $template_name && 'bullhorn2wp' === get_option( 'job_manager_allowed_application_method' ) ) {
+			return dirname( __FILE__ ) . '/wp-job-manager-job-application-template.php';
+		}
+
+		return $template;
 	}
 
 	public static function wp_job_manager_menu( $sections ) {
+
+		for ( $i = 0; $i < count( $sections['job_submission'][1] ); $i++ ) {
+
+			if ( 'job_manager_allowed_application_method' === $sections['job_submission'][1][ $i ]['name'] ) {
+				$sections['job_submission'][1][ $i ]['options']['bullhorn2wp'] = __( 'Bullhorn', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
+			}
+		}
 
 		$settings[] = array(
 			'name' 		  => 'job_manager_bullhorn_client_id',
