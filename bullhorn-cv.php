@@ -650,28 +650,25 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		}
 		$resume = self::add_data_to_canditate_data( $resume, $profile_data );
 
-		$resume->candidate->source = 'New Website';
+		// $resume->candidate->source = 'New Website';
 
-		// API authentication
-		self::api_auth();
+		// // API authentication
+		// self::api_auth();
 
-		$url = add_query_arg(
-			array(
-				'BhRestToken' => self::$session,
-			), self::$url . 'entity/Candidate'
-		);
+		// $url = add_query_arg(
+		// 	array(
+		// 		'BhRestToken' => self::$session,
+		// 	), self::$url . 'entity/Candidate'
+		// );
 
-		$response = wp_remote_get( $url, array( 'body' => wp_json_encode( $resume->candidate ), 'method' => 'PUT' ) );
+		// $response = wp_remote_get( $url, array( 'body' => wp_json_encode( $resume->candidate ), 'method' => 'PUT' ) );
 
-		$safety_count = 0;
-		while ( 500 === $response['response']['code'] && 5 > $safety_count ) {
-			error_log( 'Create Canditate failed( ' . $safety_count . '): ' . serialize( $response ) );
-			$response = wp_remote_get( $url, array(
-				'body'   => wp_json_encode( $resume->candidate ),
-				'method' => 'PUT'
-			) );
-			$safety_count ++;
-		}
+		// $safety_count = 0;
+		// while ( 500 === $response['response']['code'] && 5 > $safety_count ) {
+		// 	error_log( 'Create Canditate failed( ' . $safety_count . '): ' . serialize( $response ) );
+		// 	$response = wp_remote_get( $url, array( 'body' => wp_json_encode( $resume->candidate ), 'method' => 'PUT' ) );
+		// 	$safety_count ++;
+		// }
 
 		if ( isset( $profile_data['phone'] ) ) {
 			$cv_phone = $resume->candidate->phone;
