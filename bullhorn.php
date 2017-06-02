@@ -233,7 +233,9 @@ class Bullhorn_Connection {
 			$body['last_refreshed'] = time();
 			update_option( 'bullhorn_api_access', $body );
 			self::$api_access = $body;
-			//		error_log( 'refresh token finish' );
+			// Sleep for a Quarter Second. Bullhorn's Login servers sometimes sync slower
+			// slower than our script runs. This sleep should minimize login failures.
+			usleep(250000);
 			return true;
 		} elseif ( isset( $body['error_description'] ) ) {
 
