@@ -11,7 +11,16 @@ class Bullhorn_WP_Job_Manager_Addon {
 	}
 
 	public static function render_application_form() {
-			echo \bullhorn_2_wp\Shortcodes::render_cv_appication_with_jobs();
+
+		$option = get_option( 'job_manager_bullhorn_default_form_input' );
+
+		if ( 'name_email_phone' === $option ) {
+			echo \bullhorn_2_wp\Shortcodes::render_cv_form();
+		} else if ( 'name_email_phone_address' === $option ) {
+			echo \bullhorn_2_wp\Shortcodes::render_cv_appication();
+		} else {
+			echo \bullhorn_2_wp\Shortcodes::render_cv_form();
+		}
 	}
 
 	public static function job_manager_locate_template( $template, $template_name, $template_path ) {
@@ -70,6 +79,19 @@ class Bullhorn_WP_Job_Manager_Addon {
 			'label' 	  => __( 'Client Corporation', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 			'desc'        => __( 'This field is optional, but will filter the jobs retreived from Bullhorn to only those listed under a specific Client Corporation. This must be the ID of the corporation. Leave blank to sync all job listings.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 			'type'      => 'input',
+		);
+
+		$settings[] = array(
+			'name' 		  => 'job_manager_bullhorn_default_form_input',
+			'std' 		  => 'false',
+			'placeholder' => '',
+			'label' 	  => __( 'Default Form Input', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'desc'        => '',
+			'type'        => 'select',
+			'options'     => array(
+				'name_email_phone'       => __( 'Name + Email + Phone', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+				'name_email_phone_address' => __( 'Name + Email + Phone + Address', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			),
 		);
 
 		$settings[] = array(
