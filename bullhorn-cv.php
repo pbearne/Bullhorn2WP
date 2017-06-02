@@ -79,7 +79,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 					if ( ! isset( self::$api_access['refresh_token'] ) ) {
 						$permalink = add_query_arg( array(
-							'bh_applied' => true,
+							'bh_applied'    => true,
 							'refresh_token' => true,
 						), $thanks_page_url );
 
@@ -92,7 +92,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 						$permalink = add_query_arg( array(
 							'bh_applied' => true,
-							'cron_used' => true,
+							'cron_used'  => true,
 						), $thanks_page_url );
 
 						wp_safe_redirect( $permalink );
@@ -100,8 +100,8 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 					}
 
 					if ( isset( $local_post_data['cv_name'] ) && isset( $local_post_data['cv_dir'] ) ) {
-						$file_data['resume']['name']                  = $local_post_data['cv_name'];
-						$file_data['resume']['tmp_name']              = $local_post_data['cv_dir'];
+						$file_data['resume']['name']     = $local_post_data['cv_name'];
+						$file_data['resume']['tmp_name'] = $local_post_data['cv_dir'];
 
 						$resume = self::parseResume( $file_data );
 
@@ -176,8 +176,8 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 						self::attach_skills( $resume, $candidate );
 
 						// Attach note to candidate
-						self::attach_note( $candidate, $local_post_data );
-//						die();
+						// not working yet
+						// self::attach_note( $candidate, $local_post_data );
 
 						// link to job
 						self::link_candidate_to_job( $candidate );
@@ -282,7 +282,19 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		$post_title = $name . ' ' . __( 'applied for', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . ' ' . $job_title;
 
-		$posiable_fields = array( 'name', 'email', 'phone', 'message', 'address1', 'address2', 'city', 'state', 'zip', 'position', 'post' );
+		$posiable_fields = array(
+			'name',
+			'email',
+			'phone',
+			'message',
+			'address1',
+			'address2',
+			'city',
+			'state',
+			'zip',
+			'position',
+			'post'
+		);
 
 		$data         = array();
 		$post_content = '';
@@ -364,7 +376,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		self::link_candidate_to_job( $candidate, $profile_data['job_id'] );
 
 
-				// Attach resume file to candidate
+		// Attach resume file to candidate
 		if ( is_array( $file_data ) ) {
 
 			error_log( 'wp_upload_file_request: ' . self::wp_upload_file_request( $candidate, $file_data ) );
@@ -443,7 +455,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			if ( ! is_array( $local_files ) ) {
 				$application_post_data = (array) get_post_meta( absint( $local_files ), 'bh_candidate_data', true );
 
-				if( isset( $application_post_data['cv_name'] ) && isset( $application_post_data['cv_dir'] ) ) {
+				if ( isset( $application_post_data['cv_name'] ) && isset( $application_post_data['cv_dir'] ) ) {
 					$files['resume']['name']     = $application_post_data['cv_name'];
 					$files['resume']['tmp_name'] = $application_post_data['cv_dir'];
 
@@ -473,23 +485,25 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		//https://github.com/jeckman/wpgplus/blob/master/gplus.php#L554
 		$boundary = md5( time() );
 		$payload  = '';
-		$payload .= '--' . $boundary;
-		$payload .= "\r\n";
-		$payload .= 'Content-Disposition: form-data; name="photo_upload_file_name"; filename="' . $file_name . '"' . "\r\n";
-		$payload .= 'Content-Type: ' . $ext . "\r\n"; // If you	know the mime-type
-		$payload .= 'Content-Transfer-Encoding: binary' . "\r\n";
-		$payload .= "\r\n";
-		$payload .= file_get_contents( $local_file );
-		$payload .= "\r\n";
-		$payload .= '--' . $boundary . '--';
-		$payload .= "\r\n\r\n";
+		$payload  .= '--' . $boundary;
+		$payload  .= "\r\n";
+		$payload  .= 'Content-Disposition: form-data; name="photo_upload_file_name"; filename="' . $file_name . '"' . "\r\n";
+		$payload  .= 'Content-Type: ' . $ext . "\r\n"; // If you	know the mime-type
+		$payload  .= 'Content-Transfer-Encoding: binary' . "\r\n";
+		$payload  .= "\r\n";
+		$payload  .= file_get_contents( $local_file );
+		$payload  .= "\r\n";
+		$payload  .= '--' . $boundary . '--';
+		$payload  .= "\r\n\r\n";
 
 		$args = array(
 			'method'  => 'POST',
 			'timeout' => 120, // default is 45 set to 2 minuets for this one call
 			'headers' => array(
-				'accept'       => 'application/json', // The API returns JSON
-				'content-type' => 'multipart/form-data;boundary=' . $boundary, // Set content type to multipart/form-data
+				'accept'       => 'application/json',
+				// The API returns JSON
+				'content-type' => 'multipart/form-data;boundary=' . $boundary,
+				// Set content type to multipart/form-data
 			),
 			'body'    => $payload,
 		);
@@ -586,14 +600,14 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 				$format = 'HTML';
 				break;
 			default:
-				$format   = '';
+				$format = '';
 				if ( null !== $local_post_id ) {
 
 					update_post_meta( $local_post_id, 'bullhorn_synced', 'bad_file' );
 				}
 				$orig_url = $_POST['_wp_http_referer'];
 				unset( $_GET['sync'] );
-				$url      = add_query_arg(
+				$url = add_query_arg(
 					array_merge( array(
 						'bh-message' => rawurlencode( apply_filters( 'file_type_failed_text', __( "Oops. This document isn't the correct format. Please upload it as one of the following formats: .txt, .html, .pdf, .doc, .docx, .rft.", 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ) ),
 
@@ -699,6 +713,36 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			$resume->candidate->address          = $address_data;
 			$resume->candidate->secondaryAddress = $cv_address;
 
+		}
+
+		$resume->candidate->comments = '';
+
+		$position_prex = apply_filters( 'bullhorn_position_prex', __( 'Position applied for: ', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
+		if ( isset( $profile_data['position'] ) ) {
+			if ( is_numeric( $profile_data['position'] ) ) {
+				$position_text = get_the_title( absint( $profile_data['position'] ) );
+			} else {
+				$position_text = $profile_data['position'];
+			}
+
+			$resume->candidate->comments .= esc_html( $position_prex . $position_text . PHP_EOL );
+		} elseif ( isset( $_POST['position'] ) ) {
+			if ( is_numeric( $_POST['position'] ) ) {
+				$position_text = get_the_title( absint( $_POST['position'] ) );
+			} else {
+				$position_text = $_POST['position'];
+			}
+			$resume->candidate->comments .= esc_html( $position_prex . $position_text . PHP_EOL );
+		}
+
+
+		$message_prex = apply_filters( 'bullhorn_message_prex', __( 'Message: ', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
+		if ( isset( $profile_data['message'] ) ) {
+
+			$resume->candidate->comments .= esc_html( PHP_EOL . $message_prex . $profile_data['message'] );
+		} elseif ( isset( $_POST['message'] ) ) {
+
+			$resume->candidate->comments .= esc_html( PHP_EOL . $message_prex . $_POST['message'] );
 		}
 
 		$resume->candidate->source = 'New Website';
@@ -896,8 +940,8 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		self::api_auth();
 		$skill_ids = array();
 		$skillList = self::get_skill_list();
-		if( is_array( $skillList ) ) {
-			foreach( $skillList as $key => $skill ){
+		if ( is_array( $skillList ) ) {
+			foreach ( $skillList as $key => $skill ) {
 
 				$skill_ids[] = $key;
 			}
@@ -944,12 +988,12 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		// API authentication
 		self::api_auth();
 
-		$data['comments'] = $local_post_data['message'];
-		$data['commentingPerson'] =array( 'id' => $candidate->changedEntityId );
-		$data['candidates'] = array(
+		$data['comments']         = $local_post_data['message'];
+		$data['commentingPerson'] = array( 'id' => $candidate->changedEntityId );
+		$data['candidates']       = array(
 			array( 'id' => $candidate->changedEntityId )
 		);
-		$data['personReference'] =array( 'id' => $candidate->changedEntityId );
+		$data['personReference']  = array( 'id' => $candidate->changedEntityId );
 
 //		var_dump(wp_json_encode( $data ));
 //		{
@@ -963,7 +1007,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		//https://rest9.bullhornstaffing.com/rest-services/13n5s0/entity/Note?BhRestToken=96dc2cad-8bbd-4826-80d5-f958a56fdad3
 
 		// Create the url && variables array
-		$url      = add_query_arg(
+		$url = add_query_arg(
 			array(
 				'BhRestToken' => self::$session,
 			), self::$url . 'entity/Note/'
@@ -1090,7 +1134,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		// wp_remote_request way
 
-		$url      = add_query_arg(
+		$url = add_query_arg(
 			array(
 				'BhRestToken' => self::$session,
 				'externalID'  => 'portfolio', //'Portfolio',
@@ -1101,16 +1145,16 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		//https://github.com/jeckman/wpgplus/blob/master/gplus.php#L554
 		$boundary = md5( time() );
 		$payload  = '';
-		$payload .= '--' . $boundary;
-		$payload .= "\r\n";
-		$payload .= 'Content-Disposition: form-data; name="portfolio"; filename="' . $file_name . '"' . "\r\n";
-		$payload .= 'Content-Type: ' . $ext . "\r\n"; // If you	know the mime-type
-		$payload .= 'Content-Transfer-Encoding: binary' . "\r\n";
-		$payload .= "\r\n";
-		$payload .= file_get_contents( $local_file );
-		$payload .= "\r\n";
-		$payload .= '--' . $boundary . '--';
-		$payload .= "\r\n\r\n";
+		$payload  .= '--' . $boundary;
+		$payload  .= "\r\n";
+		$payload  .= 'Content-Disposition: form-data; name="portfolio"; filename="' . $file_name . '"' . "\r\n";
+		$payload  .= 'Content-Type: ' . $ext . "\r\n"; // If you	know the mime-type
+		$payload  .= 'Content-Transfer-Encoding: binary' . "\r\n";
+		$payload  .= "\r\n";
+		$payload  .= file_get_contents( $local_file );
+		$payload  .= "\r\n";
+		$payload  .= '--' . $boundary . '--';
+		$payload  .= "\r\n\r\n";
 
 		$args = array(
 			'method'  => 'PUT',
@@ -1152,22 +1196,24 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		//https://github.com/jeckman/wpgplus/blob/master/gplus.php#L554
 		$boundary = md5( time() . $ext );
 		$payload  = '';
-		$payload .= '--' . $boundary;
-		$payload .= "\r\n";
-		$payload .= 'Content-Disposition: form-data; name="photo_upload_file_name"; filename="' . $_FILES['resume']['name'] . '"' . "\r\n";
-		$payload .= 'Content-Type: ' . $format . '\r\n'; // If you	know the mime-type
-		$payload .= 'Content-Transfer-Encoding: binary' . "\r\n";
-		$payload .= "\r\n";
-		$payload .= file_get_contents( $local_file );
-		$payload .= "\r\n";
-		$payload .= '--' . $boundary . '--';
-		$payload .= "\r\n\r\n";
+		$payload  .= '--' . $boundary;
+		$payload  .= "\r\n";
+		$payload  .= 'Content-Disposition: form-data; name="photo_upload_file_name"; filename="' . $_FILES['resume']['name'] . '"' . "\r\n";
+		$payload  .= 'Content-Type: ' . $format . '\r\n'; // If you	know the mime-type
+		$payload  .= 'Content-Transfer-Encoding: binary' . "\r\n";
+		$payload  .= "\r\n";
+		$payload  .= file_get_contents( $local_file );
+		$payload  .= "\r\n";
+		$payload  .= '--' . $boundary . '--';
+		$payload  .= "\r\n\r\n";
 
 		$args = array(
 			'method'  => 'PUT',
 			'headers' => array(
-				'accept'       => 'application/json', // The API returns JSON
-				'content-type' => 'multipart/form-data;boundary=' . $boundary, // Set content type to multipart/form-data
+				'accept'       => 'application/json',
+				// The API returns JSON
+				'content-type' => 'multipart/form-data;boundary=' . $boundary,
+				// Set content type to multipart/form-data
 			),
 			'body'    => $payload,
 		);
@@ -1189,22 +1235,24 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		//https://github.com/jeckman/wpgplus/blob/master/gplus.php#L554
 		$boundary = md5( time() . $ext );
 		$payload  = '';
-		$payload .= '--' . $boundary;
-		$payload .= "\r\n";
-		$payload .= 'Content-Disposition: form-data; name="photo_upload_file_name"; filename="' . $_FILES['resume']['name'] . '"' . "\r\n";
-		$payload .= 'Content-Type: ' . $format . '\r\n'; // If you	know the mime-type
-		$payload .= 'Content-Transfer-Encoding: binary' . "\r\n";
-		$payload .= "\r\n";
-		$payload .= $response;
-		$payload .= "\r\n";
-		$payload .= '--' . $boundary . '--';
-		$payload .= "\r\n\r\n";
+		$payload  .= '--' . $boundary;
+		$payload  .= "\r\n";
+		$payload  .= 'Content-Disposition: form-data; name="photo_upload_file_name"; filename="' . $_FILES['resume']['name'] . '"' . "\r\n";
+		$payload  .= 'Content-Type: ' . $format . '\r\n'; // If you	know the mime-type
+		$payload  .= 'Content-Transfer-Encoding: binary' . "\r\n";
+		$payload  .= "\r\n";
+		$payload  .= $response;
+		$payload  .= "\r\n";
+		$payload  .= '--' . $boundary . '--';
+		$payload  .= "\r\n\r\n";
 
 		$args = array(
 			'method'  => 'PUT',
 			'headers' => array(
-				'accept'       => 'application/json', // The API returns JSON
-				'content-type' => 'multipart/form-data;boundary=' . $boundary, // Set content type to multipart/form-data
+				'accept'       => 'application/json',
+				// The API returns JSON
+				'content-type' => 'multipart/form-data;boundary=' . $boundary,
+				// Set content type to multipart/form-data
 			),
 			'body'    => $payload,
 		);
@@ -1279,7 +1327,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		if ( 200 === $response['response']['code'] ) {
 
-			if( $mark_submitted ) {
+			if ( $mark_submitted ) {
 				$body = json_decode( $response['body'] );
 
 				$changed_entity_id = $body->changedEntityId;
@@ -1308,7 +1356,6 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 			return json_decode( $response['body'] );
 		}
-
 
 
 		return false;
@@ -1410,7 +1457,14 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			$resume->candidate->lastName = sanitize_text_field( $_POST['lastName'] );
 		}
 
-		$address_fields = array( 'address1' => 40, 'address2' => 40, 'city' => 40, 'state' => 30, 'zip' => 15, 'countryName' => 99 );
+		$address_fields = array(
+			'address1'    => 40,
+			'address2'    => 40,
+			'city'        => 40,
+			'state'       => 30,
+			'zip'         => 15,
+			'countryName' => 99
+		);
 
 		foreach ( $address_fields as $key => $length ) {
 			if ( isset( $resume->candidate->address->$key ) ) {
