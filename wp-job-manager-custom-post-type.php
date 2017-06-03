@@ -20,53 +20,80 @@ class Bullhorn_WP_Job_Manager_Custom_Post_Type {
 
 	public static function init() {
 
-//		if ( ! taxonomy_exists( 'job_listing_region' ) ) {
+		$labels = array(
+			'name'               => _x( 'Applications', 'Taxonomy General Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'singular_name'      => _x( 'Application', 'Taxonomy Singular Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'add_new'            => __( 'Add New', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'add_new_item'       => __( 'Add New Application', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'edit_item'          => __( 'Edit Application', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'new_item'           => __( 'New Application', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'all_items'          => __( 'All Applications', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'view_item'          => __( 'View Application', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'search_items'       => __( 'Search Applications', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'not_found'          => __( 'No Applications found', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'not_found_in_trash' => __( 'No Applications found in Trash', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'parent_item_colon'  => '',
+			'menu_name'          => __( 'Application', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+		);
+		$args   = array(
+			'labels'             => $labels,
+			'public'             => false,
+			'publicly_queryable' => false,
+			'show_ui'            => true,
+			'show_in_menu'       => 'edit.php?post_type=' . Bullhorn_2_WP::$post_type_job_listing,
+			'query_var'          => true,
+			'capability_type'    => 'post',
+			'has_archive'        => false,
+			'hierarchical'       => false,
+			'menu_position'      => null,
+			'supports'           => array( 'title', 'editor', 'custom-fields' ),
+		);
+		register_post_type( Bullhorn_2_WP::$post_type_application, $args );
+
+		$labels = array(
+			'name'                       => _x( 'States', 'Taxonomy General Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'singular_name'              => _x( 'State', 'Taxonomy Singular Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'menu_name'                  => __( 'States', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'all_items'                  => __( 'All States', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'parent_item'                => __( 'Parent State', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'parent_item_colon'          => __( 'Parent State:', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'new_item_name'              => __( 'New State', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'add_new_item'               => __( 'Add New State', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'edit_item'                  => __( 'Edit State', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'update_item'                => __( 'Update State', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'separate_items_with_commas' => __( 'Separate states with commas', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'search_items'               => __( 'Search states', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'add_or_remove_items'        => __( 'Add or remove states', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'choose_from_most_used'      => __( 'Choose from the most used states', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+		);
+		$args   = array(
+			'labels'            => $labels,
+			'hierarchical'      => false,
+			'public'            => true,
+			'show_ui'           => true,
+			'show_admin_column' => true,
+			'show_in_nav_menus' => true,
+			'show_tagcloud'     => true,
+		);
+		register_taxonomy( Bullhorn_2_WP::$taxonomy_listing_state, Bullhorn_2_WP::$post_type_job_listing, $args );
+
+		if ( 'job_listing_category' !== Bullhorn_2_WP::$taxonomy_listing_category ) {
 
 			$labels = array(
-				'name'               => _x( 'Applications', 'Taxonomy General Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'singular_name'      => _x( 'Application', 'Taxonomy Singular Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'add_new'            => __( 'Add New', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'add_new_item'       => __( 'Add New Application', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'edit_item'          => __( 'Edit Application', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'new_item'           => __( 'New Application', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'all_items'          => __( 'All Applications', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'view_item'          => __( 'View Application', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'search_items'       => __( 'Search Applications', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'not_found'          => __( 'No Applications found', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'not_found_in_trash' => __( 'No Applications found in Trash', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'parent_item_colon'  => '',
-				'menu_name'          => __( 'Application', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-			);
-			$args   = array(
-				'labels'             => $labels,
-				'public'             => false,
-				'publicly_queryable' => false,
-				'show_ui'            => true,
-				'show_in_menu'       => 'edit.php?post_type=' . Bullhorn_2_WP::$post_type_job_listing,
-				'query_var'          => true,
-				'capability_type'    => 'post',
-				'has_archive'        => false,
-				'hierarchical'       => false,
-				'menu_position'      => null,
-				'supports'           => array( 'title', 'editor', 'custom-fields' ),
-			);
-			register_post_type( Bullhorn_2_WP::$post_type_application, $args );
-
-			$labels = array(
-				'name'                       => _x( 'States', 'Taxonomy General Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'singular_name'              => _x( 'State', 'Taxonomy Singular Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'menu_name'                  => __( 'States', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'all_items'                  => __( 'All States', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'parent_item'                => __( 'Parent State', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'parent_item_colon'          => __( 'Parent State:', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'new_item_name'              => __( 'New State', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'add_new_item'               => __( 'Add New State', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'edit_item'                  => __( 'Edit State', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'update_item'                => __( 'Update State', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'separate_items_with_commas' => __( 'Separate states with commas', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'search_items'               => __( 'Search states', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'add_or_remove_items'        => __( 'Add or remove states', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
-				'choose_from_most_used'      => __( 'Choose from the most used states', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+				'name'                       => _x( 'Categories', 'Taxonomy General Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+				'singular_name'              => _x( 'Category', 'Taxonomy Singular Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+				'menu_name'                  => __( 'Categories', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+				'all_items'                  => __( 'All Categories', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+				'parent_item'                => __( 'Parent Category', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+				'parent_item_colon'          => __( 'Parent Category:', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+				'new_item_name'              => __( 'New Category', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+				'add_new_item'               => __( 'Add New Category', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+				'edit_item'                  => __( 'Edit Category', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+				'update_item'                => __( 'Update Category', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+				'separate_items_with_commas' => __( 'Separate categories with commas', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+				'search_items'               => __( 'Search categories', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+				'add_or_remove_items'        => __( 'Add or remove categories', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+				'choose_from_most_used'      => __( 'Choose from the most used categories', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 			);
 			$args   = array(
 				'labels'            => $labels,
@@ -77,8 +104,9 @@ class Bullhorn_WP_Job_Manager_Custom_Post_Type {
 				'show_in_nav_menus' => true,
 				'show_tagcloud'     => true,
 			);
-			register_taxonomy( Bullhorn_2_WP::$taxonomy_listing_state, Bullhorn_2_WP::$post_type_job_listing, $args );
-//		}
+
+			register_taxonomy( Bullhorn_2_WP::$taxonomy_listing_category, Bullhorn_2_WP::$post_type_job_listing, $args );
+		}
 	}
 
 	public static function add_json_ld_to_content( $content = null ) {
