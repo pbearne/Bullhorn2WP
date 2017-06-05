@@ -652,27 +652,6 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		$resume->candidate->source = 'New Website';
 
-		// API authentication
-		self::api_auth();
-
-		$url = add_query_arg(
-			array(
-				'BhRestToken' => self::$session,
-			), self::$url . 'entity/Candidate'
-		);
-
-		$response = wp_remote_get( $url, array( 'body' => wp_json_encode( $resume->candidate ), 'method' => 'PUT' ) );
-
-		$safety_count = 0;
-		while ( 500 === $response['response']['code'] && 5 > $safety_count ) {
-			error_log( 'Create Canditate failed( ' . $safety_count . '): ' . serialize( $response ) );
-			$response = wp_remote_get( $url, array(
-				'body'   => wp_json_encode( $resume->candidate ),
-				'method' => 'PUT'
-			) );
-			$safety_count ++;
-		}
-
 		if ( isset( $profile_data['phone'] ) ) {
 			$cv_phone = $resume->candidate->phone;
 
