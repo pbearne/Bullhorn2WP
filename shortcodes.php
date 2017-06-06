@@ -32,6 +32,7 @@ class Shortcodes {
 		add_shortcode( 'b2wp_application', array( __CLASS__, 'render_cv_appication' ) );
 
 		add_shortcode( 'b2wp_application_with_jobs', array( __CLASS__, 'render_cv_appication_with_jobs' ) );
+		add_shortcode( 'b2wp_application_with_job_text', array( __CLASS__, 'render_cv_form_with_job_text' ) );
 		add_shortcode( 'b2wp_shortapp', array( __CLASS__, 'render_cv_form' ) );
 
 		add_filter( 'posts_where', array( __CLASS__, 'bullhorn_title_like_posts_where' ), 10, 2 );
@@ -44,27 +45,27 @@ class Shortcodes {
 
 	public static function render_cv_only() {
 
-		return self::render_cv();
+		return self::render_cv( array( 'cv' ) );
 	}
 
 	public static function render_cv_form() {
 
-		return self::render_cv( array( 'name', 'email', 'phone' ) );
+		return self::render_cv( array( 'name', 'email', 'phone', 'message', 'cv' ) );
 	}
 
-	public static function renderender_cv_form_with_jobsr_cv_form() {
+	public static function render_cv_form_with_job_text() {
 
-		return self::render_cv( array( 'name', 'email', 'phone', 'jobs' ) );
+		return self::render_cv( array( 'name', 'email', 'phone', 'address', 'job_text', 'message', 'cv' ) );
 	}
 
 	public static function render_cv_appication() {
 
-		return self::render_cv( array( 'name', 'email', 'phone', 'address' ) );
+		return self::render_cv( array( 'name', 'email', 'phone', 'address', 'message', 'cv' ) );
 	}
 
 	public static function render_cv_appication_with_jobs() {
 
-		return self::render_cv( array( 'name', 'email', 'phone', 'address', 'jobs' ) );
+		return self::render_cv( array( 'name', 'email', 'phone', 'address', 'jobs_list', 'message', 'cv' ) );
 	}
 
 
@@ -77,7 +78,7 @@ class Shortcodes {
 	 *
 	 * @return string
 	 */
-	public static function render_cv( $element_to_show = array() ) {
+	public static function render_cv( $element_to_show = array(), $address_options = null ) {
 		$settings = (array) get_option( 'bullhorn_settings' );
 
 		if ( isset( $settings['form_page'] ) && 0 < $settings['form_page'] && get_the_ID() !== $settings['form_page'] ) {
@@ -96,14 +97,23 @@ class Shortcodes {
 			);
 		}
 
-		if ( null === $element_to_show ) {
-			$element_to_show = apply_filters( 'wp_bullhorn_render_cv_to_show', array(
+		if ( null === $element_to_show || empty( $element_to_show ) ) {
+			$element_to_show = apply_filters( 'wp_bullhorn_render_cv_defaault_to_show', array(
 				'name',
 				'email',
-				'phone'
+				'phone',
 			), $settings );
 		}
+		if ( null === $address_options ) {
+			$address_options = apply_filters( 'wp_bullhorn_render_cv_default_address_options', array(
+				'address1',
+				'address2',
+				'city',
+				'state',
+				'zip',
 
+			), $settings );
+		}
 		ob_start();
 		if ( isset( $_GET['bh-message'] ) ) {
 			printf( '<div class="bh-message"><strong>%s</strong></div>', esc_html( apply_filters( 'bh-message', wp_unslash( $_GET['bh-message'] ) ) ) );
@@ -181,80 +191,144 @@ class Shortcodes {
 			<?php
 			do_action( 'wp_bullhorn_render_cv_form_top', $element_to_show, $settings );
 
-			if ( false !== array_search( 'name', $element_to_show ) ) { ?>
-                <label for="name"><?php _e( 'Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?> <span
-                            class="gfield_required"> *</span></label>
-                <input id="name" name="name" type="text"/>
-			<?php } ?>
-			<?php if ( false !== array_search( 'email', $element_to_show ) ) { ?>
-                <label for="email"><?php _e( 'Email', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?><span
-                            class="gfield_required"> *</span></label>
-                <input id="email" name="email" type="text"/>
-			<?php } ?>
-			<?php if ( false !== array_search( 'phone', $element_to_show ) ) { ?>
-                <label for="phone"><?php _e( 'Phone', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?></label>
-                <input id="phone" name="phone" type="text"/>
+			$element_to_show = apply_filters( 'wp_bullhorn_shortcode_elements_to_show', $element_to_show );
 
-			<?php } ?>
-			<?php if ( false !== array_search( 'address', $element_to_show ) ) { ?>
-                <label for="address1"><?php _e( 'Address', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?></label>
-                <input id="address1" name="address1" type="text"/>
-                <label for="address2"><?php _e( 'Address Cont', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?></label>
-                <input id="address2" name="address2" type="text"/>
-                <label for="city"><?php _e( 'City', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?></label>
-                <input id="city" name="city" type="text"/>
-                <label for="state"><?php _e( 'State/Province', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?></label>
-                <input id="state" name="state" type="text"/>
-                <label for="zip"><?php _e( 'Zip/Postal Code', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?></label>
-                <input id="zip" name="zip" type="text"/>
-			<?php }
+			$position_added   = false;
 
-			if ( false !== array_search( 'jobs', $element_to_show ) ) {
+			foreach ( $element_to_show as $index => $element ) {
 
-				$args = array(
-					'posts_per_page' => - 1,
-					'orderby'        => 'title',
-					'order'          => 'DESC',
-					'post_type'      => Bullhorn_2_WP::$post_type_job_listing,
-					'post_status'    => 'publish',
-				);
-				$jobs = get_posts( $args );
-
-				if ( ! empty( $jobs ) ) { ?>
-                    <label for="position"><?php esc_html_e( 'Position applying for', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?>
-                        <span class="gfield_required"> *</span></label>
-                    <select id="position" name="position">
-                        <option value = "-1"><?php esc_html_e( 'Select a Job to apply for', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?> </option>
-						<?php
-						foreach ( $jobs as $job ) {
-							$bullhorn_job_id = get_post_meta( $job->ID, 'bullhorn_job_id', true );
-							var_dump( $bullhorn_job_id );
-							printf( '<option value="%s">%s</option>', $bullhorn_job_id, $job->title );
-
-						}
+				switch ( $element ) {
+					case 'name':
 						?>
-                    </select>
-					<?php
+                        <label for="name"><?php _e( 'Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?> <span
+                                    class="gfield_required"> *</span></label>
+                        <input id="name" name="name" type="text"/>
+
+						<?php
+						break;
+					case 'email':
+						?>
+                        <label for="email"><?php _e( 'Email', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?><span
+                                    class="gfield_required"> *</span></label>
+                        <input id="email" name="email" type="text"/>
+
+						<?php
+						break;
+					case 'phone':
+						?>
+                        <label for="phone"><?php _e( 'Phone', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?></label>
+                        <input id="phone" name="phone" type="text"/>
+
+						<?php
+						break;
+					case 'address':
+						foreach ( $address_options as $option ) {
+							switch ( $option ) {
+								case 'address1':
+									?>
+                                    <label for="address1"><?php _e( 'Address', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?></label>
+                                    <input id="address1" name="address1" type="text"/>
+									<?php
+									break;
+								case 'address2':
+									?>
+                                    <label for="address2"><?php _e( 'Address Cont', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?></label>
+                                    <input id="address2" name="address2" type="text"/>
+									<?php
+									break;
+								case 'city':
+									?>
+                                    <label for="city"><?php _e( 'City', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?></label>
+                                    <input id="city" name="city" type="text"/>
+									<?php
+									break;
+								case  'state':
+									?>
+                                    <label for="state"><?php _e( 'State/Province', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?></label>
+                                    <input id="state" name="state" type="text"/>
+									<?php
+									break;
+								case 'zip':
+									?>
+                                    <label for="zip"><?php _e( 'Zip/Postal Code', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?></label>
+                                    <input id="zip" name="zip" type="text"/>
+									<?php
+									break;
+							}
+						}
+						break;
+					case 'jobs_list':
+						$args = array(
+							'posts_per_page' => - 1,
+							'orderby'        => 'title',
+							'order'          => 'DESC',
+							'post_type'      => \Bullhorn_2_WP::$post_type_job_listing,
+							'post_status'    => 'publish',
+						);
+						$jobs = get_posts( $args );
+
+						if ( ! empty( $jobs ) ) { ?>
+                            <label for="position"><?php esc_html_e( 'Position applying for', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?>
+                                <span class="gfield_required"> *</span></label>
+                            <select id="position" name="position">
+                                <option value="-1"><?php esc_html_e( 'Select a Job to apply for', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?> </option>
+								<?php
+								foreach ( $jobs as $job ) {
+									$bullhorn_job_id = get_post_meta( $job->ID, 'bullhorn_job_id', true );
+									printf( '<option value="%s">%s</option>', $bullhorn_job_id, $job->title );
+
+								}
+								?>
+                            </select>
+
+							<?php
+							$position_added = true;
+						}
+
+						break;
+					case 'job_text':
+						?>
+                        <label for="position"><?php _e( 'Position', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?></label>
+                        <input id="position" name="position" type="text"/>
+
+						<?php
+						$position_added = true;
+						break;
+					case 'message':
+						?>
+                        <label for="message"><?php _e( '<br/>Message<br/>', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?></label>
+                        <textarea name="message" cols="40" rows="10" id="message"></textarea>
+
+						<?php
+						break;
+					case 'cv':
+						do_action( 'wp_bullhorn_render_cv_form_pre_cv', $element_to_show, $settings );
+
+						?>
+                        <label for="fileToUpload"><?php esc_html_e( 'Your Resume', 'bh-staffing-job-listing-and-cv-upload-for-wp' ); ?>
+                            <span class="gfield_required"> *</span></label>
+                        <span class="<?php echo apply_filters( 'wp_bullhorn_render_cv_form_file_input_styles', 'file-to-upload-wrap' ); ?>">
+                            <input id="fileToUpload" name="resume" type="file"
+                                   accept=".pdf,.docx,.doc,.text,.rft,.html"/>
+                        </span>
+                        <br/><br/>
+
+						<?php
+						do_action( 'wp_bullhorn_render_cv_form_post_cv', $element_to_show, $settings );
+						break;
+
+
 				}
 			}
-			do_action( 'wp_bullhorn_render_cv_form_pre_cv', $element_to_show, $settings );
 
-			?>
-            <label for="message"><?php _e( '<br/>Message<br/>', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?></label>
-            <textarea name="message" cols="40" rows="10" id="message"></textarea>
-
-            <label for="fileToUpload"><?php esc_html_e( 'Your Resume', 'bh-staffing-job-listing-and-cv-upload-for-wp' ); ?>
-                <span class="gfield_required"> *</span></label>
-            <span class="<?php echo apply_filters( 'wp_bullhorn_render_cv_form_file_input_styles', 'file-to-upload-wrap' ); ?>">
-				<input id="fileToUpload" name="resume" type="file" accept=".pdf,.docx,.doc,.text,.rft,.html"/>
-			</span>
-            <br/><br/>
-			<?php
-			if ( isset( $_GET['position'] ) ) {
-				printf( '<input id="position" name="position" type="hidden" value="%s" />', esc_attr( $_GET['position'] ) );
-			} elseif ( Bullhorn_2_WP::$post_type_job_listing === get_post_type() ) {
-				printf( '<input id="position" name="position" type="hidden" value="%s" />', esc_attr( get_post_meta( get_the_ID(), 'bullhorn_job_id', true ) ) );
+			if ( false === $position_added ) {
+				if ( isset( $_GET['position'] ) ) {
+					printf( '<input id="position" name="position" type="hidden" value="%s" />', esc_attr( $_GET['position'] ) );
+				} elseif ( \Bullhorn_2_WP::$post_type_job_listing === get_post_type() ) {
+					printf( '<input id="position" name="position" type="hidden" value="%s" />', esc_attr( get_post_meta( get_the_ID(), 'bullhorn_job_id', true ) ) );
+				}
 			}
+
 			printf( '<input id="post" name="post" type="hidden" value="%s" />',
 				esc_attr( ( isset( $_GET['post'] ) ) ? isset( $_GET['post'] ) : get_the_ID() )
 			);
@@ -285,7 +359,8 @@ class Shortcodes {
         <script type="application/javascript">
 
             jQuery(document).ready(function () {
-                error_color = apply_filter( 'bullhorn_js_error_color', '#FFDFE0' );
+                error_color = '#FFDFE0';
+
                 defaut_file_color = jQuery('#fileToUpload').css('background-color'); //'#fff';
                 defaut_color = jQuery('#email').css('background-color'); //'#d0eafa';
                 jQuery('#bullhorn-resume').on('submit', function () {
@@ -317,10 +392,10 @@ class Shortcodes {
                         $fileToUpload.css('background-color', defaut_file_color);
                     }
 
-                    if( 1 === jQuery( 'select#position' ).length ){
+                    if (1 === jQuery('select#position').length) {
 
-                        $position = jQuery( 'select#position' );
-                        if ( 0 > $position.val() ) {
+                        $position = jQuery('select#position');
+                        if (0 > $position.val()) {
                             $position.css('background-color', error_color);
                             $no_error = false;
                         } else {
@@ -394,24 +469,24 @@ class Shortcodes {
 		}
 
 		$args = array(
-			'post_type'      => Bullhorn_2_WP::$post_type_job_listing,
+			'post_type'      => \Bullhorn_2_WP::$post_type_job_listing,
 			'posts_per_page' => intval( $limit ),
 			'tax_query'      => array(),
 		);
 
 		if ( $state ) {
 			$args['tax_query'][] = array(
-				'taxonomy' => Bullhorn_2_WP::$taxonomy_listing_state,
+				'taxonomy' => \Bullhorn_2_WP::$taxonomy_listing_state,
 				'field'    => 'slug',
 				'terms'    => sanitize_title( $state ),
 			);
 		}
 
-		if ( isset( $_GET[ Bullhorn_2_WP::$taxonomy_listing_state ] ) ) {
+		if ( isset( $_GET[ \Bullhorn_2_WP::$taxonomy_listing_state ] ) ) {
 			$args['tax_query'][] = array(
-				'taxonomy' => Bullhorn_2_WP::$taxonomy_listing_state,
+				'taxonomy' => \Bullhorn_2_WP::$taxonomy_listing_state,
 				'field'    => 'slug',
-				'terms'    => sanitize_key( $_GET[ Bullhorn_2_WP::$taxonomy_listing_state ] ),
+				'terms'    => sanitize_key( $_GET[ \Bullhorn_2_WP::$taxonomy_listing_state ] ),
 			);
 		}
 
@@ -423,11 +498,11 @@ class Shortcodes {
 			);
 		}
 
-		if ( isset( $_GET[Bullhorn_2_WP::$taxonomy_listing_category] ) ) {
+		if ( isset( $_GET[\Bullhorn_2_WP::$taxonomy_listing_category] ) ) {
 			$args['tax_query'][] = array(
-				'taxonomy' => Bullhorn_2_WP::$taxonomy_listing_category,
+				'taxonomy' => \Bullhorn_2_WP::$taxonomy_listing_category,
 				'field'    => 'slug',
-				'terms'    => sanitize_key( $_GET[Bullhorn_2_WP::$taxonomy_listing_category] ),
+				'terms'    => sanitize_key( $_GET[\Bullhorn_2_WP::$taxonomy_listing_category] ),
 			);
 		}
 
@@ -556,21 +631,21 @@ class Shortcodes {
 		$output .= '<option value="">Filter by category...</option>';
 
 		$categories = get_categories( array(
-			'taxonomy'   => Bullhorn_2_WP::$taxonomy_listing_category,
+			'taxonomy'   => \Bullhorn_2_WP::$taxonomy_listing_category,
 			'hide_empty' => 0,
 		) );
 		foreach ( $categories as $category ) {
-			$params = array( Bullhorn_2_WP::$taxonomy_listing_category => $category->slug );
-			if ( isset( $_GET[ Bullhorn_2_WP::$taxonomy_listing_state ] ) ) {
-				$params[ Bullhorn_2_WP::$taxonomy_listing_state ] = $_GET[ Bullhorn_2_WP::$taxonomy_listing_state ];
+			$params = array( \Bullhorn_2_WP::$taxonomy_listing_category => $category->slug );
+			if ( isset( $_GET[ \Bullhorn_2_WP::$taxonomy_listing_state ] ) ) {
+				$params[ \Bullhorn_2_WP::$taxonomy_listing_state ] = $_GET[ \Bullhorn_2_WP::$taxonomy_listing_state ];
 			}
 
 			$selected = null;
-			if ( isset( $_GET[ Bullhorn_2_WP::$taxonomy_listing_category ] ) and $_GET[ Bullhorn_2_WP::$taxonomy_listing_category ] === $category->slug ) {
+			if ( isset( $_GET[ \Bullhorn_2_WP::$taxonomy_listing_category ] ) and $_GET[ \Bullhorn_2_WP::$taxonomy_listing_category ] === $category->slug ) {
 				$selected = 'selected="selected"';
 			}
 
-			$output .= '<option value="' . get_post_type_archive_link( Bullhorn_2_WP::$post_type_job_listing ) . '?' . http_build_query( $params ) . '" ' . $selected . '>' . esc_html( $category->name ) . '</option>';
+			$output .= '<option value="' . get_post_type_archive_link( \Bullhorn_2_WP::$post_type_job_listing ) . '?' . http_build_query( $params ) . '" ' . $selected . '>' . esc_html( $category->name ) . '</option>';
 		}
 
 		$output .= '</select>';
@@ -594,21 +669,21 @@ class Shortcodes {
 		$output .= '<option value="">Filter by state...</option>';
 
 		$states = get_categories( array(
-			'taxonomy'   => Bullhorn_2_WP::$taxonomy_listing_state,
+			'taxonomy'   => \Bullhorn_2_WP::$taxonomy_listing_state,
 			'hide_empty' => 0,
 		) );
 		foreach ( $states as $state ) {
-			$params = array( Bullhorn_2_WP::$taxonomy_listing_state => $state->slug );
-			if ( isset( $_GET[ Bullhorn_2_WP::$taxonomy_listing_category ] ) ) {
-				$params[ Bullhorn_2_WP::$taxonomy_listing_category ] = $_GET[ Bullhorn_2_WP::$taxonomy_listing_category ];
+			$params = array( \Bullhorn_2_WP::$taxonomy_listing_state => $state->slug );
+			if ( isset( $_GET[ \Bullhorn_2_WP::$taxonomy_listing_category ] ) ) {
+				$params[ \Bullhorn_2_WP::$taxonomy_listing_category ] = $_GET[ \Bullhorn_2_WP::$taxonomy_listing_category ];
 			}
 
 			$selected = null;
-			if ( isset( $_GET[ Bullhorn_2_WP::$taxonomy_listing_state ] ) and $_GET[ Bullhorn_2_WP::$taxonomy_listing_state ] === $state->slug ) {
+			if ( isset( $_GET[ \Bullhorn_2_WP::$taxonomy_listing_state ] ) and $_GET[ \Bullhorn_2_WP::$taxonomy_listing_state ] === $state->slug ) {
 				$selected = 'selected="selected"';
 			}
 
-			$output .= '<option value="' . get_post_type_archive_link( Bullhorn_2_WP::$post_type_job_listing ) . '?' . http_build_query( $params ) . '" ' . $selected . '>' . esc_html( $state->name ) . '</option>';
+			$output .= '<option value="' . get_post_type_archive_link( \Bullhorn_2_WP::$post_type_job_listing ) . '?' . http_build_query( $params ) . '" ' . $selected . '>' . esc_html( $state->name ) . '</option>';
 		}
 
 		$output .= '</select>';
@@ -629,7 +704,7 @@ class Shortcodes {
 			_doing_it_wrong( __FUNCTION__, __( 'bullhorn categories Shortcode does not need attributes', 'bh-staffing-job-listing-and-cv-upload-for-wp' ), 2.0 );
 		}
 		$form   = get_search_form( false );
-		$hidden = '<input type="hidden" name="post_type" value="' . Bullhorn_2_WP::$post_type_job_listing . '" />';
+		$hidden = '<input type="hidden" name="post_type" value="' . \Bullhorn_2_WP::$post_type_job_listing . '" />';
 
 		return str_replace( '</form>', $hidden . '</form>', $form );
 	}

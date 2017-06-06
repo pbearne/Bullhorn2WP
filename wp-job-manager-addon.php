@@ -4,11 +4,40 @@ class Bullhorn_WP_Job_Manager_Addon {
 
 	public function __construct() {
 
-		add_filter( 'wp_bullhorn_api_redirect_uri', array( __CLASS__, 'get_api_redirect_uri' ) );
-		add_filter( 'wp_bullhorn_settings', array( __CLASS__, 'get_settings' ) );
+		add_filter( 'job_manager_locate_template', array( __CLASS__, 'job_manager_locate_template' ), 10, 3 );
+		add_filter( 'job_manager_application_details_bullhorn', array( __CLASS__, 'render_application_form' ) );
+	}
+
+	public static function render_application_form() {
+
+		$option = get_option( 'job_manager_bullhorn_default_form_input' );
+
+		if ( 'name_email_phone' === $option ) {
+			echo \bullhorn_2_wp\Shortcodes::render_cv_form();
+		} else if ( 'name_email_phone_address' === $option ) {
+			echo \bullhorn_2_wp\Shortcodes::render_cv_appication();
+		} else {
+			echo \bullhorn_2_wp\Shortcodes::render_cv_form();
+		}
+	}
+
+	public static function job_manager_locate_template( $template, $template_name, $template_path ) {
+
+		if ( 'job-application.php' === $template_name && 'bullhorn2wp' === get_option( 'job_manager_allowed_application_method' ) ) {
+			return dirname( __FILE__ ) . '/wp-job-manager-job-application-template.php';
+		}
+
+		return $template;
 	}
 
 	public static function wp_job_manager_menu( $sections ) {
+
+		for ( $i = 0; $i < count( $sections['job_submission'][1] ); $i++ ) {
+
+			if ( 'job_manager_allowed_application_method' === $sections['job_submission'][1][ $i ]['name'] ) {
+				$sections['job_submission'][1][ $i ]['options']['bullhorn2wp'] = __( 'Bullhorn', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
+			}
+		}
 
 		$settings[] = array(
 			'name' 		  => 'job_manager_bullhorn_client_id',
@@ -26,7 +55,7 @@ class Bullhorn_WP_Job_Manager_Addon {
 			'label' 	  => __( 'Client Secret', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 			'desc'        => sprintf( __( 'Note: You will have to ask Bullhorn support to add this URL "%s" to your API white list for this to work. (see the plugin install notes for more info)',
 				                         'bh-staffing-job-listing-and-cv-upload-for-wp'
-			                         ), self::get_api_redirect_uri() ),
+			                         ), Bullhorn_Settings::get_api_redirect_uri() ),
 			'type'      => 'input',
 		);
 
@@ -48,6 +77,19 @@ class Bullhorn_WP_Job_Manager_Addon {
 			'label' 	  => __( 'Client Corporation', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 			'desc'        => __( 'This field is optional, but will filter the jobs retreived from Bullhorn to only those listed under a specific Client Corporation. This must be the ID of the corporation. Leave blank to sync all job listings.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 			'type'      => 'input',
+		);
+
+		$settings[] = array(
+			'name' 		  => 'job_manager_bullhorn_default_form_input',
+			'std' 		  => 'false',
+			'placeholder' => '',
+			'label' 	  => __( 'Default Form Input', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'desc'        => '',
+			'type'        => 'select',
+			'options'     => array(
+				'name_email_phone'       => __( 'Name + Email + Phone', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+				'name_email_phone_address' => __( 'Name + Email + Phone + Address', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			),
 		);
 
 		$settings[] = array(
@@ -160,15 +202,9 @@ class Bullhorn_WP_Job_Manager_Addon {
 		);
 	}
 
-	public static function get_api_redirect_uri( $redirect_uri ) {
+	public static function form_sync_button_handler() {
 
-		$redirect_uri = admin_url( 'edit.php?post_type=job_listing&page=job-manager-settings#settings-bullhorn' );
-		return $redirect_uri;
-	}
-
-	public static function form_sync_button_handler( $option, $attributes, $value, $placeholder ) {
-
-		$settings = (array) get_option( 'bullhorn_settings' );
+		$settings = apply_filters( 'wp_bullhorn_settings', (array) get_option( 'bullhorn_settings' ) );
 
 		$state_string = __( 'not ready', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
 		if ( Bullhorn_Settings::authorized() ) {
@@ -180,20 +216,12 @@ class Bullhorn_WP_Job_Manager_Addon {
 			array(
 				'client_id'     => $settings['client_id'],
 				'response_type' => 'code',
-				'redirect_uri'  => self::get_api_redirect_uri(),
+				'redirect_uri'  => Bullhorn_Settings::get_api_redirect_uri(),
 			),
 			'auth.bullhornstaffing.com/oauth/authorize'
 		);
 
 		printf( '<a class="button" href="https://%s">%s</a>', $url, esc_html( $state_string ) );
-	}
-
-	public static function get_settings( $settings ) {
-
-		$settings['client_id'] = get_option( 'job_manager_bullhorn_client_id' );
-		$settings['client_secret'] = get_option( 'job_manager_bullhorn_client_secret' );
-
-		return $settings;
 	}
 
 	public static function form_js_handler() {

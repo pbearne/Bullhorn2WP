@@ -92,7 +92,12 @@ class Bullhorn_Connection {
 			}
 		}
 
-		$jobs = self::get_jobs_from_bullhorn();
+		if ( 'wp-job-manager-addon' === Bullhorn_2_WP::$mode ) {
+			$jobs = self::get_jobs_from_bullhorn_wp_job_manager();
+		} else {
+			$jobs = self::get_jobs_from_bullhorn();
+		}
+
 		if ( is_wp_error( $jobs ) ) {
 			return __( 'Get Jobs failed: ' . serialize( $jobs ) );
 		}
@@ -374,7 +379,74 @@ class Bullhorn_Connection {
 			$url    = self::$url . 'query/JobOrder';
 			$params = array(
 				'BhRestToken' => self::$session,
-				'fields'      => 'id,title,' . $description . ',dateAdded,categories,address,benefits,salary,educationDegree,employmentType,yearsRequired,clientCorporation,degreeList,skillList,bonusPackage,status',
+				'fields'      => 'id,title,' . $description . ',dateAdded,dateEnd,categories,address,benefits,salary,educationDegree,employmentType,yearsRequired,clientCorporation,degreeList,skillList,bonusPackage,status',
+				//'fields'        => '*',
+				'where'       => $where,
+				'count'       => $page,
+				'start'       => $start,
+			);
+
+			if ( isset( self::$settings['client_corporation'] ) and ! empty( self::$settings['client_corporation'] ) ) {
+				$ids = explode( ',', self::$settings['client_corporation'] );
+				$ids = array_map( 'trim', $ids );
+
+				$params['where'] .= ' AND (clientCorporation.id=' . implode( ' OR clientCorporation.id=', $ids ) . ')';
+			}
+
+			$response = self::request( $url . '?' . http_build_query( $params ), false );
+
+			if ( is_wp_error( $response ) ) {
+
+				return $response;
+			}
+
+			$body = json_decode( $response['body'] );
+
+			if ( isset( $body->data ) ) {
+				$start += $page;
+
+				$jobs = array_merge( $jobs, $body->data );
+
+				if ( count( $body->data ) < $page ) {
+					break;
+				}
+			} else {
+				break;
+			}
+		}
+
+		return $jobs;
+	}
+
+
+	/**
+	 * This retreives all available jobs from WP Job Manager.
+	 *
+	 * @return array
+	 */
+	private static function get_jobs_from_bullhorn_wp_job_manager() {
+		// Use the specified description field if set, otherwise the default
+		$description = self::get_description_field();
+
+		$where = 'isPublic=1 AND isOpen=true AND isDeleted=false';
+
+		$settings = apply_filters( 'wp_bullhorn_settings', (array) get_option( 'bullhorn_settings' ) );
+
+		if ( isset( $settings['is_public'] ) ) {
+			$is_public = $settings['is_public'];
+			if ( 'false' === $is_public ) {
+				$where = 'isOpen=true AND isDeleted=false';
+			}
+		}
+
+		$start = 0;
+		$page  = 100;
+		$jobs  = array();
+		while ( true ) {
+			$url    = self::$url . 'query/JobOrder';
+			$params = array(
+				'BhRestToken' => self::$session,
+				'fields'      => 'id,title,' . $description . ',dateAdded,dateEnd,categories,address,benefits,salary,educationDegree,employmentType,yearsRequired,clientCorporation,degreeList,skillList,bonusPackage,status',
 				//'fields'        => '*',
 				'where'       => $where,
 				'count'       => $page,
@@ -479,19 +551,52 @@ class Bullhorn_Connection {
 			update_post_meta( $id, $key, $val );
 		}
 
-		if ( isset( $create_json_ld['jobLocation']['address']['addressLocality'] ) ) {
-			update_post_meta( $id, 'city', $create_json_ld['jobLocation']['address']['addressLocality'] );
+		$city = isset( $create_json_ld['jobLocation']['address']['addressLocality'] ) ? $create_json_ld['jobLocation']['address']['addressLocality'] : '';
+		$state = isset( $create_json_ld['jobLocation']['address']['addressRegion'] ) ? $create_json_ld['jobLocation']['address']['addressRegion'] : '';
+		$country = isset( $create_json_ld['jobLocation']['address']['addressCountry'] ) ? $create_json_ld['jobLocation']['address']['addressCountry'] : '';
+		$zip = isset( $create_json_ld['jobLocation']['address']['postalCode'] ) ? $create_json_ld['jobLocation']['address']['postalCode'] : '';
+
+		$comma = ( $city && $state ) ? ', ' : '';
+		$space = ( $city || $state ) && $zip ? ' ' : '';
+		$dash = (( $city || $state || $zip ) && $country) ? ' - ' : '';
+
+		if ( $city ) {
+			update_post_meta( $id, 'city', $city );
 		}
-		if ( isset( $create_json_ld['jobLocation']['address']['addressRegion'] ) ) {
-			update_post_meta( $id, 'state', $create_json_ld['jobLocation']['address']['addressRegion'] );
+		if ( $state ) {
+			update_post_meta( $id, 'state', $state );
 		}
-		if ( isset( $create_json_ld['jobLocation']['address']['addressCountry'] ) ) {
-			update_post_meta( $id, 'Country', $create_json_ld['jobLocation']['address']['addressCountry'] );
+		if ( $country ) {
+			update_post_meta( $id, 'Country', $country );
 		}
-		if ( isset( $create_json_ld['jobLocation']['address']['postalCode'] ) ) {
-			update_post_meta( $id, 'zip', $create_json_ld['jobLocation']['address']['postalCode'] );
+		if ( $zip ) {
+			update_post_meta( $id, 'zip', $zip );
 		}
 
+		//some fields wp job manager uses
+		$location = sprintf( '%s%s%s%s%s%s%s', $city, $comma, $state, $space, $zip, $dash, $country );
+		if ( $location ) {
+			update_post_meta( $id, '_job_location', $location );
+		}
+
+		if ( isset( $create_json_ld['hiringOrganization']['name'] ) ) {
+			update_post_meta( $id, '_company_name', $create_json_ld['hiringOrganization']['name'] );
+		}
+
+		if ( isset( $create_json_ld['validThrough'] ) ) {
+
+			try {
+				$date = new DateTime( $create_json_ld['validThrough'] );
+				$job_expires = $date->format( 'Y-m-d' );
+				update_post_meta( $id, '_job_expires', $job_expires );
+			} catch (Exception $e) {
+				error_log( $e->getMessage() );
+			}
+		}
+
+		if ( isset( $create_json_ld['hiringOrganization']['url'] ) ) {
+			update_post_meta( $id, '_company_website', $create_json_ld['hiringOrganization']['url'] );
+		}
 
 		$custom_fields = array(
 			'bullhorn_job_id'      => $job->id,
@@ -519,8 +624,11 @@ class Bullhorn_Connection {
 		$ld['description']                     = $job->{$description};
 		$ld['datePosted']                      = self::format_date_to_8601( $job->dateAdded );
 		$ld['occupationalCategory']            = implode( ',', $categories );
-		$ld['jobLocation']['@type']            = 'place';
+		$ld['jobLocation']['@type']            = 'Place';
 		$ld['jobLocation']['address']['@type'] = 'PostalAddress';
+		$ld['validThrough']                    = self::format_date_to_8601( $job->dateEnd );
+		$ld['hiringOrganization']['@type']     = 'Organization';
+
 
 		if ( ! empty( $address['city'] ) ) {
 			$ld['jobLocation']['address']['addressLocality'] = $address['city'];
@@ -543,6 +651,13 @@ class Bullhorn_Connection {
 
 		if ( isset( $job->clientCorporation->name ) ) {
 			$ld['hiringOrganization']['name'] = $job->clientCorporation->name;
+		}
+		if ( isset( $job->clientCorporation->id ) ) {
+
+			$url = self::get_hiring_organization_url( $job->clientCorporation->id );
+			if ( false !== $url ) {
+				$ld['hiringOrganization']['url'] = $url;
+			}
 		}
 		if ( isset( $job->benefits ) && null !== $job->benefits ) {
 			$ld['jobBenefits'] = $job->benefits;
@@ -587,7 +702,7 @@ class Bullhorn_Connection {
 		return $utc->format( 'c' );
 	}
 
-	private static function get_country_name ( $country_id ) {
+	private static function get_country_name( $country_id ) {
 
 		$country_list_id = 'bullhorn_country_list';
 
@@ -606,7 +721,7 @@ class Bullhorn_Connection {
 			if ( 200 === $response['response']['code'] ) {
 				$body = wp_remote_retrieve_body( $response );
 				$data = json_decode( $body, true );
-				if ( isset( $data['data'] ) ) {
+				if ( ! isset( $data['data'] ) ) {
 					return false;
 				}
 				$data = $data['data'];
@@ -626,6 +741,31 @@ class Bullhorn_Connection {
 		return _x( '- None Specified -', ' no county set', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
 	}
 
+	private static function get_hiring_organization_url( $organization_id ) {
+
+		$cached_organization_url = get_transient( 'bullhorn_organization_id#' . $organization_id );
+
+		if ( $cached_organization_url ) {
+			return $cached_organization_url;
+		}
+
+		$url      = self::$url . 'entity/ClientCorporation/' . $organization_id;
+		$params   = array( 'BhRestToken' => self::$session, 'fields' => 'companyURL' );
+		$response = self::request( $url . '?' . http_build_query( $params ) );
+
+		if ( 200 === $response['response']['code'] ) {
+			$body = wp_remote_retrieve_body( $response );
+			$data = json_decode( $body, true );
+			if ( ! isset( $data['data']['companyURL'] ) || empty( $data['data']['companyURL'] ) ) {
+				return false;
+			} else {
+				set_transient( 'bullhorn_organization_id#' . $organization_id, $data['data']['companyURL'], HOUR_IN_SECONDS * 1 );
+				return $data['data']['companyURL'];
+			}
+		} else {
+			return false;
+		}
+	}
 
 	/**
 	 * Before we start adding in new jobs, we need to delete jobs that are no

@@ -39,8 +39,11 @@ class Bullhorn_2_WP {
 
 			self::$post_type_job_listing = 'job_listing';
 			self::$post_type_application = 'bullhornapplication';
-			self::$taxonomy_listing_category = 'job_listing_category';
 			self::$taxonomy_listing_state = 'bullhorn_state';
+
+			if ( '1' === get_option( 'job_manager_enable_categories' ) ) {
+				self::$taxonomy_listing_category = 'job_listing_category';
+			}
 		}
 
 		self::load();

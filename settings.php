@@ -9,6 +9,8 @@ class Bullhorn_Settings {
 	 */
 	public function __construct() {
 
+		add_filter( 'wp_bullhorn_settings', array( __CLASS__, 'get_settings' ) );
+
 		//move this if to somewhere else, add admin check
 		if ( isset( $_GET['sync'] ) && 'bullhorn' === $_GET['sync'] ) {
 			add_action( 'admin_init', 'bullhorn_sync_now' );
@@ -49,9 +51,7 @@ class Bullhorn_Settings {
 	 */
 	public static function init() {
 
-		$redirect_uri = admin_url( 'options-general.php?page=bullhorn' );
-
-		$redirect_uri = apply_filters( 'wp_bullhorn_api_redirect_uri', $redirect_uri );
+		$redirect_uri = self::get_api_redirect_uri();
 
 		if ( isset( $_GET['sync'] ) && 'bullhorn' === $_GET['sync'] ) {
 			wp_redirect( $redirect_uri );
@@ -110,8 +110,7 @@ class Bullhorn_Settings {
 			                                    isset( $settings['client_secret'] ) and ! empty( $settings['client_secret'] ) and
 			                                                                            isset( $_GET['code'] )
 		) {
-			$redirect_uri = admin_url( 'options-general.php?page=bullhorn' );
-			$redirect_uri = apply_filters( 'wp_bullhorn_api_redirect_uri', $redirect_uri );
+			$redirect_uri = self::get_api_redirect_uri();
 			$url = add_query_arg(
 				array(
 					'grant_type'    => 'authorization_code',
@@ -193,8 +192,7 @@ class Bullhorn_Settings {
 			} elseif ( self::connected() ) {
 				$state_string = __( 'Connect to Bullhorn', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
 			}
-			$redirect_uri = admin_url( 'options-general.php?page=bullhorn' );
-			$redirect_uri = apply_filters( 'wp_bullhorn_api_redirect_uri', $redirect_uri );
+			$redirect_uri = self::get_api_redirect_uri();
 			$url = add_query_arg(
 				array(
 					'client_id'     => $settings['client_id'],
@@ -560,5 +558,28 @@ class Bullhorn_Settings {
 			isset( $settings['client_secret'] ) and
 			! empty( $settings['client_secret'] )
 		);
+	}
+
+	public static function get_settings( $settings ) {
+
+		if ( 'wp-job-manager-addon' === Bullhorn_2_WP::$mode ) {
+			$settings['client_id'] = get_option( 'job_manager_bullhorn_client_id' );
+			$settings['client_secret'] = get_option( 'job_manager_bullhorn_client_secret' );
+			$settings['client_corporation'] = get_option( 'job_manager_bullhorn_client_corporation' );
+			$settings['is_public'] = get_option( 'job_manager_bullhorn_cron_is_public' );
+		}
+
+		return $settings;
+	}
+
+	public static function get_api_redirect_uri() {
+
+		if ( 'wp-job-manager-addon' === Bullhorn_2_WP::$mode ) {
+			$redirect_uri = admin_url( 'edit.php?post_type=job_listing&page=job-manager-settings#settings-bullhorn' );
+		} else {
+			$redirect_uri = admin_url( 'options-general.php?page=bullhorn' );
+		}
+
+		return $redirect_uri;
 	}
 }
