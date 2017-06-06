@@ -566,6 +566,7 @@ class Bullhorn_Settings {
 			$settings['client_id'] = get_option( 'job_manager_bullhorn_client_id' );
 			$settings['client_secret'] = get_option( 'job_manager_bullhorn_client_secret' );
 			$settings['client_corporation'] = get_option( 'job_manager_bullhorn_client_corporation' );
+			$settings['is_public'] = get_option( 'job_manager_bullhorn_cron_is_public' );
 		}
 
 		return $settings;

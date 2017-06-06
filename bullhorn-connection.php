@@ -428,9 +428,16 @@ class Bullhorn_Connection {
 		// Use the specified description field if set, otherwise the default
 		$description = self::get_description_field();
 
-		$where = 'isPublic=0 AND isOpen=true AND isDeleted=false';
+		$where = 'isPublic=1 AND isOpen=true AND isDeleted=false';
 
 		$settings = apply_filters( 'wp_bullhorn_settings', (array) get_option( 'bullhorn_settings' ) );
+
+		if ( isset( $settings['is_public'] ) ) {
+			$is_public = $settings['is_public'];
+			if ( 'false' === $is_public ) {
+				$where = 'isOpen=true AND isDeleted=false';
+			}
+		}
 
 		$start = 0;
 		$page  = 100;
