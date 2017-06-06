@@ -261,9 +261,10 @@ class Shortcodes {
 
 			wp_nonce_field( 'bullhorn_cv_form', 'bullhorn_cv_form' );
 			do_action( 'wp_bullhorn_render_cv_form_bottom', $element_to_show, $settings );
-			?>
-            <input name="submit" type="submit" value="Upload Resume"/>
-			<?php do_action( 'wp_bullhorn_render_cv_form_close', $element_to_show, $settings ); ?>
+
+            printf( '<input name="submit" type="submit" value="%s"/>', apply_filters( 'bullhorn_submit_text', __( 'Upload Resume',  'bh-staffing-job-listing-and-cv-upload-for-wp' ) ) )
+
+            do_action( 'wp_bullhorn_render_cv_form_close', $element_to_show, $settings ); ?>
             <div id="bullhorn_upload_overlay">
                 <div class="bullhorn_upload_overlay_background"></div>
 				<?php
