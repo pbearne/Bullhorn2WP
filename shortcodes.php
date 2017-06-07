@@ -179,6 +179,24 @@ class Shortcodes {
                 margin: -4px 6px 0;
             }
 
+            .application_details #bullhorn-resume{
+                padding: 20px;
+            }
+            .application_details button.mfp-close,
+            .application_details button.mfp-close:active{
+                top: 0;
+                right: 0;
+            }
+
+            .application_details .bh-submint{
+                  width: 100%;
+              }
+            .application_details #bullhorn_upload_overlay div.bullhorn_upload_overlay_message{
+                margin-top: -75%;
+                margin-left: 4%;
+                margin-right: 4%;
+            }
+
             <?php
 				$css = ob_get_contents();
 				ob_end_clean();
@@ -336,7 +354,7 @@ class Shortcodes {
 			wp_nonce_field( 'bullhorn_cv_form', 'bullhorn_cv_form' );
 			do_action( 'wp_bullhorn_render_cv_form_bottom', $element_to_show, $settings );
 
-            printf( '<input name="submit" type="submit" value="%s"/>', apply_filters( 'bullhorn_submit_text', __( 'Upload Resume',  'bh-staffing-job-listing-and-cv-upload-for-wp' ) ) )
+            printf( '<input name="submit" type="submit" value="%s" class="bh-submint"/>', apply_filters( 'bullhorn_submit_text', __( 'Upload Resume',  'bh-staffing-job-listing-and-cv-upload-for-wp' ) ) );
 
             do_action( 'wp_bullhorn_render_cv_form_close', $element_to_show, $settings ); ?>
             <div id="bullhorn_upload_overlay">

@@ -108,6 +108,7 @@ class Bullhorn_Connection {
 
 		if ( count( $jobs ) ) {
 			foreach ( $jobs as $job ) {
+
 				if ( 'Archive' !== $job->status ) {
 					if ( isset( $existing[ $job->id ] ) ) {
 						self::sync_job( $job, $existing[ $job->id ] );
@@ -420,7 +421,7 @@ class Bullhorn_Connection {
 
 
 	/**
-	 * This retreives all available jobs from WP Job Manager.
+	 * This retreives all available jobs for WP Job Manager.
 	 *
 	 * @return array
 	 */
