@@ -250,13 +250,8 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			$job_title = get_the_title( absint( $_REQUEST['post'] ) );
 			$job_id    = get_post_meta( absint( $_REQUEST['post'] ), 'bullhorn_job_id', true );
 		} elseif ( isset( $_REQUEST['position'] ) && ! empty( $_REQUEST['position'] ) ) {
-			$args      = array(
-				'meta_key'   => 'bullhorn_job_id',
-				'meta_value' => absint( $_REQUEST['position'] ),
-				'post_type'  => Bullhorn_2_WP::$post_type_job_listing,
-				'number'     => 1,
-			);
-			$job_post  = get_pages( $args );
+
+			$job_post = self::get_post_by_bullhorn_id( absint( $_REQUEST['position'] ) );
 			$job_title = $job_post->post_title . ' (' . absint( $_REQUEST['position'] ) . ')';
 			$job_id    = get_post_meta( $job_post->ID, 'bullhorn_job_id', true );
 		}
@@ -703,23 +698,22 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$resume->candidate->comments = '';
 
 		$position_prex = apply_filters( 'bullhorn_position_prex', __( 'Position applied for: ', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
-		if ( isset( $profile_data['position'] ) ) {
+		if ( isset( $profile_data['position'] ) && null !== $profile_data['position'] ) {
 			if ( is_numeric( $profile_data['position'] ) ) {
-				$position_text = get_the_title( absint( $profile_data['position'] ) );
+				$position_text = self::get_post_by_bullhorn_id( absint( $profile_data['position'] ) )->post_title;
 			} else {
 				$position_text = $profile_data['position'];
 			}
 
 			$resume->candidate->comments .= esc_html( $position_prex . $position_text . PHP_EOL );
-		} elseif ( isset( $_POST['position'] ) ) {
+		} elseif ( isset( $_POST['position'] ) && ! empty( $_POST['position'] ) ) {
 			if ( is_numeric( $_POST['position'] ) ) {
-				$position_text = get_the_title( absint( $_POST['position'] ) );
+				$position_text = self::get_post_by_bullhorn_id( absint( $_POST['position'] ) )->post_title;
 			} else {
 				$position_text = $_POST['position'];
 			}
 			$resume->candidate->comments .= esc_html( $position_prex . $position_text . PHP_EOL );
 		}
-
 
 		$message_prex = apply_filters( 'bullhorn_message_prex', __( 'Message: ', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
 		if ( isset( $profile_data['message'] ) ) {
@@ -756,6 +750,20 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		}
 
 		return false;
+	}
+
+	public static function get_post_by_bullhorn_id( $id ){
+		$args      = array(
+			'meta_key'   => 'bullhorn_job_id',
+			'meta_value' => absint( $id ),
+			'post_type'  => Bullhorn_2_WP::$post_type_job_listing,
+			'number'     => 1,
+		);
+
+		$job_post  = get_posts( $args );
+
+		return $job_post[0];
+
 	}
 
 	/**
@@ -958,7 +966,8 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	}
 
 	/**
-	 * Attach Work History to a candidate
+	 * Attach Note to a candidate
+	 * // not working yet
 	 *
 	 * @param $resume
 	 * @param $candidate
