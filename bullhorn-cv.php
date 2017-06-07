@@ -983,11 +983,11 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		self::api_auth();
 
 		$data['comments']         = $local_post_data['message'];
-		$data['commentingPerson'] = array( 'id' => $candidate->changedEntityId );
+//		$data['commentingPerson'] = array( 'id' => $candidate->changedEntityId );
 		$data['candidates']       = array(
 			array( 'id' => $candidate->changedEntityId )
 		);
-		$data['personReference']  = array( 'id' => $candidate->changedEntityId );
+//		$data['personReference']  = array( 'id' => $candidate->changedEntityId );
 
 //		var_dump(wp_json_encode( $data ));
 //		{
@@ -999,17 +999,21 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 //"personReference": { "id" : "2"}
 //}
 		//https://rest9.bullhornstaffing.com/rest-services/13n5s0/entity/Note?BhRestToken=96dc2cad-8bbd-4826-80d5-f958a56fdad3
+// http://developer.bullhorn.com/doc/version_2-0/operations/addnotereference.htm // we might to link it afterwards
+
+		// http://developer.bullhorn.com/doc/version_2-0/entities/entity-note.htm
+
 
 		// Create the url && variables array
 		$url = add_query_arg(
 			array(
 				'BhRestToken' => self::$session,
-			), self::$url . 'entity/Note/'
+			), self::$url . 'entity/note/'
 		);
-//		var_dump($url);
+		var_dump($url);
 		$response = wp_remote_get( $url, array( 'body' => wp_json_encode( $data ), 'method' => 'PUT' ) );
-//		var_dump($response);
-
+		var_dump($response);
+die();
 		if ( 200 === $response['response']['code'] ) {
 
 			return wp_remote_retrieve_body( $response );
@@ -1306,11 +1310,13 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$body = array(
 			'candidate'       => array( 'id' => absint( $candidate->changedEntityId ) ),
 			'jobOrder'        => array( 'id' => absint( $job_order ) ),
+			'source'          => get_bloginfo( 'name' ) . ' Web Site',
 			'status'          => 'New Lead',
 			'dateWebResponse' => self::microtime_float(), //date( 'u', $date ),// time(),
 		);
 
 		$response = wp_remote_get( $url, array( 'body' => wp_json_encode( $body ), 'method' => 'PUT' ) );
+
 
 		$safety_count = 0;
 		while ( 500 === $response['response']['code'] && 5 > $safety_count ) {
@@ -1338,10 +1344,11 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 					'dateWebResponse' => self::microtime_float(), //date( 'u', $date ),// time(),
 				);
 
-				$response = wp_remote_post( $url, array( 'body' => wp_json_encode( $body ) ) );
+				$response = wp_remote_post( $url, array( 'body' => wp_json_encode( $body ), 'method' => 'POST' ) );
+
 				while ( 500 === $response['response']['code'] && 5 > $safety_count ) {
 					error_log( 'Link to job failed( ' . $safety_count . '): ' . serialize( $response ) );
-					$response = wp_remote_get( $url, array( 'body' => wp_json_encode( $body ), 'method' => 'PUT' ) );
+					$response = wp_remote_get( $url, array( 'body' => wp_json_encode( $body ), 'method' => 'POST' ) );
 					$safety_count ++;
 				}
 
