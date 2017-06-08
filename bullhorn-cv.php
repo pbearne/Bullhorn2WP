@@ -250,13 +250,8 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			$job_title = get_the_title( absint( $_REQUEST['post'] ) );
 			$job_id    = get_post_meta( absint( $_REQUEST['post'] ), 'bullhorn_job_id', true );
 		} elseif ( isset( $_REQUEST['position'] ) && ! empty( $_REQUEST['position'] ) ) {
-			$args      = array(
-				'meta_key'   => 'bullhorn_job_id',
-				'meta_value' => absint( $_REQUEST['position'] ),
-				'post_type'  => 'bullhornjoblisting',
-				'number'     => 1,
-			);
-			$job_post  = get_pages( $args );
+
+			$job_post = self::get_post_by_bullhorn_id( absint( $_REQUEST['position'] ) );
 			$job_title = $job_post->post_title . ' (' . absint( $_REQUEST['position'] ) . ')';
 			$job_id    = get_post_meta( $job_post->ID, 'bullhorn_job_id', true );
 		}
@@ -655,24 +650,6 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		// API authentication
 		self::api_auth();
 
-		$url = add_query_arg(
-			array(
-				'BhRestToken' => self::$session,
-			), self::$url . 'entity/Candidate'
-		);
-
-		$response = wp_remote_get( $url, array( 'body' => wp_json_encode( $resume->candidate ), 'method' => 'PUT' ) );
-
-		$safety_count = 0;
-		while ( 500 === $response['response']['code'] && 5 > $safety_count ) {
-			error_log( 'Create Canditate failed( ' . $safety_count . '): ' . serialize( $response ) );
-			$response = wp_remote_get( $url, array(
-				'body'   => wp_json_encode( $resume->candidate ),
-				'method' => 'PUT'
-			) );
-			$safety_count ++;
-		}
-
 		if ( isset( $profile_data['phone'] ) ) {
 			$cv_phone = $resume->candidate->phone;
 
@@ -721,17 +698,17 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$resume->candidate->comments = '';
 
 		$position_prex = apply_filters( 'bullhorn_position_prex', __( 'Position applied for: ', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
-		if ( isset( $profile_data['position'] ) ) {
+		if ( isset( $profile_data['position'] ) && null !== $profile_data['position'] ) {
 			if ( is_numeric( $profile_data['position'] ) ) {
-				$position_text = get_the_title( absint( $profile_data['position'] ) );
+				$position_text = self::get_post_by_bullhorn_id( absint( $profile_data['position'] ) )->post_title;
 			} else {
 				$position_text = $profile_data['position'];
 			}
 
 			$resume->candidate->comments .= esc_html( $position_prex . $position_text . PHP_EOL );
-		} elseif ( isset( $_POST['position'] ) ) {
+		} elseif ( isset( $_POST['position'] ) && ! empty( $_POST['position'] ) ) {
 			if ( is_numeric( $_POST['position'] ) ) {
-				$position_text = get_the_title( absint( $_POST['position'] ) );
+				$position_text = self::get_post_by_bullhorn_id( absint( $_POST['position'] ) )->post_title;
 			} else {
 				$position_text = $_POST['position'];
 			}
@@ -764,7 +741,10 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$safety_count = 0;
 		while ( 500 === $response['response']['code'] && 5 > $safety_count ) {
 			error_log( 'Create Canditate failed( ' . $safety_count . '): ' . serialize( $response ) );
-			$response = wp_remote_get( $url, array( 'body' => json_encode( $resume->candidate ), 'method' => 'PUT' ) );
+			$response = wp_remote_get( $url, array(
+				'body' => json_encode( $resume->candidate ),
+				'method' => 'PUT',
+			) );
 			$safety_count ++;
 		}
 
@@ -776,11 +756,25 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		return false;
 	}
 
+	public static function get_post_by_bullhorn_id( $id ){
+		$args      = array(
+			'meta_key'   => 'bullhorn_job_id',
+			'meta_value' => absint( $id ),
+			'post_type'  => Bullhorn_2_WP::$post_type_job_listing,
+			'number'     => 1,
+		);
+
+		$job_post  = get_posts( $args );
+
+		return $job_post[0];
+
+	}
+
 	/**
 	 * Create a candidate int he system
 	 *
-	 * @param $resume
-	 * @param array $profile_data
+	 * @param $candidate_id
+	 * @param array $candidate
 	 *
 	 * @return mixed
 	 */
@@ -796,12 +790,18 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			), self::$url . 'entity/Candidate/' . $candidate_id
 		);
 
-		$response = wp_remote_get( $url, array( 'body' => wp_json_encode( $candidate ), 'method' => 'PUT' ) );
+		$response = wp_remote_get( $url, array(
+			'body' => wp_json_encode( $candidate ),
+			'method' => 'PUT',
+		) );
 
 		$safety_count = 0;
 		while ( 500 === $response['response']['code'] && 5 > $safety_count ) {
 			error_log( 'Create Canditate failed( ' . $safety_count . '): ' . serialize( $response ) );
-			$response = wp_remote_get( $url, array( 'body' => wp_json_encode( $candidate ), 'method' => 'PUT' ) );
+			$response = wp_remote_get( $url, array(
+				'body' => wp_json_encode( $candidate ),
+				'method' => 'PUT',
+			) );
 			$safety_count ++;
 		}
 
@@ -976,7 +976,8 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	}
 
 	/**
-	 * Attach Work History to a candidate
+	 * Attach Note to a candidate
+	 * // not working yet
 	 *
 	 * @param $resume
 	 * @param $candidate
@@ -1315,6 +1316,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$body = array(
 			'candidate'       => array( 'id' => absint( $candidate->changedEntityId ) ),
 			'jobOrder'        => array( 'id' => absint( $job_order ) ),
+			'source'          => get_bloginfo( 'name' ) . ' Web Site',
 			'status'          => 'New Lead',
 			'dateWebResponse' => self::microtime_float(), //date( 'u', $date ),// time(),
 		);
@@ -1347,10 +1349,11 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 					'dateWebResponse' => self::microtime_float(), //date( 'u', $date ),// time(),
 				);
 
-				$response = wp_remote_post( $url, array( 'body' => wp_json_encode( $body ) ) );
+				$response = wp_remote_post( $url, array( 'body' => wp_json_encode( $body ), 'method' => 'POST' ) );
+
 				while ( 500 === $response['response']['code'] && 5 > $safety_count ) {
 					error_log( 'Link to job failed( ' . $safety_count . '): ' . serialize( $response ) );
-					$response = wp_remote_get( $url, array( 'body' => wp_json_encode( $body ), 'method' => 'PUT' ) );
+					$response = wp_remote_get( $url, array( 'body' => wp_json_encode( $body ), 'method' => 'POST' ) );
 					$safety_count ++;
 				}
 
