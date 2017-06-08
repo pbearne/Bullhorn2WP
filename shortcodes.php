@@ -336,9 +336,10 @@ class Shortcodes {
 
 			wp_nonce_field( 'bullhorn_cv_form', 'bullhorn_cv_form' );
 			do_action( 'wp_bullhorn_render_cv_form_bottom', $element_to_show, $settings );
-			?>
-            <input name="submit" type="submit" value="Upload Resume"/>
-			<?php do_action( 'wp_bullhorn_render_cv_form_close', $element_to_show, $settings ); ?>
+
+            printf( '<input name="submit" type="submit" value="%s" class="bh-submint"/>', apply_filters( 'bullhorn_submit_text', __( 'Upload Resume',  'bh-staffing-job-listing-and-cv-upload-for-wp' ) ) );
+
+            do_action( 'wp_bullhorn_render_cv_form_close', $element_to_show, $settings ); ?>
             <div id="bullhorn_upload_overlay">
                 <div class="bullhorn_upload_overlay_background"></div>
 				<?php
@@ -359,7 +360,7 @@ class Shortcodes {
         <script type="application/javascript">
 
             jQuery(document).ready(function () {
-                error_color = apply_filter('bullhorn_js_error_color', '#FFDFE0');
+                error_color = '<?php echo esc_attr( apply_filters( 'bullhorn_js_error_color', '#FFDFE0') ); ?>';
                 defaut_file_color = jQuery('#fileToUpload').css('background-color'); //'#fff';
                 defaut_color = jQuery('#email').css('background-color'); //'#d0eafa';
                 jQuery('#bullhorn-resume').on('submit', function () {
