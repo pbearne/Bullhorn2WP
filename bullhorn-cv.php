@@ -647,9 +647,6 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		$resume->candidate->source = 'New Website';
 
-		// API authentication
-		self::api_auth();
-
 		if ( isset( $profile_data['phone'] ) ) {
 			$cv_phone = $resume->candidate->phone;
 
