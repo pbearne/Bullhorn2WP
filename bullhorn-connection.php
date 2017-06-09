@@ -376,8 +376,7 @@ class Bullhorn_Connection {
 			$url    = self::$url . 'query/JobOrder';
 			$params = array(
 				'BhRestToken' => self::$session,
-				'fields'      => 'id,title,' . $description . ',dateAdded,dateEnd,categories,address,benefits,salary,educationDegree,employmentType,yearsRequired,clientCorporation,degreeList,skillList,bonusPackage,status',
-				//'fields'        => '*',
+				'fields'        => '*',
 				'where'       => $where,
 				'count'       => $page,
 				'start'       => $start,
@@ -533,6 +532,12 @@ class Bullhorn_Connection {
 			'bullhorn_json_ld'     => $create_json_ld,
 			'employmentType'       => $job->employmentType,
 			'baseSalary'           => $job->salary,
+			'educationDegree'      => $job->educationDegree,
+			'payRate'              => $job->payRate,
+			'taxStatus'            => $job->taxStatus,
+			'travelRequirements'   => $job->travelRequirements,
+			'willRelocate'         => $job->willRelocate,
+			'yearsRequired'        => $job->yearsRequired,
 		);
 
 		foreach ( $custom_fields as $key => $val ) {
@@ -557,6 +562,8 @@ class Bullhorn_Connection {
 		$ld['jobLocation']['address']['@type'] = 'PostalAddress';
 		$ld['validThrough']                    = self::format_date_to_8601( $job->dateEnd );
 		$ld['hiringOrganization']['@type']     = 'Organization';
+		$ld['educationRequirements']           = $job->educationDegree;
+		$ld['employmentType']                  = $job->employmentType;
 
 
 		if ( ! empty( $address['city'] ) ) {
