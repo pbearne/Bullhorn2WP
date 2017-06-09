@@ -92,11 +92,7 @@ class Bullhorn_Connection {
 			}
 		}
 
-		if ( 'wp-job-manager-addon' === Bullhorn_2_WP::$mode ) {
-			$jobs = self::get_jobs_from_bullhorn_wp_job_manager();
-		} else {
-			$jobs = self::get_jobs_from_bullhorn();
-		}
+		$jobs = self::get_jobs_from_bullhorn();
 
 		if ( is_wp_error( $jobs ) ) {
 			return __( 'Get Jobs failed: ' . serialize( $jobs ) );
@@ -364,73 +360,6 @@ class Bullhorn_Connection {
 
 		$where = 'isPublic=1 AND isOpen=true AND isDeleted=false';
 
-		$settings = (array) get_option( 'bullhorn_settings' );
-
-		if ( isset( $settings['is_public'] ) ) {
-			$is_public = $settings['is_public'];
-			if ( 'false' === $is_public ) {
-				$where = 'isOpen=true AND isDeleted=false';
-			}
-		}
-
-		$start = 0;
-		$page  = 100;
-		$jobs  = array();
-		while ( true ) {
-			$url    = self::$url . 'query/JobOrder';
-			$params = array(
-				'BhRestToken' => self::$session,
-				'fields'      => 'id,title,' . $description . ',dateAdded,dateEnd,categories,address,benefits,salary,educationDegree,employmentType,yearsRequired,clientCorporation,degreeList,skillList,bonusPackage,status',
-				//'fields'        => '*',
-				'where'       => $where,
-				'count'       => $page,
-				'start'       => $start,
-			);
-
-			if ( isset( self::$settings['client_corporation'] ) and ! empty( self::$settings['client_corporation'] ) ) {
-				$ids = explode( ',', self::$settings['client_corporation'] );
-				$ids = array_map( 'trim', $ids );
-
-				$params['where'] .= ' AND (clientCorporation.id=' . implode( ' OR clientCorporation.id=', $ids ) . ')';
-			}
-
-			$response = self::request( $url . '?' . http_build_query( $params ), false );
-
-			if ( is_wp_error( $response ) ) {
-
-				return $response;
-			}
-
-			$body = json_decode( $response['body'] );
-
-			if ( isset( $body->data ) ) {
-				$start += $page;
-
-				$jobs = array_merge( $jobs, $body->data );
-
-				if ( count( $body->data ) < $page ) {
-					break;
-				}
-			} else {
-				break;
-			}
-		}
-
-		return $jobs;
-	}
-
-
-	/**
-	 * This retreives all available jobs for WP Job Manager.
-	 *
-	 * @return array
-	 */
-	private static function get_jobs_from_bullhorn_wp_job_manager() {
-		// Use the specified description field if set, otherwise the default
-		$description = self::get_description_field();
-
-		$where = 'isPublic=1 AND isOpen=true AND isDeleted=false';
-
 		$settings = apply_filters( 'wp_bullhorn_settings', (array) get_option( 'bullhorn_settings' ) );
 
 		if ( isset( $settings['is_public'] ) ) {
@@ -485,7 +414,6 @@ class Bullhorn_Connection {
 
 		return $jobs;
 	}
-
 
 	/**
 	 * This will take a job object from Bullhorn and insert it into WordPress
