@@ -92,6 +92,15 @@ class Bullhorn_Connection {
 			}
 		}
 
+		$response = self::get_skills_from_bullhorn();
+		if ( is_wp_error( $response ) ) {
+			if ( $throw ) {
+				error_log( 'Get skills failed: ' . serialize( $response->get_error_message() ) );
+			} else {
+				return __( 'Get skills failed: ' . serialize( $response->get_error_message() ) );
+			}
+		}
+
 		$jobs = self::get_jobs_from_bullhorn();
 
 		if ( is_wp_error( $jobs ) ) {
@@ -294,7 +303,8 @@ class Bullhorn_Connection {
 		$body = json_decode( $response['body'] );
 		if ( isset( $body->data ) ) {
 			foreach ( $body->data as $category ) {
-				wp_insert_term( $category->name, 'bullhorn_skills' );
+				$args = array( 'description' => __( 'Synced with Bullhorn', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
+				wp_insert_term( $category->name, Bullhorn_2_WP::$taxonomy_skills, $args );
 			}
 		}
 
@@ -306,7 +316,7 @@ class Bullhorn_Connection {
 	 *
 	 * @return error|bool
 	 */
-	private static function get_specialties_from_bullhorn () {
+	private static function get_specialties_from_bullhorn() {
 		$url = self::$url . 'query/Specialties';
 		$url = add_query_arg( $params = array(
 			'BhRestToken' => self::$session,
@@ -354,7 +364,7 @@ class Bullhorn_Connection {
 	 *
 	 * @return array
 	 */
-	private static function get_jobs_from_bullhorn () {
+	private static function get_jobs_from_bullhorn() {
 		// Use the specified description field if set, otherwise the default
 		$description = self::get_description_field();
 
@@ -376,7 +386,7 @@ class Bullhorn_Connection {
 			$url    = self::$url . 'query/JobOrder';
 			$params = array(
 				'BhRestToken' => self::$session,
-				'fields'        => '*',
+				'fields'        => 'id,title,' . $description . ',dateAdded,dateEnd,categories,address,benefits,salary,educationDegree,employmentType,yearsRequired,clientCorporation,degreeList,skillList,bonusPackage,status,skills,payRate,taxStatus,travelRequirements,willRelocate',
 				'where'       => $where,
 				'count'       => $page,
 				'start'       => $start,
@@ -425,7 +435,7 @@ class Bullhorn_Connection {
 	 * @return bool
 	 * @throws Exception
 	 */
-	private static function sync_job ( $job, $id = null ) {
+	private static function sync_job( $job, $id = null ) {
 		global $post;
 		$description = self::get_description_field();
 
@@ -448,29 +458,17 @@ class Bullhorn_Connection {
 		unset( $address['countryID'] );
 
 		$categories = array();
-		// TODO: cache as trans to save API calls
 		foreach ( $job->categories->data as $category ) {
-			$category_id = $category->id;
-
-			// Check to see if this category name has been cached already
-			if ( isset( self::$categories[ $category_id ] ) ) {
-				$categories[] = self::$categories[ $category_id ];
-			} else {
-				$url      = self::$url . 'entity/Category/' . $category_id;
-				$params   = array( 'BhRestToken' => self::$session, 'fields' => 'id,name' );
-				$response = self::request( $url . '?' . http_build_query( $params ) );
-
-				$category = json_decode( $response['body'] );
-				if ( isset( $category->data->name ) ) {
-					$categories[] = $category->data->name;
-
-					// Cache this category in an array
-					self::$categories[ $category_id ] = $category->data->name;
-				}
-			}
+			$categories[] = $category->name;
 		}
-
 		wp_set_object_terms( $id, $categories, Bullhorn_2_WP::$taxonomy_category );
+
+		$skills = array();
+		foreach ( $job->skills->data as $skill ) {
+			$skills[] = $skill->name;
+		}
+		wp_set_object_terms( $id, $skills, Bullhorn_2_WP::$taxonomy_skills );
+
 		wp_set_object_terms( $id, array( $job->address->state ), Bullhorn_2_WP::$taxonomy_state );
 
 		$create_json_ld = self::create_json_ld( $job, $categories );

@@ -152,6 +152,33 @@ class Bullhorn_Custom_Post_Type {
 		);
 		register_taxonomy( Bullhorn_2_WP::$taxonomy_state, Bullhorn_2_WP::$post_type_job_listing, $args );
 
+		$labels = array(
+			'name'                       => _x( 'Skills', 'Taxonomy General Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'singular_name'              => _x( 'Skill', 'Taxonomy Singular Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'menu_name'                  => __( 'Skills', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'all_items'                  => __( 'All Skills', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'parent_item'                => __( 'Parent Skill', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'parent_item_colon'          => __( 'Parent Skill:', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'new_item_name'              => __( 'New Skill', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'add_new_item'               => __( 'Add New Skill', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'edit_item'                  => __( 'Edit Skill', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'update_item'                => __( 'Update Skill', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'separate_items_with_commas' => __( 'Separate skills with commas', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'search_items'               => __( 'Search skills', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'add_or_remove_items'        => __( 'Add or remove skills', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'choose_from_most_used'      => __( 'Choose from the most used skills', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+		);
+		$args   = array(
+			'labels'            => $labels,
+			'hierarchical'      => false,
+			'public'            => true,
+			'show_ui'           => true,
+			'show_admin_column' => true,
+			'show_in_nav_menus' => true,
+			'show_tagcloud'     => true,
+		);
+		register_taxonomy( Bullhorn_2_WP::$taxonomy_skills, Bullhorn_2_WP::$post_type_job_listing, $args );
+
 		return true;
 	}
 
