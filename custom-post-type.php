@@ -123,7 +123,7 @@ class Bullhorn_Custom_Post_Type {
 			'show_in_nav_menus' => true,
 			'show_tagcloud'     => true,
 		);
-		register_taxonomy( Bullhorn_2_WP::$taxonomy_listing_category, Bullhorn_2_WP::$post_type_job_listing, $args );
+		register_taxonomy( Bullhorn_2_WP::$taxonomy_category, Bullhorn_2_WP::$post_type_job_listing, $args );
 
 		$labels = array(
 			'name'                       => _x( 'States', 'Taxonomy General Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
@@ -150,7 +150,7 @@ class Bullhorn_Custom_Post_Type {
 			'show_in_nav_menus' => true,
 			'show_tagcloud'     => true,
 		);
-		register_taxonomy( Bullhorn_2_WP::$taxonomy_listing_state, Bullhorn_2_WP::$post_type_job_listing, $args );
+		register_taxonomy( Bullhorn_2_WP::$taxonomy_state, Bullhorn_2_WP::$post_type_job_listing, $args );
 
 		return true;
 	}
@@ -396,19 +396,19 @@ class Bullhorn_Custom_Post_Type {
 		}
 
 		if ( true === $modify_query ) {
-			if ( isset( $_GET[ Bullhorn_2_WP::$taxonomy_listing_state ] ) ) {
+			if ( isset( $_GET[ Bullhorn_2_WP::$taxonomy_state ] ) ) {
 				$tax_queries[] = array(
-					'taxonomy' => Bullhorn_2_WP::$taxonomy_listing_state,
+					'taxonomy' => Bullhorn_2_WP::$taxonomy_state,
 					'field'    => 'slug',
-					'terms'    => sanitize_key( $_GET[ Bullhorn_2_WP::$taxonomy_listing_state ] ),
+					'terms'    => sanitize_key( $_GET[ Bullhorn_2_WP::$taxonomy_state ] ),
 				);
 			}
 
-			if ( isset( $_GET[ Bullhorn_2_WP::$taxonomy_listing_category ] ) ) {
+			if ( isset( $_GET[ Bullhorn_2_WP::$taxonomy_category ] ) ) {
 				$tax_queries[] = array(
-					'taxonomy' => Bullhorn_2_WP::$taxonomy_listing_category,
+					'taxonomy' => Bullhorn_2_WP::$taxonomy_category,
 					'field'    => 'slug',
-					'terms'    => sanitize_key( $_GET[ Bullhorn_2_WP::$taxonomy_listing_category ] ),
+					'terms'    => sanitize_key( $_GET[ Bullhorn_2_WP::$taxonomy_category ] ),
 				);
 			}
 

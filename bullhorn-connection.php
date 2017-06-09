@@ -265,7 +265,7 @@ class Bullhorn_Connection {
 		$body = json_decode( $response['body'] );
 		if ( isset( $body->data ) ) {
 			foreach ( $body->data as $category ) {
-				wp_insert_term( $category->label, Bullhorn_2_WP::$taxonomy_listing_category );
+				wp_insert_term( $category->label, Bullhorn_2_WP::$taxonomy_category );
 			}
 		}
 
@@ -470,8 +470,8 @@ class Bullhorn_Connection {
 			}
 		}
 
-		wp_set_object_terms( $id, $categories, Bullhorn_2_WP::$taxonomy_listing_category );
-		wp_set_object_terms( $id, array( $job->address->state ), Bullhorn_2_WP::$taxonomy_listing_state );
+		wp_set_object_terms( $id, $categories, Bullhorn_2_WP::$taxonomy_category );
+		wp_set_object_terms( $id, array( $job->address->state ), Bullhorn_2_WP::$taxonomy_state );
 
 		$create_json_ld = self::create_json_ld( $job, $categories );
 

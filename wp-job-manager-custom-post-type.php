@@ -75,9 +75,9 @@ class Bullhorn_WP_Job_Manager_Custom_Post_Type {
 			'show_in_nav_menus' => true,
 			'show_tagcloud'     => true,
 		);
-		register_taxonomy( Bullhorn_2_WP::$taxonomy_listing_state, Bullhorn_2_WP::$post_type_job_listing, $args );
+		register_taxonomy( Bullhorn_2_WP::$taxonomy_state, Bullhorn_2_WP::$post_type_job_listing, $args );
 
-		if ( 'job_listing_category' !== Bullhorn_2_WP::$taxonomy_listing_category ) {
+		if ( 'job_listing_category' !== Bullhorn_2_WP::$taxonomy_category ) {
 
 			$labels = array(
 				'name'                       => _x( 'Categories', 'Taxonomy General Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
@@ -105,7 +105,7 @@ class Bullhorn_WP_Job_Manager_Custom_Post_Type {
 				'show_tagcloud'     => true,
 			);
 
-			register_taxonomy( Bullhorn_2_WP::$taxonomy_listing_category, Bullhorn_2_WP::$post_type_job_listing, $args );
+			register_taxonomy( Bullhorn_2_WP::$taxonomy_category, Bullhorn_2_WP::$post_type_job_listing, $args );
 		}
 	}
 

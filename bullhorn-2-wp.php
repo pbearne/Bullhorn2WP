@@ -27,8 +27,8 @@ class Bullhorn_2_WP {
 
 	static $post_type_job_listing = 'bullhornjoblisting';
 	static $post_type_application = 'bullhornapplication';
-	static $taxonomy_listing_category = 'bullhorn_category';
-	static $taxonomy_listing_state = 'bullhorn_state';
+	static $taxonomy_category = 'bullhorn_category';
+	static $taxonomy_state = 'bullhorn_state';
 
 	static $mode = 'plugin';
 
@@ -39,10 +39,10 @@ class Bullhorn_2_WP {
 
 			self::$post_type_job_listing = 'job_listing';
 			self::$post_type_application = 'bullhornapplication';
-			self::$taxonomy_listing_state = 'bullhorn_state';
+			self::$taxonomy_state        = 'bullhorn_state';
 
 			if ( '1' === get_option( 'job_manager_enable_categories' ) ) {
-				self::$taxonomy_listing_category = 'job_listing_category';
+				self::$taxonomy_category = 'job_listing_category';
 			}
 		}
 
