@@ -386,7 +386,7 @@ class Bullhorn_Connection {
 			$url    = self::$url . 'query/JobOrder';
 			$params = array(
 				'BhRestToken' => self::$session,
-				'fields'        => 'id,title,' . $description . ',dateAdded,dateEnd,categories,address,benefits,salary,educationDegree,employmentType,yearsRequired,clientCorporation,degreeList,skillList,bonusPackage,status,skills,payRate,taxStatus,travelRequirements,willRelocate',
+				'fields'        => 'id,title,' . $description . ',dateAdded,dateEnd,categories,address,benefits,salary,educationDegree,employmentType,yearsRequired,clientCorporation,degreeList,skillList,bonusPackage,status,skills,payRate,taxStatus,travelRequirements,willRelocate,certificationList',
 				'where'       => $where,
 				'count'       => $page,
 				'start'       => $start,
@@ -468,6 +468,12 @@ class Bullhorn_Connection {
 			$skills[] = $skill->name;
 		}
 		wp_set_object_terms( $id, $skills, Bullhorn_2_WP::$taxonomy_skills );
+
+		$certifications = array();
+		foreach ( $job->certificationList as $certification ) {
+			$certifications[] = $certification;
+		}
+		wp_set_object_terms( $id, $certifications, Bullhorn_2_WP::$taxonomy_certifications );
 
 		wp_set_object_terms( $id, array( $job->address->state ), Bullhorn_2_WP::$taxonomy_state );
 

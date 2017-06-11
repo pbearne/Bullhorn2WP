@@ -30,6 +30,7 @@ class Bullhorn_2_WP {
 	static $taxonomy_category = 'bullhorn_category';
 	static $taxonomy_state = 'bullhorn_state';
 	static $taxonomy_skills = 'bullhorn_skills';
+	static $taxonomy_certifications = 'bullhorn_certifications';
 
 	static $mode = 'plugin';
 
