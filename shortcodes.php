@@ -377,8 +377,7 @@ class Shortcodes {
         <script type="application/javascript">
 
             jQuery(document).ready(function () {
-                error_color = '#FFDFE0';
-
+                error_color = '<?php echo esc_attr( apply_filters( 'bullhorn_js_error_color', '#FFDFE0') ); ?>';
                 defaut_file_color = jQuery('#fileToUpload').css('background-color'); //'#fff';
                 defaut_color = jQuery('#email').css('background-color'); //'#d0eafa';
                 jQuery('#bullhorn-resume').on('submit', function () {

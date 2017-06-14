@@ -647,9 +647,6 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		$resume->candidate->source = 'New Website';
 
-		// API authentication
-		self::api_auth();
-
 		if ( isset( $profile_data['phone'] ) ) {
 			$cv_phone = $resume->candidate->phone;
 
@@ -740,7 +737,10 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$safety_count = 0;
 		while ( 500 === $response['response']['code'] && 5 > $safety_count ) {
 			error_log( 'Create Canditate failed( ' . $safety_count . '): ' . serialize( $response ) );
-			$response = wp_remote_get( $url, array( 'body' => json_encode( $resume->candidate ), 'method' => 'PUT' ) );
+			$response = wp_remote_get( $url, array(
+				'body' => json_encode( $resume->candidate ),
+				'method' => 'PUT',
+			) );
 			$safety_count ++;
 		}
 
@@ -769,8 +769,8 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	/**
 	 * Create a candidate int he system
 	 *
-	 * @param $resume
-	 * @param array $profile_data
+	 * @param $candidate_id
+	 * @param array $candidate
 	 *
 	 * @return mixed
 	 */
@@ -786,12 +786,18 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			), self::$url . 'entity/Candidate/' . $candidate_id
 		);
 
-		$response = wp_remote_get( $url, array( 'body' => wp_json_encode( $candidate ), 'method' => 'PUT' ) );
+		$response = wp_remote_get( $url, array(
+			'body' => wp_json_encode( $candidate ),
+			'method' => 'PUT',
+		) );
 
 		$safety_count = 0;
 		while ( 500 === $response['response']['code'] && 5 > $safety_count ) {
 			error_log( 'Create Canditate failed( ' . $safety_count . '): ' . serialize( $response ) );
-			$response = wp_remote_get( $url, array( 'body' => wp_json_encode( $candidate ), 'method' => 'PUT' ) );
+			$response = wp_remote_get( $url, array(
+				'body' => wp_json_encode( $candidate ),
+				'method' => 'PUT',
+			) );
 			$safety_count ++;
 		}
 

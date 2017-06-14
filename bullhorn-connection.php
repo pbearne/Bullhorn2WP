@@ -85,9 +85,9 @@ class Bullhorn_Connection {
 			$response = self::get_specialties_from_bullhorn();
 			if ( is_wp_error( $response ) ) {
 				if ( $throw ) {
-					error_log( 'Get skills failed: ' . serialize( $response->get_error_message() ) );
+					error_log( 'Get specialties failed: ' . serialize( $response->get_error_message() ) );
 				} else {
-					return __( 'Get skills failed: ' . serialize( $response->get_error_message() ) );
+					return __( 'Get specialties failed: ' . serialize( $response->get_error_message() ) );
 				}
 			}
 		}
@@ -386,7 +386,7 @@ class Bullhorn_Connection {
 			$url    = self::$url . 'query/JobOrder';
 			$params = array(
 				'BhRestToken' => self::$session,
-				'fields'        => 'id,title,' . $description . ',dateAdded,dateEnd,categories,address,benefits,salary,educationDegree,employmentType,yearsRequired,clientCorporation,degreeList,skillList,bonusPackage,status,skills,payRate,taxStatus,travelRequirements,willRelocate,certificationList',
+				'fields'        => 'id,title,' . $description . ',dateAdded,dateEnd,categories,address,benefits,salary,educationDegree,employmentType,yearsRequired,clientCorporation,degreeList,skillList,bonusPackage,status,skills,payRate,taxStatus,travelRequirements,willRelocate,certificationList,notes',
 				'where'       => $where,
 				'count'       => $page,
 				'start'       => $start,
@@ -457,21 +457,58 @@ class Bullhorn_Connection {
 		$address = (array) $job->address;
 		unset( $address['countryID'] );
 
+		//categories
 		$categories = array();
-		foreach ( $job->categories->data as $category ) {
-			$categories[] = $category->name;
+		if ( $job->categories->total <= 5 ) {
+			foreach ( $job->categories->data as $category ) {
+				$categories[] = $category->name;
+			}
+		} else {
+
+			$url    = self::$url . 'entity/JobOrder/' . $job->id . '/categories';
+			$params = array(
+				'BhRestToken' => self::$session,
+				'fields'      => '*',
+			);
+
+			$response = self::request( $url . '?' . http_build_query( $params ), false );
+
+			$body = json_decode( $response['body'] );
+
+			foreach ( $body->data as $category ) {
+				$categories[] = $category->name;
+			}
 		}
 		wp_set_object_terms( $id, $categories, Bullhorn_2_WP::$taxonomy_category );
 
+		//skills
 		$skills = array();
-		foreach ( $job->skills->data as $skill ) {
-			$skills[] = $skill->name;
+		if ( $job->skills->total <= 5 ) {
+			foreach ( $job->skills->data as $skill ) {
+				$skills[] = $skill->name;
+			}
+		} else {
+
+			$url    = self::$url . 'entity/JobOrder/' . $job->id . '/skills';
+			$params = array(
+				'BhRestToken' => self::$session,
+				'fields'      => '*',
+			);
+
+			$response = self::request( $url . '?' . http_build_query( $params ), false );
+
+			$body = json_decode( $response['body'] );
+
+			foreach ( $body->data as $skill ) {
+				$skills[] = $skill->name;
+			}
 		}
 		wp_set_object_terms( $id, $skills, Bullhorn_2_WP::$taxonomy_skills );
 
+		//certifications
 		$certifications = array();
-		foreach ( $job->certificationList as $certification ) {
-			$certifications[] = $certification;
+		if ( $job->certificationList ) {
+			$certifications = $job->certificationList;
 		}
 		wp_set_object_terms( $id, $certifications, Bullhorn_2_WP::$taxonomy_certifications );
 
@@ -551,7 +588,7 @@ class Bullhorn_Connection {
 		return true;
 	}
 
-	private static function create_json_ld ( $job, $categories ) {
+	private static function create_json_ld( $job, $categories ) {
 		$description = self::get_description_field();
 		$address     = (array) $job->address;
 
