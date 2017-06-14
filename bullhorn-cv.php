@@ -176,8 +176,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 						self::attach_skills( $resume, $candidate );
 
 						// Attach note to candidate
-						// not working yet
-						// self::attach_note( $candidate, $local_post_data );
+						 self::attach_note( $candidate, $local_post_data );
 
 						// link to job
 						self::link_candidate_to_job( $candidate );
@@ -973,7 +972,6 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 	/**
 	 * Attach Note to a candidate
-	 * // not working yet
 	 *
 	 * @param $resume
 	 * @param $candidate
@@ -989,37 +987,17 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		self::api_auth();
 
 		$data['comments']         = $local_post_data['message'];
-//		$data['commentingPerson'] = array( 'id' => $candidate->changedEntityId );
-		$data['candidates']       = array(
-			array( 'id' => $candidate->changedEntityId )
-		);
-//		$data['personReference']  = array( 'id' => $candidate->changedEntityId );
-
-//		var_dump(wp_json_encode( $data ));
-//		{
-//			"commentingPerson": { "id" : "2"},
-//"candidates" : [
-//            { "id" : "4"}
-//            ],
-//"comments":"This is note",
-//"personReference": { "id" : "2"}
-//}
-		//https://rest9.bullhornstaffing.com/rest-services/13n5s0/entity/Note?BhRestToken=96dc2cad-8bbd-4826-80d5-f958a56fdad3
-// http://developer.bullhorn.com/doc/version_2-0/operations/addnotereference.htm // we might to link it afterwards
-
-		// http://developer.bullhorn.com/doc/version_2-0/entities/entity-note.htm
-
+		$data['personReference']  = array( 'id' => $candidate->changedEntityId );
 
 		// Create the url && variables array
 		$url = add_query_arg(
 			array(
 				'BhRestToken' => self::$session,
-			), self::$url . 'entity/note/'
+			), self::$url . 'entity/Note'
 		);
-		var_dump($url);
+
 		$response = wp_remote_get( $url, array( 'body' => wp_json_encode( $data ), 'method' => 'PUT' ) );
-		var_dump($response);
-die();
+
 		if ( 200 === $response['response']['code'] ) {
 
 			return wp_remote_retrieve_body( $response );
