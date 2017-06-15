@@ -27,10 +27,10 @@ class Bullhorn_2_WP {
 
 	static $post_type_job_listing = 'bullhornjoblisting';
 	static $post_type_application = 'bullhornapplication';
-	static $taxonomy_category = 'bullhorn_category';
-	static $taxonomy_state = 'bullhorn_state';
-	static $taxonomy_skills = 'bullhorn_skills';
-	static $taxonomy_certifications = 'bullhorn_certifications';
+	static $taxonomy_listing_category = 'bullhorn_category';
+	static $taxonomy_listing_state = 'bullhorn_state';
+	static $taxonomy_listing_type = null;
+
 
 	static $mode = 'plugin';
 
@@ -39,12 +39,14 @@ class Bullhorn_2_WP {
 		if ( is_plugin_active( 'wp-job-manager/wp-job-manager.php' ) ) {
 			self::$mode = 'wp-job-manager-addon';
 
-			self::$post_type_job_listing = 'job_listing';
-			self::$post_type_application = 'bullhornapplication';
-			self::$taxonomy_state        = 'bullhorn_state';
+			self::$post_type_job_listing  = 'job_listing';
+			self::$post_type_application  = 'bullhornapplication';
+			self::$taxonomy_listing_state = 'bullhorn_state';
+
+			self::$taxonomy_listing_type = 'job_listing_type';
 
 			if ( '1' === get_option( 'job_manager_enable_categories' ) ) {
-				self::$taxonomy_category = 'job_listing_category';
+				self::$taxonomy_listing_category = 'job_listing_category';
 			}
 		}
 

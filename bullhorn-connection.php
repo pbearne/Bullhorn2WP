@@ -83,6 +83,7 @@ class Bullhorn_Connection {
 
 		if ( apply_filters( 'bullhorn_sync_specialties', false ) ) {
 			$response = self::get_specialties_from_bullhorn();
+
 			if ( is_wp_error( $response ) ) {
 				if ( $throw ) {
 					error_log( 'Get specialties failed: ' . serialize( $response->get_error_message() ) );
@@ -513,6 +514,10 @@ class Bullhorn_Connection {
 		wp_set_object_terms( $id, $certifications, Bullhorn_2_WP::$taxonomy_certifications );
 
 		wp_set_object_terms( $id, array( $job->address->state ), Bullhorn_2_WP::$taxonomy_state );
+
+		if( null !== Bullhorn_2_WP::$taxonomy_listing_type ){
+			wp_set_object_terms( $id, array( $job->employmentType ), Bullhorn_2_WP::$taxonomy_listing_type );
+		}
 
 		$create_json_ld = self::create_json_ld( $job, $categories );
 

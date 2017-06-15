@@ -257,7 +257,7 @@ class Bullhorn_Custom_Post_Type {
 	}
 
 
-	function orderby( $query ) {
+	public static function orderby( $query ) {
 		if ( ! is_admin() ) {
 			return;
 		}
