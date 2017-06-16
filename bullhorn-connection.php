@@ -275,7 +275,7 @@ class Bullhorn_Connection {
 		$body = json_decode( $response['body'] );
 		if ( isset( $body->data ) ) {
 			foreach ( $body->data as $category ) {
-				wp_insert_term( $category->label, Bullhorn_2_WP::$taxonomy_category );
+				wp_insert_term( $category->label, Bullhorn_2_WP::$taxonomy_listing_category );
 			}
 		}
 
@@ -305,7 +305,7 @@ class Bullhorn_Connection {
 		if ( isset( $body->data ) ) {
 			foreach ( $body->data as $category ) {
 				$args = array( 'description' => __( 'Synced with Bullhorn', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
-				wp_insert_term( $category->name, Bullhorn_2_WP::$taxonomy_skills, $args );
+				wp_insert_term( $category->name, Bullhorn_2_WP::$taxonomy_listing_skills, $args );
 			}
 		}
 
@@ -480,7 +480,7 @@ class Bullhorn_Connection {
 				$categories[] = $category->name;
 			}
 		}
-		wp_set_object_terms( $id, $categories, Bullhorn_2_WP::$taxonomy_category );
+		wp_set_object_terms( $id, $categories, Bullhorn_2_WP::$taxonomy_listing_category );
 
 		//skills
 		$skills = array();
@@ -504,16 +504,16 @@ class Bullhorn_Connection {
 				$skills[] = $skill->name;
 			}
 		}
-		wp_set_object_terms( $id, $skills, Bullhorn_2_WP::$taxonomy_skills );
+		wp_set_object_terms( $id, $skills, Bullhorn_2_WP::$taxonomy_listing_skills );
 
 		//certifications
 		$certifications = array();
 		if ( $job->certificationList ) {
 			$certifications = $job->certificationList;
 		}
-		wp_set_object_terms( $id, $certifications, Bullhorn_2_WP::$taxonomy_certifications );
+		wp_set_object_terms( $id, $certifications, Bullhorn_2_WP::$taxonomy_listing_certifications );
 
-		wp_set_object_terms( $id, array( $job->address->state ), Bullhorn_2_WP::$taxonomy_state );
+		wp_set_object_terms( $id, array( $job->address->state ), Bullhorn_2_WP::$taxonomy_listing_state );
 
 		if( null !== Bullhorn_2_WP::$taxonomy_listing_type ){
 			wp_set_object_terms( $id, array( $job->employmentType ), Bullhorn_2_WP::$taxonomy_listing_type );
