@@ -6,6 +6,13 @@ class Bullhorn_WP_Job_Manager_Addon {
 
 		add_filter( 'job_manager_locate_template', array( __CLASS__, 'job_manager_locate_template' ), 10, 3 );
 		add_filter( 'job_manager_application_details_bullhorn', array( __CLASS__, 'render_application_form' ) );
+
+		// support for addons
+		if ( is_plugin_active( 'wp-job-manager-locations/wp-job-manager-locations.php' ) ) {
+            require 'wp-job-manager-addon-regions.php';
+            new WP_Job_Manager_Addon_Regions();
+		}
+
 	}
 
 	public static function render_application_form() {
