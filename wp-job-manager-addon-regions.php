@@ -14,23 +14,34 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WP_Job_Manager_Addon_Regions {
 
 	static $job_listing_region_tax = 'job_listing_region';
+	static $last_job_done = 0;
+
 
 	function __construct() {
 		// run after the geogcode has been set
 		add_action( 'job_manager_update_job_data', array( $this, 'set_location_tax' ), 30 );
 		add_action( 'job_manager_job_location_edited', array( $this, 'set_location_tax' ), 30 );
+
+
+		add_action( 'bullhorn_sync_complete', array( $this, 'set_location_tax' ) );
 	}
 
 
 	public static function set_location_tax( $job_id ) {
+
+		if ( self::$last_job_done === $job_id ) {
+
+			return;
+		}
+
 		if ( apply_filters( 'job_manager_geolocation_enabled', true ) ) {
 
 			$meta = get_post_meta( $job_id );
 
-			if ( ! isset( $meta['geolocated'] ) && '1' !== $meta['geolocated'] ) {
-
-				return;
-			}
+//			if ( ! isset( $meta['geolocated'] ) && '1' !== $meta['geolocated'] ) {
+//
+//				return;
+//			}
 
 			$cat_ids        = array();
 			$parent_term_id = 1;
@@ -65,7 +76,7 @@ class WP_Job_Manager_Addon_Regions {
 				} else {
 					$args = array(
 						'parent' => $parent_term_id,
-						'slug'   => $geo . '-' . $slug,
+						'slug'   => $slug . '-' . $geo,
 					);
 
 					$parent_term    = wp_insert_term( $geo, self::$job_listing_region_tax, $args );
@@ -87,7 +98,7 @@ class WP_Job_Manager_Addon_Regions {
 				} else {
 					$args = array(
 						'parent' => $parent_term_id,
-						'slug'   => $geo . '-' . $slug,
+						'slug'   => $slug . '-' . $geo,
 					);
 
 					$parent_term    = wp_insert_term( $geo, self::$job_listing_region_tax, $args );

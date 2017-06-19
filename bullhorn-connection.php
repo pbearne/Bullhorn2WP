@@ -455,6 +455,7 @@ class Bullhorn_Connection {
 			$id = wp_insert_post( $post_args );
 		}
 
+
 		$address = (array) $job->address;
 		unset( $address['countryID'] );
 
@@ -589,6 +590,8 @@ class Bullhorn_Connection {
 		foreach ( $custom_fields as $key => $val ) {
 			update_post_meta( $id, $key, $val );
 		}
+
+		do_action('bullhorn_sync_complete', $id, $job );
 
 		return true;
 	}
