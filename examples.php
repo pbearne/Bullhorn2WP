@@ -10,24 +10,24 @@
 function send_me_form( $candidate, $resume, $local_post_id, $local_post_data ) {
 
 	// get the info from the form
-	$fullname = ( isset( $_POST['name'] ) ) ? trim( sanitize_text_field( wp_unslash( $_POST['name'] ) ) ) : 'n/a';
-	$email = ( isset( $_POST['email'] ) ) ? trim( sanitize_email( wp_unslash( $_POST['email'] ) ) ) : 'n/a';
-	$phone = ( isset( $_POST['phone'] ) ) ? trim( sanitize_text_field( wp_unslash( $_POST['phone'] ) ) ) : 'n/a';
-	$position_id = ( isset( $_POST['position'] ) ) ? absint( wp_unslash( $_POST['position'] ) ) : - 1;
+	$fullname     = ( isset( $_POST['name'] ) ) ? trim( sanitize_text_field( wp_unslash( $_POST['name'] ) ) ) : 'n/a';
+	$email        = ( isset( $_POST['email'] ) ) ? trim( sanitize_email( wp_unslash( $_POST['email'] ) ) ) : 'n/a';
+	$phone        = ( isset( $_POST['phone'] ) ) ? trim( sanitize_text_field( wp_unslash( $_POST['phone'] ) ) ) : 'n/a';
+	$position_id  = ( isset( $_POST['position'] ) ) ? absint( wp_unslash( $_POST['position'] ) ) : - 1;
 	$user_message = ( isset( $_POST['message'] ) ) ? trim( sanitize_text_field( wp_unslash( $_POST['message'] ) ) ) : 'n/a';
-	$title = '';
-	$attachments = array();
+	$title        = '';
+	$attachments  = array();
 
 	if ( 0 < $position_id ) {
 		$args = array(
-			'meta_query' => array(
+			'meta_query'     => array(
 				array(
-					'key' => 'bullhorn_job_id',
-					'value' => $position_id,
+					'key'     => 'bullhorn_job_id',
+					'value'   => $position_id,
 					'compare' => '=',
 				),
 			),
-			'post_type' => 'bullhornjoblisting',
+			'post_type'      => 'bullhornjoblisting',
 			'posts_per_page' => 1,
 		);
 
@@ -71,6 +71,7 @@ add_action( 'wp-bullhorn-cv-upload-complete', 'send_me_form', 10, 4 );
  * change the CV upload error mesage
  *
  * @param $text
+ *
  * @return string
  */
 function ah_parse_resume_failed_text( $text ) {
@@ -80,7 +81,6 @@ function ah_parse_resume_failed_text( $text ) {
 }
 
 add_filter( 'parse_resume_failed_text', 'ah_parse_resume_failed_text' );
-
 
 
 function bullhorn_shortcode_bottom_job( $output, $id ) {
@@ -95,7 +95,37 @@ add_filter( 'bullhorn_shortcode_bottom_job', 'bullhorn_shortcode_bottom_job', 10
 
 function bullhorn_shortcode_base_salary_meta_value( $meta_value ) {
 
-	return 'Payrate: $'. $meta_value;
+	return 'Payrate: $' . $meta_value;
 }
 
 add_filter( 'bullhorn-shortcode-baseSalary-meta-value', 'bullhorn_shortcode_base_salary_meta_value' );
+
+
+function spec_bullhorn_submit_string( $string ) {
+
+	return 'Submit..';
+}
+
+add_filter( 'bullhorn_submit_text', 'spec_bullhorn_submit_string' );
+
+
+function wp_bullhorn_shortcode_elements_to_require( $require ) {
+
+	$require[] = 'job_text';
+	$require[] = 'zip';
+	$require[] = 'phone';
+	$key       = array_search( 'jobs_list', $require );
+	if ( $key !== false ) {
+		unset( $require[ $key ] );
+	}
+
+	$key = array_search( 'cv', $require );
+	if ( $key !== false ) {
+		unset( $require[ $key ] );
+	}
+
+
+	return $require;
+}
+
+add_filter( 'wp_bullhorn_shortcode_elements_to_require', 'wp_bullhorn_shortcode_elements_to_require' );

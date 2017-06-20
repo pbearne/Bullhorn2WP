@@ -179,19 +179,21 @@ class Shortcodes {
                 margin: -4px 6px 0;
             }
 
-            .application_details #bullhorn-resume{
+            .application_details #bullhorn-resume {
                 padding: 20px;
             }
+
             .application_details button.mfp-close,
-            .application_details button.mfp-close:active{
+            .application_details button.mfp-close:active {
                 top: 0;
                 right: 0;
             }
 
-            .application_details .bh-submint{
-                  width: 100%;
-              }
-            .application_details #bullhorn_upload_overlay div.bullhorn_upload_overlay_message{
+            .application_details .bh-submint {
+                width: 100%;
+            }
+
+            .application_details #bullhorn_upload_overlay div.bullhorn_upload_overlay_message {
                 margin-top: -75%;
                 margin-left: 4%;
                 margin-right: 4%;
@@ -209,32 +211,48 @@ class Shortcodes {
 			<?php
 			do_action( 'wp_bullhorn_render_cv_form_top', $element_to_show, $settings );
 
-			$element_to_show = apply_filters( 'wp_bullhorn_shortcode_elements_to_show', $element_to_show );
+			$element_to_show    = apply_filters( 'wp_bullhorn_shortcode_elements_to_show', $element_to_show );
+			$element_to_require = apply_filters( 'wp_bullhorn_shortcode_elements_to_require', array(
+				'name',
+				'email',
+				'cv',
+				'jobs_list',
+			) );
 
-			$position_added   = false;
+			$position_added = false;
+
+			$require_html     = apply_filters( 'wp_bullhorn_shortcode_require_html', '<span class="gfield_required"> *</span>' );
 
 			foreach ( $element_to_show as $index => $element ) {
 
 				switch ( $element ) {
 					case 'name':
 						?>
-                        <label for="name"><?php _e( 'Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?> <span
-                                    class="gfield_required"> *</span></label>
+                        <label for="name"><?php _e( 'Name', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
+							if ( in_array( $element, $element_to_require, true ) ) {
+								echo wp_kses_post( $require_html );
+							}
+							?> </label>
                         <input id="name" name="name" type="text"/>
 
 						<?php
 						break;
 					case 'email':
 						?>
-                        <label for="email"><?php _e( 'Email', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?><span
-                                    class="gfield_required"> *</span></label>
+                        <label for="email"><?php _e( 'Email', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
+							if ( in_array( $element, $element_to_require, true ) ) {
+								echo wp_kses_post( $require_html );
+							} ?></label>
                         <input id="email" name="email" type="text"/>
 
 						<?php
 						break;
 					case 'phone':
 						?>
-                        <label for="phone"><?php _e( 'Phone', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?></label>
+                        <label for="phone"><?php _e( 'Phone', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
+							if ( in_array( $element, $element_to_require, true ) ) {
+								echo wp_kses_post( $require_html );
+							} ?></label>
                         <input id="phone" name="phone" type="text"/>
 
 						<?php
@@ -244,31 +262,46 @@ class Shortcodes {
 							switch ( $option ) {
 								case 'address1':
 									?>
-                                    <label for="address1"><?php _e( 'Address', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?></label>
+                                    <label for="address1"><?php _e( 'Address', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
+										if ( in_array( $option, $element_to_require, true ) ) {
+											echo wp_kses_post( $require_html );
+										} ?></label>
                                     <input id="address1" name="address1" type="text"/>
 									<?php
 									break;
 								case 'address2':
 									?>
-                                    <label for="address2"><?php _e( 'Address Cont', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?></label>
+                                    <label for="address2"><?php _e( 'Address Cont', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
+										if ( in_array( $option, $element_to_require, true ) ) {
+											echo wp_kses_post( $require_html );
+										} ?></label>
                                     <input id="address2" name="address2" type="text"/>
 									<?php
 									break;
 								case 'city':
 									?>
-                                    <label for="city"><?php _e( 'City', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?></label>
+                                    <label for="city"><?php _e( 'City', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
+										if ( in_array( $option, $element_to_require, true ) ) {
+											echo wp_kses_post( $require_html );
+										} ?></label>
                                     <input id="city" name="city" type="text"/>
 									<?php
 									break;
 								case  'state':
 									?>
-                                    <label for="state"><?php _e( 'State/Province', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?></label>
+                                    <label for="state"><?php _e( 'State/Province', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
+										if ( in_array( $option, $element_to_require, true ) ) {
+											echo wp_kses_post( $require_html );
+										} ?></label>
                                     <input id="state" name="state" type="text"/>
 									<?php
 									break;
 								case 'zip':
 									?>
-                                    <label for="zip"><?php _e( 'Zip/Postal Code', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?></label>
+                                    <label for="zip"><?php _e( 'Zip/Postal Code', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
+										if ( in_array( $option, $element_to_require, true ) ) {
+											echo wp_kses_post( $require_html );
+										} ?></label>
                                     <input id="zip" name="zip" type="text"/>
 									<?php
 									break;
@@ -286,8 +319,11 @@ class Shortcodes {
 						$jobs = get_posts( $args );
 
 						if ( ! empty( $jobs ) ) { ?>
-                            <label for="position"><?php esc_html_e( 'Position applying for', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?>
-                                <span class="gfield_required"> *</span></label>
+                            <label for="position"><?php esc_html_e( 'Position applying for', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
+								if ( in_array( $element, $element_to_require, true ) ) {
+									echo wp_kses_post( $require_html );
+								} ?>
+                            </label>
                             <select id="position" name="position">
                                 <option value="-1"><?php esc_html_e( 'Select a Job to apply for', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?> </option>
 								<?php
@@ -306,7 +342,10 @@ class Shortcodes {
 						break;
 					case 'job_text':
 						?>
-                        <label for="position"><?php _e( 'Position', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?></label>
+                        <label for="position"><?php _e( 'Position', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
+							if ( in_array( $element, $element_to_require, true ) ) {
+								echo wp_kses_post( $require_html );
+							} ?></label>
                         <input id="position" name="position" type="text"/>
 
 						<?php
@@ -314,7 +353,10 @@ class Shortcodes {
 						break;
 					case 'message':
 						?>
-                        <label for="message"><?php _e( '<br/>Message<br/>', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ?></label>
+                        <label for="message"><?php _e( '<br/>Message<br/>', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
+							if ( in_array( $element, $element_to_require, true ) ) {
+								echo wp_kses_post( $require_html );
+							} ?></label>
                         <textarea name="message" cols="40" rows="10" id="message"></textarea>
 
 						<?php
@@ -323,8 +365,11 @@ class Shortcodes {
 						do_action( 'wp_bullhorn_render_cv_form_pre_cv', $element_to_show, $settings );
 
 						?>
-                        <label for="fileToUpload"><?php esc_html_e( 'Your Resume', 'bh-staffing-job-listing-and-cv-upload-for-wp' ); ?>
-                            <span class="gfield_required"> *</span></label>
+                        <label for="fileToUpload"><?php esc_html_e( 'Your Resume', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
+							if ( in_array( $element, $element_to_require, true ) ) {
+								echo wp_kses_post( $require_html );
+							} ?>
+                        </label>
                         <span class="<?php echo apply_filters( 'wp_bullhorn_render_cv_form_file_input_styles', 'file-to-upload-wrap' ); ?>">
                             <input id="fileToUpload" name="resume" type="file"
                                    accept=".pdf,.docx,.doc,.text,.rft,.html"/>
@@ -354,9 +399,9 @@ class Shortcodes {
 			wp_nonce_field( 'bullhorn_cv_form', 'bullhorn_cv_form' );
 			do_action( 'wp_bullhorn_render_cv_form_bottom', $element_to_show, $settings );
 
-            printf( '<input name="submit" type="submit" value="%s" class="bh-submint"/>', apply_filters( 'bullhorn_submit_text', __( 'Upload Resume',  'bh-staffing-job-listing-and-cv-upload-for-wp' ) ) );
+			printf( '<input name="submit" type="submit" value="%s" class="bh-submint"/>', apply_filters( 'bullhorn_submit_text', __( 'Upload Resume', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ) );
 
-            do_action( 'wp_bullhorn_render_cv_form_close', $element_to_show, $settings ); ?>
+			do_action( 'wp_bullhorn_render_cv_form_close', $element_to_show, $settings ); ?>
             <div id="bullhorn_upload_overlay">
                 <div class="bullhorn_upload_overlay_background"></div>
 				<?php
@@ -377,49 +422,86 @@ class Shortcodes {
         <script type="application/javascript">
 
             jQuery(document).ready(function () {
-                error_color = <?php echo esc_attr( apply_filters( 'bullhorn_js_error_color', '#FFDFE0') ); ?>;
+                error_color = '<?php echo esc_attr( apply_filters( 'bullhorn_js_error_color', '#FFDFE0' ) ); ?>';
+
                 defaut_file_color = jQuery('#fileToUpload').css('background-color'); //'#fff';
                 defaut_color = jQuery('#email').css('background-color'); //'#d0eafa';
                 jQuery('#bullhorn-resume').on('submit', function () {
 
+					<?php
 
-                    var $email = jQuery('#email'),
-                        $no_error = true,
-                        $name,
-                        $fileToUpload;
+					foreach ( $element_to_require as $input ) {
 
-                    if (( 3 > $email.val().length ) || !isValidEmailAddress($email.val())) {
-                        $email.css('background-color', error_color);
-                        $no_error = false;
-                    } else {
-                        $email.css('background-color', defaut_color);
-                    }
-                    $name = jQuery('#name');
-                    if (3 > $name.val().length) {
-                        $name.css('background-color', error_color);
-                        $no_error = false;
-                    } else {
-                        $name.css('background-color', defaut_color);
-                    }
-                    $fileToUpload = jQuery('#fileToUpload');
-                    if (3 > $fileToUpload.val().length) {
-                        $fileToUpload.css('background-color', error_color);
-                        $no_error = false;
-                    } else {
-                        $fileToUpload.css('background-color', defaut_file_color);
-                    }
+                        switch ( $input ) {
+                        case 'email':
+                        ?>
+                        var $email = jQuery('#email'),
+                            $no_error = true,
+                            $name,
+                            $fileToUpload;
 
-                    if (1 === jQuery('select#position').length) {
-
-                        $position = jQuery('select#position');
-                        if (0 > $position.val()) {
-                            $position.css('background-color', error_color);
+                        if (( 3 > $email.val().length ) || !isValidEmailAddress($email.val())) {
+                            $email.css('background-color', error_color);
                             $no_error = false;
                         } else {
-                            $position.css('background-color', defaut_color);
+                            $email.css('background-color', defaut_color);
                         }
-                    }
+                        <?php
+                        break;
+                        case 'jobs_list':
+                        ?>
+                        if (1 === jQuery('select#position').length) {
 
+                            $position = jQuery('select#position');
+                            if (0 > $position.val()) {
+                                $position.css('background-color', error_color);
+                                $no_error = false;
+                            } else {
+                                $position.css('background-color', defaut_color);
+                            }
+                        }
+                        <?php
+                        break;
+                        case 'job_text':
+                        ?>
+                            $field = jQuery('#position');
+                            if (3 > $field.val().length) {
+                                $field.css('background-color', error_color);
+                                $no_error = false;
+                            } else {
+                                $field.css('background-color', defaut_color);
+                            }
+                        <?php
+                        break;
+                        case 'cv':
+                        ?>
+                            $fileToUpload = jQuery('#fileToUpload');
+                            if (3 > $fileToUpload.val().length) {
+                                $fileToUpload.css('background-color', error_color);
+                                $no_error = false;
+                            } else {
+                                $fileToUpload.css('background-color', defaut_file_color);
+                            }
+                        <?php
+                        break;
+                        default:
+                        ?>
+                            $field = jQuery('#<?php echo $input ?>');
+                            if (3 > $field.val().length) {
+                                $field.css('background-color', error_color);
+                                $no_error = false;
+                            } else {
+                                $field.css('background-color', defaut_color);
+                            }
+                        <?php
+                        break;
+                        } // switch end.
+                    } // foreach end.
+					?>
+
+
+
+					<?php do_action( 'bullhorn_js_error' ); ?>
                     //	e.preventDefault();
                     if (true === $no_error) {
                         jQuery('#bullhorn_upload_overlay').show();
@@ -516,6 +598,7 @@ class Shortcodes {
 		}
 
 		if ( isset( $_GET[\Bullhorn_2_WP::$taxonomy_listing_category] ) ) {
+
 			$args['tax_query'][] = array(
 				'taxonomy' => \Bullhorn_2_WP::$taxonomy_listing_category,
 				'field'    => 'slug',
