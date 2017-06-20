@@ -35,7 +35,7 @@ class WP_Job_Manager_Addon_Regions {
 
 			if (  isset( $meta['Country'] ) || isset( $meta['geolocation_country_long'] ) ) {
 				$geo  = isset( $meta['Country'] ) ? $meta['Country'][0] : $meta['geolocation_country_long'][0];
-				$term = self::get_region_term_by_name_and_parent( $geo, null );
+				$term = self::get_region_term_by_name_and_parent( $geo, 0 );
 
 				if ( false !== $term ) {
 					$cat_ids[]      = $term->term_id;
@@ -43,7 +43,7 @@ class WP_Job_Manager_Addon_Regions {
 					$slug           = $term->slug;
 				} else {
 					$parent_term    = wp_insert_term( $geo, self::$job_listing_region_tax );
-					$term           = self::get_region_term_by_name_and_parent( $geo, null );
+					$term           = self::get_region_term_by_name_and_parent( $geo, 0 );
 					$slug           = $term->slug;
 					$parent_term_id = $parent_term['term_id'];
 
@@ -108,17 +108,10 @@ class WP_Job_Manager_Addon_Regions {
 			'name' => $name,
 			'taxonomy' => self::$job_listing_region_tax,
 			'hide_empty' => false,
+			'parent' => $parent_id,
 		);
 
-		if ( $parent_id ) {
-			$args['parent'] = $parent_id;
-		} else {
-			$args['childless'] = true;
-		}
-
 		$terms = get_terms( $args );
-
-		//remove childless
 
 		if ( empty( $terms ) ) {
 			return false;
