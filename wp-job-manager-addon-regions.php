@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Created by IntelliJ IDEA.
- * User: pbear
- * Date: 2017-06-16
- * Time: 8:46 AM
- */
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -22,7 +15,6 @@ class WP_Job_Manager_Addon_Regions {
 		add_action( 'job_manager_update_job_data', array( $this, 'set_location_tax' ), 30 );
 		add_action( 'job_manager_job_location_edited', array( $this, 'set_location_tax' ), 30 );
 
-
 		add_action( 'bullhorn_sync_complete', array( $this, 'set_location_tax' ) );
 	}
 
@@ -30,7 +22,6 @@ class WP_Job_Manager_Addon_Regions {
 	public static function set_location_tax( $job_id ) {
 
 		if ( self::$last_job_done === $job_id ) {
-
 			return;
 		}
 
@@ -38,18 +29,13 @@ class WP_Job_Manager_Addon_Regions {
 
 			$meta = get_post_meta( $job_id );
 
-//			if ( ! isset( $meta['geolocated'] ) && '1' !== $meta['geolocated'] ) {
-//
-//				return;
-//			}
-
 			$cat_ids        = array();
 			$parent_term_id = 1;
 			$slug           = '';
 
-			if ( isset( $meta['geolocation_country_long'] ) ) {
-				$geo  = $meta['geolocation_country_long'][0];
-				$term = get_term_by( 'name', $geo, self::$job_listing_region_tax );
+			if (  isset( $meta['Country'] ) || isset( $meta['geolocation_country_long'] ) ) {
+				$geo  = isset( $meta['Country'] ) ? $meta['Country'][0] : $meta['geolocation_country_long'][0];
+				$term = self::get_region_term_by_name_and_parent( $geo, null );
 
 				if ( false !== $term ) {
 					$cat_ids[]      = $term->term_id;
@@ -57,17 +43,17 @@ class WP_Job_Manager_Addon_Regions {
 					$slug           = $term->slug;
 				} else {
 					$parent_term    = wp_insert_term( $geo, self::$job_listing_region_tax );
-					$parent_term_id = $parent_term['term_id'];
-					$term           = get_term_by( 'id', $parent_term_id, self::$job_listing_region_tax );
+					$term           = self::get_region_term_by_name_and_parent( $geo, null );
 					$slug           = $term->slug;
+					$parent_term_id = $parent_term['term_id'];
 
 					$cat_ids[] = $parent_term_id;
 				}
 			}
 
-			if ( isset( $meta['geolocation_state_long'] ) ) {
-				$geo  = $meta['geolocation_state_long'][0];
-				$term = get_term_by( 'name', $geo, self::$job_listing_region_tax );
+			if ( isset( $meta['state'] ) || isset( $meta['geolocation_state_long'] ) ) {
+				$geo  = isset( $meta['state'] ) ? $meta['state'][0] : $meta['geolocation_state_long'][0];
+				$term = self::get_region_term_by_name_and_parent( $geo, $parent_term_id );
 
 				if ( false !== $term ) {
 					$cat_ids[]      = $term->term_id;
@@ -80,17 +66,17 @@ class WP_Job_Manager_Addon_Regions {
 					);
 
 					$parent_term    = wp_insert_term( $geo, self::$job_listing_region_tax, $args );
-					$parent_term_id = $parent_term['term_id'];
-					$term           = get_term_by( 'id', $parent_term_id, self::$job_listing_region_tax );
+					$term           = self::get_region_term_by_name_and_parent( $geo, $parent_term_id );
 					$slug           = $term->slug;
+					$parent_term_id = $parent_term['term_id'];
 
 					$cat_ids[] = $parent_term_id;
 				}
 			}
 
-			if ( isset( $meta['geolocation_city'] ) ) {
-				$geo  = $meta['geolocation_city'][0];
-				$term = get_term_by( 'name', $geo, self::$job_listing_region_tax );
+			if ( isset( $meta['city'] ) || isset( $meta['geolocation_city'] ) ) {
+				$geo  = isset( $meta['city'] ) ? $meta['city'][0] : $meta['geolocation_city'][0];
+				$term = self::get_region_term_by_name_and_parent( $geo, $parent_term_id );
 
 				if ( false !== $term ) {
 					$cat_ids[]      = $term->term_id;
@@ -113,7 +99,32 @@ class WP_Job_Manager_Addon_Regions {
 			$cat_ids = array_unique( $cat_ids );
 
 			wp_set_object_terms( $job_id, $cat_ids, self::$job_listing_region_tax );
-		} // End if().
+		}
+	}
+
+	public static function get_region_term_by_name_and_parent( $name, $parent_id ) {
+
+		$args = array(
+			'name' => $name,
+			'taxonomy' => self::$job_listing_region_tax,
+			'hide_empty' => false,
+		);
+
+		if ( $parent_id ) {
+			$args['parent'] = $parent_id;
+		} else {
+			$args['childless'] = true;
+		}
+
+		$terms = get_terms( $args );
+
+		//remove childless
+
+		if ( empty( $terms ) ) {
+			return false;
+		} else {
+			return $terms[0];
+		}
 	}
 
 
