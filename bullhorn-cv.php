@@ -107,7 +107,9 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 					} else {
 						// Get Resume
-						$resume = self::parseResume();
+						$resume                     = new stdClass();
+						$resume->candidate          = new stdClass();
+						$resume->skillList          = array();
 					}
 
 
@@ -181,15 +183,16 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 						// link to job
 						self::link_candidate_to_job( $candidate );
 
-						// Attach resume file to candidate
-						error_log( 'wp_upload_file_request: ' . self::wp_upload_file_request( $candidate, $file_data ) );
+						if ( $file_data ) {
+							// Attach resume file to candidate
+							error_log( 'wp_upload_file_request: ' . self::wp_upload_file_request( $candidate, $file_data ) );
+						}
 
 						if ( apply_filters( 'bullhorn_delete_local_copy', false ) ) {
 
 							wp_delete_post( $local_post_id );
 							//TODO: remove and file saved
 						} else {
-
 							update_post_meta( $local_post_id, 'bh_candidate_data', $candidate );
 							update_post_meta( $local_post_id, 'bullhorn_synced', 'true' );
 						}
@@ -227,16 +230,14 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	public static function save_application() {
 
 		$ext = $format = '';
+
 		// get cv file
-		if ( ! isset( $_FILES['resume'] ) ) {
+		$cv_required = self::is_cv_required();
+		$cv_uploaded = self::is_cv_uploaded();
+		if ( $cv_required && ! $cv_uploaded ) {
 
 			self::throwJsonError( 500, 'No resume file found.' );
 		}
-
-//		list( $ext, $format ) = self::get_filetype();
-
-		// http://gerhardpotgieter.com/2014/07/30/uploading-files-with-wp_remote_post-or-wp_remote_request/
-		$local_file = $_FILES['resume']['tmp_name'];
 
 		$name = '--';
 		if ( isset( $_REQUEST['name'] ) && ! empty( $_REQUEST['name'] ) ) {
@@ -256,27 +257,30 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		}
 
 
-		$uploads   = wp_upload_dir();
-		$cv_folder = trailingslashit( trailingslashit( $uploads['basedir'] ) . 'cv' );
-		if ( ! file_exists( $cv_folder ) ) {
-			mkdir( $cv_folder );
+		if ( $cv_uploaded ) {
+			$local_file = $_FILES['resume']['tmp_name'];
+
+			$uploads   = wp_upload_dir();
+			$cv_folder = trailingslashit( trailingslashit( $uploads['basedir'] ) . 'cv' );
+			if ( ! file_exists( $cv_folder ) ) {
+				mkdir( $cv_folder );
+			}
+
+			$new_filename = $_FILES['resume']['name'];
+			$posfix       = 1;
+			while ( file_exists( $cv_folder . $new_filename ) ) {
+				$new_filename = str_replace( '.', '-' . $posfix . '.', $_FILES['resume']['name'] );
+				++ $posfix;
+			}
+
+			move_uploaded_file( $local_file, $cv_folder . $new_filename );
+
+			$cv_url = trailingslashit( $uploads['baseurl'] ) . 'cv/' . $new_filename;
 		}
-
-		$new_filename = $_FILES['resume']['name'];
-		$posfix       = 1;
-		while ( file_exists( $cv_folder . $new_filename ) ) {
-			$new_filename = str_replace( '.', '-' . $posfix . '.', $_FILES['resume']['name'] );
-			++ $posfix;
-		}
-
-		move_uploaded_file( $local_file, $cv_folder . $new_filename );
-
-		$cv_url = trailingslashit( $uploads['baseurl'] ) . 'cv/' . $new_filename;
-
 
 		$post_title = $name . ' ' . __( 'applied for', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . ' ' . $job_title;
 
-		$posiable_fields = array(
+		$possible_fields = array(
 			'name',
 			'email',
 			'phone',
@@ -287,12 +291,12 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			'state',
 			'zip',
 			'position',
-			'post'
+			'post',
 		);
 
 		$data         = array();
 		$post_content = '';
-		foreach ( $posiable_fields as $key ) {
+		foreach ( $possible_fields as $key ) {
 			$data[ $key ] = ( isset( $_REQUEST[ $key ] ) ) ? sanitize_text_field( $_REQUEST[ $key ] ) : '';
 			$post_content .= $key . ': ' . $data[ $key ] . PHP_EOL;
 		}
@@ -345,10 +349,8 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			}
 		} else {
 			// create data object to create Candidate
-
 			$resume                     = new stdClass();
 			$resume->candidate          = new stdClass();
-			$resume->candidate->address = array();
 			$resume->skillList          = array();
 		}
 
@@ -1507,4 +1509,25 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		return apply_filters( 'bullhorn_add_data_to_canditate_data', $resume, $profile_data );
 	}
+
+	private static function is_cv_required() {
+
+		$element_to_require = apply_filters( 'wp_bullhorn_shortcode_elements_to_require', array(
+			'name',
+			'email',
+			'cv',
+			'jobs_list',
+		) );
+
+		$cv_required = in_array('cv', $element_to_require);
+
+		return $cv_required;
+	}
+
+	private static function is_cv_uploaded() {
+
+		return ( isset( $_FILES['resume']['size'] ) ) && ( 0 !== $_FILES['resume']['size'] );
+	}
+
+
 }
