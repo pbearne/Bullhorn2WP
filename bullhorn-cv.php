@@ -111,7 +111,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 					}
 
 
-					if ( false === $resume ) {
+					if ( false === $resume && ! isset( $_POST['name'] ) ) {
 						// Redirect
 						$permalink = add_query_arg( array(
 							'bh_applied' => false,
@@ -693,7 +693,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		$resume->candidate->comments = '';
 
-		$position_prex = apply_filters( 'bullhorn_position_prex', __( 'Position applied for: ', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
+		$position_prex = apply_filters( 'bullhorn_position_prefix', __( 'Position applied for: ', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
 		if ( isset( $profile_data['position'] ) && null !== $profile_data['position'] ) {
 			if ( is_numeric( $profile_data['position'] ) ) {
 				$position_text = self::get_post_by_bullhorn_id( absint( $profile_data['position'] ) )->post_title;
@@ -711,7 +711,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			$resume->candidate->comments .= esc_html( $position_prex . $position_text . PHP_EOL );
 		}
 
-		$message_prex = apply_filters( 'bullhorn_message_prex', __( 'Message: ', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
+		$message_prex = apply_filters( 'bullhorn_message_prefix', __( 'Message: ', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
 		if ( isset( $profile_data['message'] ) ) {
 
 			$resume->candidate->comments .= esc_html( PHP_EOL . $message_prex . $profile_data['message'] );
