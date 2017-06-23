@@ -246,16 +246,18 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 		$job_title = '--';
 		$job_id    = null;
-		if ( isset( $_REQUEST['post'] ) && ! empty( $_REQUEST['post'] ) ) {
+		if ( isset( $_REQUEST['position'] ) && ! empty( $_REQUEST['position'] ) ) {
+			if ( is_numeric( $_REQUEST['position'] ) ) {
+				$job_post = self::get_post_by_bullhorn_id( absint( $_REQUEST['position'] ) );
+				$job_title = $job_post->post_title . ' (' . absint( $_REQUEST['position'] ) . ')';
+				$job_id    = get_post_meta( $job_post->ID, 'bullhorn_job_id', true );
+			} else {
+				$job_title = sanitize_title( $_REQUEST['position'] );
+			}
+		} elseif ( isset( $_REQUEST['post'] ) && ! empty( $_REQUEST['post'] ) ) {
 			$job_title = get_the_title( absint( $_REQUEST['post'] ) );
 			$job_id    = get_post_meta( absint( $_REQUEST['post'] ), 'bullhorn_job_id', true );
-		} elseif ( isset( $_REQUEST['position'] ) && ! empty( $_REQUEST['position'] ) ) {
-
-			$job_post = self::get_post_by_bullhorn_id( absint( $_REQUEST['position'] ) );
-			$job_title = $job_post->post_title . ' (' . absint( $_REQUEST['position'] ) . ')';
-			$job_id    = get_post_meta( $job_post->ID, 'bullhorn_job_id', true );
 		}
-
 
 		if ( $cv_uploaded ) {
 			$local_file = $_FILES['resume']['tmp_name'];
@@ -278,7 +280,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			$cv_url = trailingslashit( $uploads['baseurl'] ) . 'cv/' . $new_filename;
 		}
 
-		$post_title = $name . ' ' . __( 'applied for', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . ' ' . $job_title;
+		$post_title = $name . ' ' . __( 'applied for:', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . ' ' . $job_title;
 
 		$possible_fields = array(
 			'name',
