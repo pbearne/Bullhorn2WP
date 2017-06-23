@@ -670,6 +670,20 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			$resume->candidate->name = esc_attr( $_POST['name'] );
 		}
 
+		// make sure we also set the first and last names
+		$name_bits = explode( ' ', $resume->candidate->name, 2 );
+		if ( ! isset( $resume->candidate->firstName ) ) {
+			if ( isset( $name_bits[0] ) ) {
+				$resume->candidate->firstName = $name_bits[0];
+			}
+		}
+
+		if ( ! isset( $resume->candidate->lastName ) ) {
+			if ( isset( $name_bits[1] ) ) {
+				$resume->candidate->lastName = $name_bits[1];
+			}
+		}
+
 		$address_fields = array( 'address1', 'address2', 'city', 'state', 'zip' );
 		if ( isset( $profile_data['address'] ) ) {
 			$cv_address = $resume->candidate->address;
@@ -735,7 +749,10 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 			), self::$url . 'entity/Candidate'
 		);
 
-		$response = wp_remote_get( $url, array( 'body' => json_encode( $resume->candidate ), 'method' => 'PUT' ) );
+		$response = wp_remote_get( $url, array(
+			'body' => json_encode( $resume->candidate ),
+			'method' => 'PUT',
+		) );
 
 		$safety_count = 0;
 		while ( 500 === $response['response']['code'] && 5 > $safety_count ) {
