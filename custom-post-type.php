@@ -412,7 +412,7 @@ class Bullhorn_Custom_Post_Type {
 	 *
 	 * @param $query WP_QUERY
 	 */
-	function bullhorn_sort_results( $query ) {
+	public static function bullhorn_sort_results( $query ) {
 		if ( $query->is_post_type_archive( Bullhorn_2_WP::$post_type_job_listing ) ) {
 			$settings = (array) get_option( 'bullhorn_settings' );
 			if ( isset( $settings['listings_sort'] ) and ! empty( $settings['listings_sort'] ) ) {

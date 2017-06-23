@@ -371,7 +371,10 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		$job_id = null;
 
 		// link to job
-		self::link_candidate_to_job( $candidate, $profile_data['job_id'] );
+		if ( isset( $profile_data['job_id'] ) ) {
+
+			self::link_candidate_to_job( $candidate, $profile_data['job_id'] );
+		}
 
 
 		// Attach resume file to candidate
