@@ -423,6 +423,7 @@ class Shortcodes {
 
             jQuery(document).ready(function () {
                 error_color = '<?php echo esc_attr( apply_filters( 'bullhorn_js_error_color', '#FFDFE0' ) ); ?>';
+
                 defaut_file_color = jQuery('#fileToUpload').css('background-color'); //'#fff';
                 defaut_color = jQuery('#email').css('background-color'); //'#d0eafa';
                 jQuery('#bullhorn-resume').on('submit', function () {
@@ -574,33 +575,34 @@ class Shortcodes {
 
 		if ( $state ) {
 			$args['tax_query'][] = array(
-				'taxonomy' => \Bullhorn_2_WP::$taxonomy_state,
+				'taxonomy' => \Bullhorn_2_WP::$taxonomy_listing_state,
 				'field'    => 'slug',
 				'terms'    => sanitize_title( $state ),
 			);
 		}
 
-		if ( isset( $_GET[ \Bullhorn_2_WP::$taxonomy_state ] ) ) {
+		if ( isset( $_GET[ \Bullhorn_2_WP::$taxonomy_listing_state ] ) ) {
 			$args['tax_query'][] = array(
-				'taxonomy' => \Bullhorn_2_WP::$taxonomy_state,
+				'taxonomy' => \Bullhorn_2_WP::$taxonomy_listing_state,
 				'field'    => 'slug',
-				'terms'    => sanitize_key( $_GET[ \Bullhorn_2_WP::$taxonomy_state ] ),
+				'terms'    => sanitize_key( $_GET[ \Bullhorn_2_WP::$taxonomy_listing_state ] ),
 			);
 		}
 
 		if ( $type ) {
 			$args['tax_query'][] = array(
-				'taxonomy' => \Bullhorn_2_WP::$taxonomy_category,
+				'taxonomy' => \Bullhorn_2_WP::$taxonomy_listing_category,
 				'field'    => 'slug',
 				'terms'    => sanitize_title( $type ),
 			);
 		}
 
-		if ( isset( $_GET[ \Bullhorn_2_WP::$taxonomy_category ] ) ) {
+		if ( isset( $_GET[\Bullhorn_2_WP::$taxonomy_listing_category] ) ) {
+
 			$args['tax_query'][] = array(
-				'taxonomy' => \Bullhorn_2_WP::$taxonomy_category,
+				'taxonomy' => \Bullhorn_2_WP::$taxonomy_listing_category,
 				'field'    => 'slug',
-				'terms'    => sanitize_key( $_GET[ \Bullhorn_2_WP::$taxonomy_category ] ),
+				'terms'    => sanitize_key( $_GET[\Bullhorn_2_WP::$taxonomy_listing_category] ),
 			);
 		}
 
@@ -729,17 +731,17 @@ class Shortcodes {
 		$output .= '<option value="">Filter by category...</option>';
 
 		$categories = get_categories( array(
-			'taxonomy'   => \Bullhorn_2_WP::$taxonomy_category,
+			'taxonomy'   => \Bullhorn_2_WP::$taxonomy_listing_category,
 			'hide_empty' => 0,
 		) );
 		foreach ( $categories as $category ) {
-			$params = array( \Bullhorn_2_WP::$taxonomy_category => $category->slug );
-			if ( isset( $_GET[ \Bullhorn_2_WP::$taxonomy_state ] ) ) {
-				$params[ \Bullhorn_2_WP::$taxonomy_state ] = $_GET[ \Bullhorn_2_WP::$taxonomy_state ];
+			$params = array( \Bullhorn_2_WP::$taxonomy_listing_category => $category->slug );
+			if ( isset( $_GET[ \Bullhorn_2_WP::$taxonomy_listing_state ] ) ) {
+				$params[ \Bullhorn_2_WP::$taxonomy_listing_state ] = $_GET[ \Bullhorn_2_WP::$taxonomy_listing_state ];
 			}
 
 			$selected = null;
-			if ( isset( $_GET[ \Bullhorn_2_WP::$taxonomy_category ] ) and $_GET[ \Bullhorn_2_WP::$taxonomy_category ] === $category->slug ) {
+			if ( isset( $_GET[ \Bullhorn_2_WP::$taxonomy_listing_category ] ) and $_GET[ \Bullhorn_2_WP::$taxonomy_listing_category ] === $category->slug ) {
 				$selected = 'selected="selected"';
 			}
 
@@ -767,17 +769,17 @@ class Shortcodes {
 		$output .= '<option value="">Filter by state...</option>';
 
 		$states = get_categories( array(
-			'taxonomy'   => \Bullhorn_2_WP::$taxonomy_state,
+			'taxonomy'   => \Bullhorn_2_WP::$taxonomy_listing_state,
 			'hide_empty' => 0,
 		) );
 		foreach ( $states as $state ) {
-			$params = array( \Bullhorn_2_WP::$taxonomy_state => $state->slug );
-			if ( isset( $_GET[ \Bullhorn_2_WP::$taxonomy_category ] ) ) {
-				$params[ \Bullhorn_2_WP::$taxonomy_category ] = $_GET[ \Bullhorn_2_WP::$taxonomy_category ];
+			$params = array( \Bullhorn_2_WP::$taxonomy_listing_state => $state->slug );
+			if ( isset( $_GET[ \Bullhorn_2_WP::$taxonomy_listing_category ] ) ) {
+				$params[ \Bullhorn_2_WP::$taxonomy_listing_category ] = $_GET[ \Bullhorn_2_WP::$taxonomy_listing_category ];
 			}
 
 			$selected = null;
-			if ( isset( $_GET[ \Bullhorn_2_WP::$taxonomy_state ] ) and $_GET[ \Bullhorn_2_WP::$taxonomy_state ] === $state->slug ) {
+			if ( isset( $_GET[ \Bullhorn_2_WP::$taxonomy_listing_state ] ) and $_GET[ \Bullhorn_2_WP::$taxonomy_listing_state ] === $state->slug ) {
 				$selected = 'selected="selected"';
 			}
 

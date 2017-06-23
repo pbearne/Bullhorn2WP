@@ -97,6 +97,9 @@ function bullhorn_application_sync( $local_post_id = null ) {
 
 		Bullhorn_Extended_Connection::add_bullhorn_candidate( $application_post_data, $file_data );
 
+	} else {
+		$application_post_data['application_post_id'] = $local_post_id;
+		Bullhorn_Extended_Connection::add_bullhorn_candidate( $application_post_data, null );
 	}
 }
 
