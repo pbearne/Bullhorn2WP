@@ -380,6 +380,11 @@ class Shortcodes {
 						do_action( 'wp_bullhorn_render_cv_form_post_cv', $element_to_show, $settings );
 						break;
 
+                    default:
+
+                        do_action( 'wp_bullhorn_render_cv_form_default_input', $element );
+                        break;
+
 
 				}
 			}
