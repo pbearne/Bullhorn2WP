@@ -188,7 +188,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 							error_log( 'wp_upload_file_request: ' . self::wp_upload_file_request( $candidate, $file_data ) );
 						}
 
-						if ( apply_filters( 'bullhorn_delete_local_copy', false ) ) {
+						if ( apply_filters( 'wp_bullhorn_delete_local_copy', false ) ) {
 
 							wp_delete_post( $local_post_id );
 							//TODO: remove and file saved
@@ -197,7 +197,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 							update_post_meta( $local_post_id, 'bullhorn_synced', 'true' );
 						}
 
-						do_action( 'wp-bullhorn-cv-upload-complete', $candidate, $resume, $local_post_id, $local_post_data );
+						do_action( 'wp_bullhorn_cv_upload_complete', $candidate, $resume, $local_post_id, $local_post_data );
 
 						// Redirect
 						$permalink = add_query_arg( array(
@@ -1005,12 +1005,13 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 	public static function attach_note( $candidate, $local_post_data ) {
 
 		if ( ! isset( $local_post_data['message'] ) ) {
+
 			return false;
 		}
 		// API authentication
 		self::api_auth();
 
-		$data['comments']         = $local_post_data['message'];
+		$data['comments']         = apply_filters( 'wp_bullhorn_note_content', $local_post_data['message'], $candidate );
 		$data['personReference']  = array( 'id' => $candidate->changedEntityId );
 
 		// Create the url && variables array
