@@ -354,7 +354,7 @@ class Bullhorn_Custom_Post_Type {
 					$content .= sprintf( '<h4>%s</h4><br />', apply_filters( 'wp-bullhorn_apply_now_text', __( 'Apply for this Now', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) ) );
 
 					$settings = (array) get_option( 'bullhorn_settings' );
-					$inputs   = ( isset( $settings['default_shortcode'] ) ) ? $settings['default_shortcode'] : array( 'name', 'email', 'phone' );
+					$inputs   = ( isset( $settings['default_shortcode'] ) ) ? $settings['default_shortcode'] : array( 'name', 'email', 'phone', 'message', 'cv' );
 					$content .= \bullhorn_2_wp\Shortcodes::render_cv( $inputs );
 				} else {
 					$content .= '<a class="button" href="' . get_permalink( $settings['form_page'] ) . '?position=' . absint( $bullhorn_job_id ) . '">' . __( 'Submit Resume', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</a>';

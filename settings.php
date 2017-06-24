@@ -296,7 +296,7 @@ class Bullhorn_Settings {
 	 */
 	public static function default_shortcode() {
 		$settings          = (array) get_option( 'bullhorn_settings' );
-		$default_shortcode = array( 'name', 'email', 'phone' );
+		$default_shortcode = array( 'name', 'email', 'phone', 'cv' );
 
 		if ( isset( $settings['default_shortcode'] ) ) {
 			$default_shortcode = $settings['default_shortcode'];
@@ -307,6 +307,8 @@ class Bullhorn_Settings {
 			'email'   => __( 'Email', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 			'phone'   => __( 'Phone', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 			'address' => __( 'Address', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'message' => __( 'Message saved as Note', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
+			'cv' => __( 'Resume file upload', 'bh-staffing-job-listing-and-cv-upload-for-wp' ),
 		);
 
 		foreach ( $sorts as $value => $name ) {

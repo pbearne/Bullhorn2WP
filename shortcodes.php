@@ -102,6 +102,7 @@ class Shortcodes {
 				'name',
 				'email',
 				'phone',
+                'cv',
 			), $settings );
 		}
 		if ( null === $address_options ) {
@@ -126,7 +127,9 @@ class Shortcodes {
             #bullhorn-resume {
                 position: relative;
             }
-
+            #bullhorn-resume label{
+                display: block;
+            }
             #bullhorn_upload_overlay {
                 display: none;
                 width: 104%;
@@ -215,8 +218,8 @@ class Shortcodes {
 			$element_to_require = apply_filters( 'wp_bullhorn_shortcode_elements_to_require', array(
 				'name',
 				'email',
-				'cv',
 				'jobs_list',
+				'cv',
 			) );
 
 			$position_added = false;
