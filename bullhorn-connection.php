@@ -77,7 +77,7 @@ class Bullhorn_Connection {
 			if ( $throw ) {
 				error_log( 'Get categories failed: ' . serialize( $response->get_error_message() ) );
 			} else {
-				return __( 'Get categories failed: ' . serialize( $response->get_error_message() ) );
+				return __( 'Get categories failed: ', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . serialize( $response->get_error_message() );
 			}
 		}
 
@@ -88,7 +88,7 @@ class Bullhorn_Connection {
 				if ( $throw ) {
 					error_log( 'Get specialties failed: ' . serialize( $response->get_error_message() ) );
 				} else {
-					return __( 'Get specialties failed: ' . serialize( $response->get_error_message() ) );
+					return __( 'Get specialties failed: ', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . serialize( $response->get_error_message() );
 				}
 			}
 		}
@@ -98,7 +98,7 @@ class Bullhorn_Connection {
 			if ( $throw ) {
 				error_log( 'Get skills failed: ' . serialize( $response->get_error_message() ) );
 			} else {
-				return __( 'Get skills failed: ' . serialize( $response->get_error_message() ) );
+				return __( 'Get skills failed: ', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . serialize( $response->get_error_message() );
 			}
 		}
 
