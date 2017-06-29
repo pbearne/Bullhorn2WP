@@ -16,13 +16,13 @@ function bullhorn_sync() {
 			$sync = $bullhorn_connection->sync( false );
 			error_log( 'bullhorn sync ran and returned ' . serialize( $sync ) );
 
-			if ( true !== $sync ) {
-				$admin_email = get_bloginfo( 'admin_email' );
-				if ( $admin_email ) {
-					$subject = __( 'Bullhorn cron sync failed with this error', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
-					wp_mail( $admin_email, $subject, serialize( $sync ) );
-				}
-			}
+//			if ( true !== $sync ) {
+//				$admin_email = get_bloginfo( 'admin_email' );
+//				if ( $admin_email ) {
+//					$subject = __( 'Bullhorn cron sync failed with this error', 'bh-staffing-job-listing-and-cv-upload-for-wp' );
+//					wp_mail( $admin_email, $subject, serialize( $sync ) );
+//				}
+//			}
 		}
 	}
 }
@@ -80,7 +80,7 @@ function bullhorn_application_sync( $local_post_id = null ) {
 
 		$application_post = get_posts( $args );
 		// return if none found
-		if ( false === $application_post ) {
+		if ( empty( $application_post ) || false === $application_post ) {
 
 			return;
 		}
@@ -90,7 +90,7 @@ function bullhorn_application_sync( $local_post_id = null ) {
 
 	$application_post_data = (array) get_post_meta( $local_post_id, 'bh_candidate_data', true );
 
-	if( isset( $application_post_data['cv_name'] ) && isset( $application_post_data['cv_dir'] ) ) {
+	if ( isset( $application_post_data['cv_name'] ) && isset( $application_post_data['cv_dir'] ) ) {
 		$file_data['resume']['name']                  = $application_post_data['cv_name'];
 		$file_data['resume']['tmp_name']              = $application_post_data['cv_dir'];
 		$application_post_data['application_post_id'] = $local_post_id;
