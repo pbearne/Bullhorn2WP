@@ -106,7 +106,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 
 						$resume = self::parseResume( $file_data );
 						// we couldn't pause the Resume
-						if ( 500 === $resume['errorCode'] ) {
+						if ( is_array( $resume ) && 500 === $resume['errorCode'] ) {
 							$resume            = new stdClass();
 							$resume->candidate = new stdClass();
 							$resume->skillList = array();
@@ -907,7 +907,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 		foreach ( $resume->candidateEducation as $edu ) {
 			$edu->candidate     = new stdClass;
 			$edu->candidate->id = $candidate->changedEntityId;
-			if ( ! is_int( $edu->gpa ) || ! is_float( $edu->gpa ) ) {
+			if ( property_exists( $edu, 'gpa' ) && ( ! is_int( $edu->gpa ) || ! is_float( $edu->gpa ) ) ) {
 				unset( $edu->gpa );
 			}
 
