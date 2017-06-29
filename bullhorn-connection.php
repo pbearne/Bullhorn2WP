@@ -164,7 +164,7 @@ class Bullhorn_Connection {
 				error_log( 'Login failed. With the message:' . $body->errorMessage );
 				$headers = 'From: Bullhorn Plugin <' . $admin_email . '>';
 				wp_mail( $admin_email, 'Login failed please reconnect ', 'With the message: ' . $body->errorMessage, $headers );
-//				throw new Exception( $body->errorMessage );
+				throw new Exception( $body->errorMessage );
 
 				return false;
 			}
@@ -444,7 +444,7 @@ class Bullhorn_Connection {
 			'post_title'   => $job->title,
 			'post_content' => $job->{$description},
 			'post_type'    => Bullhorn_2_WP::$post_type_job_listing,
-			'post_status'  => 'publish',
+			'post_status'  => apply_filters( 'wp_bullhorn_new_job_status', 'publish' ),
 			'post_date'    => date( 'Y-m-d 00:00:01', $job->dateAdded / 1000 ),
 		);
 
