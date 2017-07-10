@@ -121,7 +121,7 @@ class Bullhorn_Settings {
 				), 'https://auth.bullhornstaffing.com/oauth/token'
 			);
 
-			$response = wp_remote_post( $url );
+			$response = wp_remote_post( $url, array( 'timeout' => 30 ) );
 			if( is_wp_error( $response ) ) {
 
 				wp_die( __( 'Callback to Bullhorn API failed. Please retry.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) );
@@ -224,8 +224,7 @@ class Bullhorn_Settings {
 			$client_corporation = null;
 		}
 		echo '<input type="text" size="40" name="bullhorn_settings[client_corporation]" value="' . esc_attr( $client_corporation ) . '" />';
-		echo '<br><span class="description">' . __( 'This field is optional, but will filter the jobs retreived from Bullhorn to only those listed under a specific
-														Client Corporation. This must be the ID of the corporation. Leave blank to sync all job listings.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</span>';
+		echo '<br><span class="description">' . __( 'This field is optional, but will filter the jobs retreived from Bullhorn to only those listed under a specific Client Corporation. This must be the ID of the corporation. Leave blank to sync all job listings.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</span>';
 	}
 
 	public static function send_email() {
@@ -250,8 +249,7 @@ class Bullhorn_Settings {
 		}
 
 		echo '<input type="text" size="40" name="bullhorn_settings[listings_page]" value="' . esc_attr( $listings_page ) . '" placeholder="' . Bullhorn_2_WP::$post_type_job_listing . '" />';
-		echo '<br><span class="description">' . __( 'This field is optional, but changing it will adjust the URL of the job listing pages from "' . Bullhorn_2_WP::$post_type_job_listing . '" to the set value.
-														You must run the sync after changing this as it changes the Custom Post Slug.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</span>';
+		echo '<br><span class="description">' . __( 'This field is optional, but changing it will adjust the URL of the job listing pages from "' . Bullhorn_2_WP::$post_type_job_listing . '" to the set value. You must run the sync after changing this as it changes the Custom Post Slug.', 'bh-staffing-job-listing-and-cv-upload-for-wp' ) . '</span>';
 	}
 
 	/**

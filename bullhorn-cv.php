@@ -358,7 +358,7 @@ class Bullhorn_Extended_Connection extends Bullhorn_Connection {
 				return false;
 			}
 
-			if ( 500 === $resume['errorCode'] ) {
+			if ( is_array( $resume ) && 500 === $resume['errorCode'] ) {
 				$resume            = new stdClass();
 				$resume->candidate = new stdClass();
 				$resume->skillList = array();
