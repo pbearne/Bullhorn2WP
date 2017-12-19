@@ -1,8 +1,5 @@
-<strong>This Plugin codebase is to be deprecated as of the next release by a completely new codebase that will be installed by the next update. We have tried to make sure that the upgrade is seamless but suggest you upgrade a dev site first.<br />
+This Plugin codebase is to be deprecated as of the next release by a completely new codebase that will be installed by the next update. We have tried to make sure that the upgrade is seamless but suggest you upgrade a dev site first.<br />
  A pro version of the plugin with support and more features is now available at <a href='https://matadorjobs.com/grandfathered/'>MatadorJobs.com.</a>
- </strong> 
-
-
 
 
 === Bullhorn Staffing and Recruitment Job Listing and CV/Resume Uploader for WordPress ===
