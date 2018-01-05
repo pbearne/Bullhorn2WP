@@ -57,9 +57,21 @@ class Bullhorn_2_WP {
 		add_action( 'plugins_loaded', array( __CLASS__, 'bullhorn_load_plugin_textdomain' ) );
 		register_activation_hook( __FILE__, array( __CLASS__, 'bullhorn_activation_hook' ) );
 		register_deactivation_hook( __FILE__, array( __CLASS__, 'bullhorn_deactivation_hook' ) );
+		
+		add_action( 'admin_notices', array( __CLASS__, 'bullhorn_deprecated_plugin_notice' ) );
+		
 	}
 
-	public static function bullhorn_load_plugin_textdomain() {
+	
+	public static function bullhorn_deprecated_plugin_notice(){
+	printf( '<div class="notice notice-%1$s is-dismissible"><p>%2$s</p></div>',
+		esc_attr(  'warning' ),
+		wp_kses_post( '<strong>The "Bullhorn Staffing and Recruitment Job Listing and CV/Resume uploader" plugin has been completely re-written. The newly written version will be installed by the next update <a href="https://matadorjobs.com/legacy-installs/">Learn more why did this here</a>. </strong> <br />We have tried to make sure that the upgrade is seamless but suggest you upgrade a dev site first.<br />
+ A pro version of the plugin is now available at <a href="https://matadorjobs.com/product/pricing/">MatadorJobs.com</a>.<br /> The Matador plugin is packed full of <a href="https://matadorjobs.com/product/features/">new features</a>, including support for Google Jobs Search and automatic reconnection to the Bullhorn API, many more shortcode options and <a href="https://matadorjobs.com/product/add-ons/">add-ons</a>.')
+	);
+}
+
+	function bullhorn_load_plugin_textdomain() {
 		load_plugin_textdomain( 'bh-staffing-job-listing-and-cv-upload-for-wp', false, basename( dirname( __FILE__ ) ) . '/languages/' );
 	}
 
