@@ -15,7 +15,13 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 This plugin adds job listings to your WordPress site from your Bullhorn account for front-end display, also providing a CV uploader.
 
 == Description ==
-
+'<strong>The "Bullhorn Staffing and Recruitment Job Listing and CV/Resume uploader" plugin has been completely re-written. The newly written version will be installed by the next update 
+<a href="https://matadorjobs.com/legacy-installs/">Learn more why did this here</a>. </strong> <br />
+We have tried to make sure that the upgrade is seamless but suggest you upgrade a dev site first.<br />
+ A pro version of the plugin is now available at <a href="https://matadorjobs.com/product/pricing/">MatadorJobs.com</a>.<br /> 
+ The Matador plugin is packed full of <a href="https://matadorjobs.com/product/features/">new features</a>, 
+ including support for Google Jobs Search and automatic reconnection to the Bullhorn API, many more shortcode options and <a href="https://matadorjobs.com/product/add-ons/">add-ons</a>.
+ 
 This plugin is a fork of the code for sale at http://bullhorntowordpress.com and additionally incorporates a resume upload extension. It automatically synchronizes with Bullhorn.
 I was hired by a client to fix the plugin he had bought. By the time I had fixed it, it was effectively a new version with lots of updates and fixes. So I have released my version to WordPress.org so that others can have access to these.
 
